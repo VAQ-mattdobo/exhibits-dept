@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=768, initial-scale=1.0">
-  <title>VAQ Solid Panel - Membership (Blue) 1 of 1</title>
+  <title>VAQ Solid Panel</title>
 
   <style>
     html, body {
@@ -12,21 +12,24 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background-color: #64a5c3;
-      position: relative;
     }
 
     .panel {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 768px;
       height: 1080px;
       background-color: #64a5c3;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: transparent; /* invisible but forces render */
+      font-size: 1px;
     }
   </style>
 </head>
+
 <body>
-  <div class="panel"></div>
+  <div class="panel">&nbsp;</div>
 </body>
 </html>
