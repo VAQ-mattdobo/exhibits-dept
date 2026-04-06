@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=1536, initial-scale=1.0" />
+<meta name="viewport" content="width=1536, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no" />
 <title>NexSigns CrowdRiff Gallery Container</title>
 
 <!--
+  Target container: 1536 x 810 px
+  Scale fix applied for Kuusoft environment rendering oversized.
   Shared asset path note:
   This page uses the repo-level ../assets/ folder for common fonts and imagery.
   Update these paths if the hosted folder structure changes later.
@@ -39,6 +41,9 @@
     height: 810px;
     overflow: hidden;
     background: transparent;
+
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
