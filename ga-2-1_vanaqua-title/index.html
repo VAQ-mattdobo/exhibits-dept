@@ -2,15 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1536, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta
+    name="viewport"
+    content="width=1536, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no"
+  >
   <title>VAQ Titlebar – #Vanaqua Memories</title>
-
-  <!--
-    Target container: 1536 x 270 px
-    Shared asset path note:
-    This page uses the repo-level ../assets/ folder for common fonts and imagery.
-    Update these paths if the hosted folder structure changes later.
-  -->
 
   <style>
     @font-face {
@@ -30,15 +26,9 @@
       padding: 0;
       overflow: hidden;
       background: transparent;
-    }
 
-    .stage {
-      width: 1536px;
-      height: 270px;
-      overflow: hidden;
-      position: relative;
-      transform: scale(1);
-      transform-origin: top left;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
     }
 
     .wrapper {
@@ -73,12 +63,9 @@
     }
   </style>
 </head>
-
 <body>
-  <div class="stage">
-    <div class="wrapper">
-      <div class="title">&num;Vanaqua Memories</div>
-    </div>
+  <div class="wrapper">
+    <div class="title">&num;Vanaqua Memories</div>
   </div>
 </body>
 </html>
