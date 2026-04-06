@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GA Pricing Admin - Stage 1</title>
+
+<!--
+  Shared asset path note:
+  This page uses the repo-level assets/ folder for common fonts and imagery.
+  Update these paths if the hosted folder structure changes later.
+-->
+
+<style>
+  /* =========================
+     Global / Reset
+  ========================= */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #f3f4f6;
+    color: #1f2937;
+    font-family: Arial, sans-serif;
+    margin: 0;
+  }
+
+  /* =========================
+     Fonts
+  ========================= */
+  @font-face {
+    font-display: swap;
+    font-family: 'BlissPro';
+    font-style: normal;
+    font-weight: 700;
+    src:
+      url('assets/BlissPro-Bold.woff2') format('woff2'),
+      url('assets/BlissPro-Bold.woff') format('woff');
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: 'BlissPro';
+    font-style: italic;
+    font-weight: 400;
+    src:
+      url('assets/BlissPro-Italic.woff2') format('woff2'),
+      url('assets/BlissPro-Italic.woff') format('woff');
+  }
+
+  /* =========================
+     Buttons
+  ========================= */
+  button {
+    background: #1d4ed8;
+    border: 0;
+    border-radius: 6px;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 14px;
+  }
+
+  button.secondary {
+    background: #64748b;
+  }
+
+  #publishBtn {
+    background: #15803d;
+  }
+
+  #saveDraftBtn {
+    background: #b45309;
+  }
+
+  /* =========================
+     Login Screen
+  ========================= */
+  #loginScreen {
+    margin: 0 auto;
+    max-width: 420px;
+    padding: 32px;
+  }
+
+  #loginScreen h1 {
+    font-size: 28px;
+    margin: 0 0 10px;
+  }
+
+  #loginScreen p {
+    color: #4b5563;
+    font-size: 14px;
+    margin: 0 0 20px;
+  }
+
+  #loginStatus {
+    display: block;
+    margin-top: 16px;
+  }
+
+  /* =========================
+     Main Layout
+  ========================= */
+  .page {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    min-height: 100vh;
+  }
+
+  .panel {
+    background: #ffffff;
+    border-right: 1px solid #d1d5db;
+    padding: 24px;
+  }
+
+  .panel h1 {
+    font-size: 24px;
+    margin: 0 0 8px;
+  }
+
+  .panel p {
+    color: #4b5563;
+    font-size: 14px;
+    margin: 0 0 20px;
+  }
+
+  /* =========================
+     Form Fields
+  ========================= */
+  .field {
+    margin-bottom: 10px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .field input,
+  .field textarea {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    padding: 10px 12px;
+    width: 100%;
+  }
+
+  .field textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .field input.invalid,
+  .field textarea.invalid {
+    background: #fff7f7;
+    border-color: #dc2626;
+  }
+
+  .field-group {
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+  }
+
+  .field-group h2 {
+    font-size: 16px;
+    margin: 0 0 12px;
+  }
+
+  /* =========================
+     Utility Layout
+  ========================= */
+  .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* =========================
+     Preview Area
+  ========================= */
+  .preview-area {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    overflow: auto;
+    padding: 24px;
+  }
+
+  .preview-area h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+  }
+
+  .preview-frame {
+    background: #000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    height: 810px;
+    overflow: hidden;
+    position: relative;
+    width: 1152px;
+  }
+
+  /* =========================
+     Signage Visuals
+  ========================= */
+  .bg-rotator {
+    animation: slowRotate 200s linear infinite;
+    background-image: url('assets/RotCircAnim_5000x5000.jpg');
+    background-repeat: no-repeat;
+    background-size: 5000px 5000px;
+    height: 5000px;
+    left: -1924px;
+    pointer-events: none;
+    position: absolute;
+    top: -2095px;
+    transform-origin: center center;
+    width: 5000px;
+    z-index: 1;
+  }
+
+  .content-layer {
+    inset: 0;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .pricing-wrapper {
+    display: flex;
+    flex-direction: column;
+    inset: 0;
+    justify-content: space-between;
+    padding: 86px 82px 70px 82px;
+    position: absolute;
+  }
+
+  .pricing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 62px;
+  }
+
+  .row {
+    align-items: baseline;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .left,
+  .right {
+    align-items: baseline;
+    display: flex;
+  }
+
+  .left {
+    gap: 18px;
+  }
+
+  .right {
+    gap: 18px;
+  }
+
+  .label {
+    color: #f3bc43;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    line-height: 1;
+  }
+
+  .age {
+    color: #ffffff;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 45px;
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .price {
+    color: #f3bc43;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 58px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .tax {
+    color: #ffffff;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 29px;
+    line-height: 1;
+  }
+
+  .footer {
+    color: #ffffff;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 29px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  /* =========================
+     Validation / Status
+  ========================= */
+  .validation-errors {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #991b1b;
+    display: none;
+    font-size: 14px;
+    margin-top: 16px;
+    padding: 12px 14px;
+  }
+
+  .validation-errors.visible {
+    display: block;
+  }
+
+  .validation-errors ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  .validation-errors li + li {
+    margin-top: 6px;
+  }
+
+  #draftStatus,
+  #lastPublishedStatus,
+  #lastSavedStatus,
+  #liveStatus {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #334155;
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  /* =========================
+     Animation
+  ========================= */
+  @keyframes slowRotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="loginScreen" style="display: none;">
+  <h1>GA Pricing Admin Login</h1>
+  <p>Sign in to access the Stage 1 pricing editor.</p>
+
+  <div class="field">
+    <label for="loginEmail">Email</label>
+    <input id="loginEmail" type="email" autocomplete="username">
+  </div>
+
+  <div class="field">
+    <label for="loginPassword">Password</label>
+    <input id="loginPassword" type="password" autocomplete="current-password">
+  </div>
+
+  <div class="button-row">
+    <button id="loginBtn" type="button">Sign In</button>
+  </div>
+
+  <div id="loginStatus" class="validation-errors">Not signed in.</div>
+</div>
+
+<div id="adminApp" style="display: none;">
+  <div class="page">
+    <div class="panel">
+      <h1>GA Pricing Admin</h1>
+      <p>Stage 1 prototype connected to Supabase. Admin access requires sign-in.</p>
+
+      <div class="button-row">
+        <button id="logoutBtn" class="secondary" type="button">Sign Out</button>
+      </div>
+
+      <div class="field-group">
+        <h2>Row 1</h2>
+        <div class="field">
+          <label for="label0">Label</label>
+          <input id="label0" type="text">
+        </div>
+        <div class="field">
+          <label for="age0">Age</label>
+          <input id="age0" type="text">
+        </div>
+        <div class="field">
+          <label for="price0">Price</label>
+          <input id="price0" type="text">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>Row 2</h2>
+        <div class="field">
+          <label for="label1">Label</label>
+          <input id="label1" type="text">
+        </div>
+        <div class="field">
+          <label for="age1">Age</label>
+          <input id="age1" type="text">
+        </div>
+        <div class="field">
+          <label for="price1">Price</label>
+          <input id="price1" type="text">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>Row 3</h2>
+        <div class="field">
+          <label for="label2">Label</label>
+          <input id="label2" type="text">
+        </div>
+        <div class="field">
+          <label for="age2">Age</label>
+          <input id="age2" type="text">
+        </div>
+        <div class="field">
+          <label for="price2">Price</label>
+          <input id="price2" type="text">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>Row 4</h2>
+        <div class="field">
+          <label for="label3">Label</label>
+          <input id="label3" type="text">
+        </div>
+        <div class="field">
+          <label for="age3">Age</label>
+          <input id="age3" type="text">
+        </div>
+        <div class="field">
+          <label for="price3">Price</label>
+          <input id="price3" type="text">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h2>Shared Text</h2>
+        <div class="field">
+          <label for="taxText">Tax Text</label>
+          <input id="taxText" type="text">
+        </div>
+        <div class="field">
+          <label for="footerText">Footer Note</label>
+          <textarea id="footerText"></textarea>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="previewBtn" type="button">Preview Draft</button>
+        <button id="saveDraftBtn" type="button">Save Draft</button>
+        <button id="publishBtn" type="button">Publish to Live</button>
+        <button id="resetBtn" class="secondary" type="button">Reset Draft</button>
+      </div>
+
+      <div id="validationErrors" class="validation-errors"></div>
+
+      <div class="field-group">
+        <h2>Status</h2>
+
+        <div class="field">
+          <label>Draft Status</label>
+          <div id="draftStatus">Draft loaded.</div>
+        </div>
+
+        <div class="field">
+          <label>Live Status</label>
+          <div id="liveStatus">Live pricing has not been published yet.</div>
+        </div>
+
+        <div class="field">
+          <label>Last Saved</label>
+          <div id="lastSavedStatus">—</div>
+        </div>
+
+        <div class="field">
+          <label>Last Published</label>
+          <div id="lastPublishedStatus">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview-area">
+      <div>
+        <h2>Draft Preview</h2>
+        <div class="preview-frame">
+          <div class="bg-rotator"></div>
+          <div class="content-layer">
+            <div class="pricing-wrapper">
+              <div class="pricing-grid" id="draftPricingGrid"></div>
+              <div class="footer" id="draftFooterNote"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2>Live Preview</h2>
+        <div class="preview-frame">
+          <div class="bg-rotator"></div>
+          <div class="content-layer">
+            <div class="pricing-wrapper">
+              <div class="pricing-grid" id="livePricingGrid"></div>
+              <div class="footer" id="liveFooterNote"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = 'https://ssiokhbxtvntozwgcgsr.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_TDSo-R4FrDG5MWhOxqWWRA_tDqBQXxE';
+
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const defaultPricingData = {
+    rows: [
+      { label: "Adult", age: "(Ages 13-64)", price: "$50.46" },
+      { label: "Senior", age: "(65+)", price: "$40.66" },
+      { label: "Student*", age: "(19+)", price: "$40.32" },
+      { label: "Child", age: "(Ages 3-12)", price: "$30.15" }
+    ],
+    tax: "+ tax",
+    footer: "* Must show valid post-secondary student ID"
+  };
+
+  function cloneData(data) {
+    return JSON.parse(JSON.stringify(data));
+  }
+
+  let draftPricingData = cloneData(defaultPricingData);
+  let livePricingData = cloneData(defaultPricingData);
+
+  function showLoginScreen(message = "Not signed in.") {
+    document.getElementById("loginScreen").style.display = "block";
+    document.getElementById("adminApp").style.display = "none";
+    document.getElementById("loginStatus").textContent = message;
+  }
+
+  function showAdminApp() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminApp").style.display = "block";
+  }
+
+  async function checkSessionAndStart() {
+    const { data, error } = await supabaseClient.auth.getSession();
+
+    if (error) {
+      console.error("Session check failed:", error);
+      showLoginScreen("Session check failed.");
+      return;
+    }
+
+    if (!data.session) {
+      showLoginScreen("Please sign in.");
+      return;
+    }
+
+    showAdminApp();
+    await loadDraftFromDatabase();
+    await loadLiveFromDatabase();
+  }
+
+  async function signInAdmin() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if (!email || !password) {
+      document.getElementById("loginStatus").textContent =
+        "Email and password are required.";
+      return;
+    }
+
+    document.getElementById("loginStatus").textContent = "Signing in...";
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      console.error("Sign-in failed:", error);
+      document.getElementById("loginStatus").textContent =
+        `Sign-in failed: ${error.message}`;
+      return;
+    }
+
+    document.getElementById("loginStatus").textContent = "Sign-in successful.";
+    await checkSessionAndStart();
+  }
+
+  async function signOutAdmin() {
+    const { error } = await supabaseClient.auth.signOut();
+
+    if (error) {
+      console.error("Sign-out failed:", error);
+      return;
+    }
+
+    // Clear login fields
+    document.getElementById("loginEmail").value = "";
+    document.getElementById("loginPassword").value = "";
+
+    showLoginScreen("Signed out.");
+  }
+
+  function populateForm(data) {
+    data.rows.forEach((row, index) => {
+      document.getElementById(`label${index}`).value = row.label;
+      document.getElementById(`age${index}`).value = row.age;
+      document.getElementById(`price${index}`).value = row.price;
+    });
+
+    document.getElementById("taxText").value = data.tax;
+    document.getElementById("footerText").value = data.footer;
+
+    clearValidationUI();
+  }
+
+  function readForm() {
+    return {
+      rows: [0, 1, 2, 3].map(index => ({
+        label: document.getElementById(`label${index}`).value.trim(),
+        age: document.getElementById(`age${index}`).value.trim(),
+        price: document.getElementById(`price${index}`).value.trim()
+      })),
+      tax: document.getElementById("taxText").value.trim(),
+      footer: document.getElementById("footerText").value.trim()
+    };
+  }
+
+  function renderPricing(data, gridId, footerId) {
+    const grid = document.getElementById(gridId);
+    const footer = document.getElementById(footerId);
+
+    grid.innerHTML = "";
+
+    data.rows.forEach((row) => {
+      const rowEl = document.createElement("div");
+      rowEl.className = "row";
+
+      rowEl.innerHTML = `
+        <div class="left">
+          <span class="label">${row.label}</span>
+          <span class="age">${row.age}</span>
+        </div>
+        <div class="right">
+          <span class="price">${row.price}</span>
+          <span class="tax">${data.tax}</span>
+        </div>
+      `;
+
+      grid.appendChild(rowEl);
+    });
+
+    footer.textContent = data.footer;
+  }
+
+  function clearValidationUI() {
+    document.querySelectorAll(".field input, .field textarea").forEach((el) => {
+      el.classList.remove("invalid");
+    });
+
+    const errorBox = document.getElementById("validationErrors");
+    errorBox.classList.remove("visible");
+    errorBox.innerHTML = "";
+  }
+
+  function markInvalidField(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add("invalid");
+    }
+  }
+
+  function validatePricingData(data) {
+    const errors = [];
+    const moneyPattern = /^\$\d+(?:\.\d{2})$/;
+
+    data.rows.forEach((row, index) => {
+      const rowNumber = index + 1;
+
+      if (!row.label) {
+        errors.push(`Row ${rowNumber}: Label is required.`);
+        markInvalidField(`label${index}`);
+      }
+
+      if (!row.age) {
+        errors.push(`Row ${rowNumber}: Age text is required.`);
+        markInvalidField(`age${index}`);
+      }
+
+      if (!row.price) {
+        errors.push(`Row ${rowNumber}: Price is required.`);
+        markInvalidField(`price${index}`);
+      } else if (!moneyPattern.test(row.price)) {
+        errors.push(`Row ${rowNumber}: Price must look like $50.46.`);
+        markInvalidField(`price${index}`);
+      }
+    });
+
+    if (!data.tax) {
+      errors.push("Tax text is required.");
+      markInvalidField("taxText");
+    }
+
+    if (!data.footer) {
+      errors.push("Footer note is required.");
+      markInvalidField("footerText");
+    }
+
+    return errors;
+  }
+
+  function showValidationErrors(errors) {
+    const errorBox = document.getElementById("validationErrors");
+
+    if (!errors.length) {
+      errorBox.classList.remove("visible");
+      errorBox.innerHTML = "";
+      return;
+    }
+
+    errorBox.innerHTML = `
+      <strong>Please fix the following:</strong>
+      <ul>
+        ${errors.map((error) => `<li>${error}</li>`).join("")}
+      </ul>
+    `;
+    errorBox.classList.add("visible");
+  }
+
+  function updateDraftStatus(message) {
+    document.getElementById("draftStatus").textContent = message;
+  }
+
+  function updateLiveStatus(message) {
+    document.getElementById("liveStatus").textContent = message;
+  }
+
+  function formatTimestamp(value) {
+    if (!value) {
+      return "—";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+
+    return date.toLocaleString();
+  }
+
+  function updateLastSavedStatus(value) {
+    document.getElementById("lastSavedStatus").textContent = formatTimestamp(value);
+  }
+
+  function updateLastPublishedStatus(value) {
+    document.getElementById("lastPublishedStatus").textContent = formatTimestamp(value);
+  }
+
+  async function loadDraftFromDatabase() {
+    const { data, error } = await supabaseClient
+      .from("pricing_sets")
+      .select("rows_json, tax_text, footer_note, saved_at")
+      .eq("mode", "draft")
+      .single();
+
+    if (error) {
+      console.error("Failed to load draft pricing:", error);
+      updateDraftStatus("Failed to load draft pricing from database.");
+      updateLastSavedStatus(null);
+      return;
+    }
+
+    if (!data || !data.rows_json) {
+      updateDraftStatus("No draft row found in database.");
+      updateLastSavedStatus(null);
+      return;
+    }
+
+    const draftData = {
+      rows: data.rows_json,
+      tax: data.tax_text,
+      footer: data.footer_note
+    };
+
+    draftPricingData = cloneData(draftData);
+
+    populateForm(draftPricingData);
+    renderPricing(draftPricingData, "draftPricingGrid", "draftFooterNote");
+    updateDraftStatus("Draft loaded from database.");
+    updateLastSavedStatus(data.saved_at);
+  }
+
+  async function loadLiveFromDatabase() {
+    const { data, error } = await supabaseClient
+      .from("pricing_sets")
+      .select("rows_json, tax_text, footer_note, published_at")
+      .eq("mode", "live")
+      .single();
+
+    if (error) {
+      console.error("Failed to load live pricing:", error);
+      updateLiveStatus("Failed to load live pricing from database.");
+      updateLastPublishedStatus(null);
+      return;
+    }
+
+    if (!data || !data.rows_json) {
+      updateLiveStatus("No live row found in database.");
+      updateLastPublishedStatus(null);
+      return;
+    }
+
+    livePricingData = {
+      rows: data.rows_json,
+      tax: data.tax_text,
+      footer: data.footer_note
+    };
+
+    renderPricing(livePricingData, "livePricingGrid", "liveFooterNote");
+    updateLiveStatus("Live preview loaded from database.");
+    updateLastPublishedStatus(data.published_at);
+  }
+
+  async function saveDraftToDatabase(data) {
+    const nowIso = new Date().toISOString();
+
+    const { error } = await supabaseClient
+      .from("pricing_sets")
+      .update({
+        rows_json: data.rows,
+        tax_text: data.tax,
+        footer_note: data.footer,
+        saved_at: nowIso,
+        updated_at: nowIso
+      })
+      .eq("mode", "draft");
+
+    return error;
+  }
+
+  async function publishLiveToDatabase(data) {
+    const { error } = await supabaseClient
+      .from("pricing_sets")
+      .update({
+        rows_json: data.rows,
+        tax_text: data.tax,
+        footer_note: data.footer,
+        updated_at: new Date().toISOString(),
+        published_at: new Date().toISOString()
+      })
+      .eq("mode", "live");
+
+    return error;
+  }
+
+  document.getElementById("loginBtn").addEventListener("click", signInAdmin);
+  document.getElementById("logoutBtn").addEventListener("click", signOutAdmin);
+
+  document.getElementById("loginEmail").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      document.getElementById("loginPassword").focus();
+    }
+  });
+
+  document.getElementById("loginPassword").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      signInAdmin();
+    }
+  });
+
+  document.getElementById("previewBtn").addEventListener("click", () => {
+    clearValidationUI();
+
+    const formData = readForm();
+    const errors = validatePricingData(formData);
+
+    if (errors.length) {
+      showValidationErrors(errors);
+      updateDraftStatus("Draft preview blocked until validation errors are fixed.");
+      return;
+    }
+
+    draftPricingData = formData;
+    renderPricing(draftPricingData, "draftPricingGrid", "draftFooterNote");
+    showValidationErrors([]);
+    updateDraftStatus("Draft preview updated locally. Not yet saved to database.");
+  });
+
+  document.getElementById("saveDraftBtn").addEventListener("click", async () => {
+    clearValidationUI();
+
+    const formData = readForm();
+    const errors = validatePricingData(formData);
+
+    if (errors.length) {
+      showValidationErrors(errors);
+      updateDraftStatus("Save blocked until validation errors are fixed.");
+      return;
+    }
+
+    draftPricingData = formData;
+    renderPricing(draftPricingData, "draftPricingGrid", "draftFooterNote");
+
+    updateDraftStatus("Saving draft to database...");
+
+    const error = await saveDraftToDatabase(draftPricingData);
+
+    if (error) {
+      console.error("Failed to save draft:", error);
+      updateDraftStatus(`Failed to save draft: ${error.message}`);
+      return;
+    }
+
+    showValidationErrors([]);
+    updateDraftStatus("Draft saved to database successfully.");
+    updateLastSavedStatus(new Date().toISOString());
+  });
+
+  document.getElementById("publishBtn").addEventListener("click", async () => {
+    clearValidationUI();
+
+    const formData = readForm();
+    const errors = validatePricingData(formData);
+
+    if (errors.length) {
+      showValidationErrors(errors);
+      updateDraftStatus("Publish blocked until validation errors are fixed.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Publish this draft to the live sign now?\n\nThis will update the public signage display."
+    );
+
+    if (!confirmed) {
+      updateDraftStatus("Publish cancelled.");
+      return;
+    }
+
+    draftPricingData = formData;
+    renderPricing(draftPricingData, "draftPricingGrid", "draftFooterNote");
+
+    updateLiveStatus("Publishing draft to live database row...");
+
+    const error = await publishLiveToDatabase(draftPricingData);
+
+    if (error) {
+      console.error("Failed to publish live row:", error);
+      updateLiveStatus(`Failed to publish live row: ${error.message}`);
+      return;
+    }
+
+    await loadLiveFromDatabase();
+
+    showValidationErrors([]);
+    updateDraftStatus("Draft published to live successfully.");
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    draftPricingData = cloneData(defaultPricingData);
+    populateForm(draftPricingData);
+    renderPricing(draftPricingData, "draftPricingGrid", "draftFooterNote");
+
+    updateDraftStatus("Draft reset to default sample data locally.");
+  });
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (session) {
+      showAdminApp();
+    } else {
+      showLoginScreen("Please sign in.");
+    }
+  });
+
+  checkSessionAndStart();
+</script>
+
+</body>
+</html>
