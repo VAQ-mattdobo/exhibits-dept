@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1152, initial-scale=1.0" />
+<title>GA Screen 4 of 4 - Dynamic Pricing</title>
+
+<!--
+  Asset path note:
+  These paths are currently relative for local development.
+  When moved to the live server, update font/image URLs if needed.
+-->
+
+<style>
+  /* =========================
+     Global / Base
+  ========================= */
+  html,
+  body {
+    background: transparent;
+    height: 810px;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    width: 1152px;
+  }
+
+  /* =========================
+     Fonts
+  ========================= */
+  @font-face {
+    font-display: swap;
+    font-family: 'BlissPro';
+    font-style: normal;
+    font-weight: 700;
+    src:
+      url('../assets/BlissPro-Bold.woff2') format('woff2'),
+      url('../assets/BlissPro-Bold.woff') format('woff');
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: 'BlissPro';
+    font-style: italic;
+    font-weight: 400;
+    src:
+      url('../assets/BlissPro-Italic.woff2') format('woff2'),
+      url('../assets/BlissPro-Italic.woff') format('woff');
+  }
+
+  /* =========================
+     Signage Frame
+  ========================= */
+  .frame {
+    background: #000;
+    height: 810px;
+    overflow: hidden;
+    position: relative;
+    width: 1152px;
+  }
+
+  .bg-rotator {
+    animation: slowRotate 200s linear infinite;
+    background-image: url('../assets/RotCircAnim_5000x5000.jpg');
+    background-repeat: no-repeat;
+    background-size: 5000px 5000px;
+    height: 5000px;
+    left: -1924px;
+    pointer-events: none;
+    position: absolute;
+    top: -2095px;
+    transform-origin: center center;
+    width: 5000px;
+    z-index: 1;
+  }
+
+  .content-layer {
+    inset: 0;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .pricing-wrapper {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    inset: 0;
+    justify-content: space-between;
+    padding: 86px 82px 70px 82px;
+    position: absolute;
+  }
+
+  .pricing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 62px;
+  }
+
+  .row {
+    align-items: baseline;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .left,
+  .right {
+    align-items: baseline;
+    display: flex;
+  }
+
+  .left {
+    gap: 18px;
+  }
+
+  .right {
+    gap: 18px;
+  }
+
+  .label {
+    color: #f3bc43;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    line-height: 1;
+  }
+
+  .age {
+    color: #ffffff;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 45px;
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .price {
+    color: #f3bc43;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 58px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .tax {
+    color: #ffffff;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 29px;
+    line-height: 1;
+  }
+
+  .footer {
+    color: #ffffff;
+    font-family: 'BlissPro', sans-serif;
+    font-size: 29px;
+    line-height: 1.1;
+  }
+
+  /* =========================
+     Animation
+  ========================= */
+  @keyframes slowRotate {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+</style>
+</head>
+
+<body>
+  <div class="frame">
+    <div class="bg-rotator"></div>
+
+    <div class="content-layer">
+      <div class="pricing-wrapper">
+        <div class="pricing-grid" id="pricingGrid"></div>
+        <div class="footer" id="footerNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = 'https://ssiokhbxtvntozwgcgsr.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_TDSo-R4FrDG5MWhOxqWWRA_tDqBQXxE';
+    const LIVE_PRICING_REFRESH_MS = 60000;
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function renderPricing(data, gridId, footerId) {
+      const grid = document.getElementById(gridId);
+      const footer = document.getElementById(footerId);
+
+      grid.innerHTML = '';
+
+      data.rows.forEach((row) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+
+        rowEl.innerHTML = `
+          <div class="left">
+            <span class="label">${row.label}</span>
+            <span class="age">${row.age}</span>
+          </div>
+          <div class="right">
+            <span class="price">${row.price}</span>
+            <span class="tax">${data.tax}</span>
+          </div>
+        `;
+
+        grid.appendChild(rowEl);
+      });
+
+      footer.textContent = data.footer;
+    }
+
+    function renderFallbackMessage(message, footerId) {
+      const grid = document.getElementById('pricingGrid');
+      const footer = document.getElementById(footerId);
+
+      grid.innerHTML = `
+        <div class="row">
+          <div class="left">
+            <span class="label">Pricing Unavailable</span>
+          </div>
+          <div class="right">
+            <span class="tax">Please check back shortly</span>
+          </div>
+        </div>
+      `;
+
+      footer.textContent = message;
+    }
+
+    async function loadLivePricing() {
+      const { data, error } = await supabaseClient
+        .from('pricing_sets')
+        .select('rows_json, tax_text, footer_note')
+        .eq('mode', 'live')
+        .single();
+
+      if (error) {
+        console.error('Error loading live pricing:', error);
+        renderFallbackMessage('Unable to load live pricing.', 'footerNote');
+        return;
+      }
+
+      if (!data || !data.rows_json) {
+        console.error('No live pricing row returned.');
+        renderFallbackMessage('No live pricing row found.', 'footerNote');
+        return;
+      }
+
+      const pricingData = {
+        footer: data.footer_note,
+        rows: data.rows_json,
+        tax: data.tax_text
+      };
+
+      renderPricing(pricingData, 'pricingGrid', 'footerNote');
+    }
+
+    loadLivePricing();
+    setInterval(loadLivePricing, LIVE_PRICING_REFRESH_MS);
+  </script>
+</body>
+</html>
