@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1536, initial-scale=1.0">
+  <title>VAQ Titlebar – #Vanaqua Memories</title>
+
+<!--
+  Shared asset path note:
+  This page uses the repo-level ../assets/ folder for common fonts and imagery.
+  Update these paths if the hosted folder structure changes later.
+-->
+
+  <style>
+    @font-face {
+      font-family: 'BlissPro';
+      src:
+        url('../assets/BlissPro-Bold.woff2') format('woff2'),
+        url('../assets/BlissPro-Bold.woff') format('woff');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    .wrapper {
+      width: 1536px;
+      height: 270px;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; 
+
+      background-color: #ffffff;
+      background-image: url('../assets/Titlebar_RptX_10x270.jpg');
+      background-repeat: repeat-x;
+      background-position: left top;
+      background-size: auto 270px;
+
+      overflow: hidden;
+    }
+
+    .title {
+      font-family: 'BlissPro', Arial, sans-serif;
+      font-size: 82px;
+      line-height: 1;
+      font-weight: 700;
+      color: #34495e;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+
+      margin-left: 85px;
+      transform: translateY(-11px);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <div class="title">&num;Vanaqua Memories</div>
+  </div>
+
+</body>
+</html>

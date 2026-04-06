@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1536, initial-scale=1.0" />
+<title>NexSigns CrowdRiff Gallery Container</title>
+
+<!--
+  Shared asset path note:
+  This page uses the repo-level ../assets/ folder for common fonts and imagery.
+  Update these paths if the hosted folder structure changes later.
+-->
+
+<style>
+  @font-face {
+    font-family: 'BlissPro';
+    src:
+      url('../assets/BlissPro-Bold.woff2') format('woff2'),
+      url('../assets/BlissPro-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'BlissPro';
+    src:
+      url('../assets/BlissPro-Italic.woff2') format('woff2'),
+      url('../assets/BlissPro-Italic.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 1536px;
+    height: 810px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  body {
+    font-family: 'BlissPro', Arial, sans-serif;
+  }
+
+  .frame {
+    position: relative;
+    width: 1536px;
+    height: 810px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .bg-rotator {
+    position: absolute;
+    width: 5000px;
+    height: 5000px;
+    top: -2095px;
+    left: -1732px;
+    background-image: url('../assets/RotCircAnim_5000x5000.jpg');
+    background-repeat: no-repeat;
+    background-size: 5000px 5000px;
+    transform-origin: center center;
+    animation: slowRotate 200s linear infinite;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @keyframes slowRotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Foreground layout */
+  .content-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  /* Top gallery region */
+  .gallery-band {
+    position: absolute;
+    left: 68px;
+    top: 66px;
+    width: 1400px;
+    height: 375px;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .gallery-band script {
+    display: block;
+  }
+
+  /* Defensive styling in case CrowdRiff injects iframes / wrappers */
+  .gallery-band iframe,
+  .gallery-band div,
+  .gallery-band section,
+  .gallery-band article,
+  .gallery-band img {
+    box-sizing: border-box;
+  }
+
+  /* CTA region */
+  .cta-region {
+    position: absolute;
+    left: 70px;
+    top: 536px;
+    width: 1395px;
+    height: 190px;
+  }
+
+  .qr-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 212px;
+    height: 212px;
+    background: #ffffff;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .qr-card img {
+    display: block;
+    width: 155px;
+    height: 155px;
+  }
+
+  .cta-text {
+    position: absolute;
+    left: 280px;
+    top: 10px;
+    width: 1080px;
+    color: #ffffff;
+  }
+
+  .cta-headline {
+    margin: 0 0 26px 0;
+    font-family: 'BlissPro', Arial, sans-serif;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 55px;
+    line-height: 1.05;
+    letter-spacing: 0;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+
+  .cta-url {
+    margin: 0;
+    font-family: 'BlissPro', Arial, sans-serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 38px;
+    line-height: 1.1;
+    color: #f2b632;
+    white-space: nowrap;
+  }
+</style>
+</head>
+
+<body>
+  <div class="frame">
+    <div class="bg-rotator"></div>
+
+    <div class="content-layer">
+
+      <div class="gallery-band">
+        <!-- CrowdRiff gallery script start -->
+        <script id="cr-init__962dcb722cdd11b8" src="https://starling.crowdriff.com/js/crowdriff.js" async></script>
+        <!-- CrowdRiff gallery script end -->
+      </div>
+
+      <div class="cta-region">
+        <div class="qr-card">
+          <img src="images/crowdriff_cta_qr_260401.png" alt="QR code linking to photo upload page" />
+        </div>
+
+        <div class="cta-text">
+          <p class="cta-headline">Share Your #VANAQUA Memories With Us!</p>
+          <p class="cta-url">https://vanaqua.org/social/upload-photos/</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
