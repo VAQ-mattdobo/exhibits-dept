@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>VAQ Program Schedule 2026 - Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 24px;
+      max-width: 1280px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .panel {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .controls-row,
+    .table-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      font: inherit;
+    }
+
+    input[type="date"] {
+      max-width: 220px;
+    }
+
+    input[type="time"] {
+      min-width: 110px;
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      margin-top: 0;
+      transform: scale(1.15);
+    }
+
+    button {
+      padding: 10px 14px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .button-small {
+      padding: 6px 10px;
+      font-size: 0.95rem;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #f4f4f4;
+      padding: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f4f4f4;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    .status {
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .checkbox-cell {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .small-note {
+      font-size: 0.92rem;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    .validation-panel {
+      display: none;
+      border: 1px solid #d9a400;
+      background: #fff9e6;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .validation-panel.is-valid {
+      display: block;
+      border-color: #1f8f4e;
+      background: #eefbf2;
+    }
+
+    .validation-panel.is-invalid {
+      display: block;
+      border-color: #c62828;
+      background: #fff3f3;
+    }
+
+    .validation-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .validation-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .row-error-list {
+      margin-top: 8px;
+      margin-bottom: 0;
+      padding-left: 18px;
+      color: #b00020;
+      font-size: 0.92rem;
+    }
+
+    .has-row-errors {
+      background: #fff8f8;
+    }
+
+    .save-status {
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .save-status.success {
+      color: #1f8f4e;
+    }
+
+    .save-status.error {
+      color: #b00020;
+    }
+
+    .save-status.neutral {
+      color: #555;
+    }
+
+    #error-panel {
+      display: none;
+      border-color: #b00020;
+      background: #fff5f6;
+    }
+
+    #auth-panel {
+      display: block;
+    }
+
+    #app-panel {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>VAQ Program Schedule Admin</h1>
+
+  <div id="error-panel" class="panel">
+    <h2>Page Error</h2>
+    <pre id="error-output"></pre>
+  </div>
+
+  <div id="auth-panel" class="panel">
+    <h2>Sign In</h2>
+
+    <label>
+      Email
+      <input type="email" id="email-input" autocomplete="username">
+    </label>
+
+    <label>
+      Password
+      <input type="password" id="password-input" autocomplete="current-password">
+    </label>
+
+    <button id="sign-in-button" type="button">Sign In</button>
+
+    <div id="auth-message" class="status">Please sign in.</div>
+  </div>
+
+  <div id="app-panel" class="panel">
+    <h2>Session Active</h2>
+
+    <div id="session-status" class="status"></div>
+
+    <div class="controls-row">
+      <label>
+        Schedule Date
+        <input type="date" id="schedule-date-input">
+      </label>
+
+      <button id="load-date-button" type="button">Load Date</button>
+      <button id="reload-button" type="button">Reload Data</button>
+      <button id="sign-out-button" type="button">Sign Out</button>
+    </div>
+
+    <h3>Schedule Summary</h3>
+    <div id="schedule-summary" class="muted">No schedule loaded yet.</div>
+
+    <h3>Draft Schedule Entries</h3>
+
+    <div id="validation-panel" class="validation-panel">
+      <div id="validation-title" class="validation-title"></div>
+      <ul id="validation-list" class="validation-list"></ul>
+    </div>
+
+    <div class="table-toolbar">
+      <button id="create-draft-button" type="button">Create Empty Draft</button>
+      <button id="add-program-button" type="button">Add Program</button>
+      <button id="validate-button" type="button">Validate Schedule</button>
+      <button id="save-draft-button" type="button">Save Draft</button>
+      <button id="publish-button" type="button">Publish to Live</button>
+    </div>
+
+    <div id="save-status" class="save-status neutral"></div>
+
+    <div id="schedule-table-container"></div>
+    <div class="small-note">Changes below are editable and can now be saved to the draft row. Publish is not implemented yet.</div>
+
+    <h3>Raw Data Debug</h3>
+    <pre id="load-test-output">No data loaded yet.</pre>
+  </div>
+
+  <script>
+    window.addEventListener('error', (event) => {
+      const panel = document.getElementById('error-panel');
+      const output = document.getElementById('error-output');
+      panel.style.display = 'block';
+      output.textContent = `${event.message}\n\n${event.filename}:${event.lineno}:${event.colno}`;
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://csxuuwbtxgdpvskggcux.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_jPeweysUr7DZvFxG7F1-LQ_UR8MT1F9';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const DEFAULT_DATE = '2026-04-07';
+
+    const appState = {
+      locationStyles: [],
+      liveSchedule: null,
+      draftSchedule: null,
+      editableEntries: [],
+      validation: {
+        isValid: true,
+        summaryErrors: [],
+        rowErrors: {}
+      }
+    };
+
+    const errorPanel = document.getElementById('error-panel');
+    const errorOutput = document.getElementById('error-output');
+    const authPanel = document.getElementById('auth-panel');
+    const appPanel = document.getElementById('app-panel');
+    const authMessage = document.getElementById('auth-message');
+    const sessionStatus = document.getElementById('session-status');
+    const output = document.getElementById('load-test-output');
+    const scheduleSummary = document.getElementById('schedule-summary');
+    const scheduleTableContainer = document.getElementById('schedule-table-container');
+    const validationPanel = document.getElementById('validation-panel');
+    const validationTitle = document.getElementById('validation-title');
+    const validationList = document.getElementById('validation-list');
+    const saveStatus = document.getElementById('save-status');
+    const emailInput = document.getElementById('email-input');
+    const passwordInput = document.getElementById('password-input');
+    const signInButton = document.getElementById('sign-in-button');
+    const reloadButton = document.getElementById('reload-button');
+    const signOutButton = document.getElementById('sign-out-button');
+    const loadDateButton = document.getElementById('load-date-button');
+    const scheduleDateInput = document.getElementById('schedule-date-input');
+    const addProgramButton = document.getElementById('add-program-button');
+    const validateButton = document.getElementById('validate-button');
+    const saveDraftButton = document.getElementById('save-draft-button');
+    const createDraftButton = document.getElementById('create-draft-button');
+    const publishButton = document.getElementById('publish-button');
+
+    scheduleDateInput.value = DEFAULT_DATE;
+
+    function showFatalError(message, detail = '') {
+      errorPanel.style.display = 'block';
+      errorOutput.textContent = detail ? `${message}\n\n${detail}` : message;
+    }
+
+    function setSaveStatus(message, type = 'neutral') {
+      saveStatus.textContent = message;
+      saveStatus.className = `save-status ${type}`;
+    }
+
+    function getSelectedDate() {
+      return scheduleDateInput.value;
+    }
+
+    function cloneEntries(entries) {
+      return JSON.parse(JSON.stringify(Array.isArray(entries) ? entries : []));
+    }
+
+    function generateEntryId() {
+      return `entry_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function createBlankEntry() {
+      return {
+        id: generateEntryId(),
+        title: '',
+        location_key: '',
+        start_time: '',
+        end_time: '',
+        description: '',
+        is_cancelled: false
+      };
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function parseTimeToMinutes(timeString) {
+      if (!timeString || !/^\d{2}:\d{2}$/.test(timeString)) {
+        return null;
+      }
+
+      const [hours, minutes] = timeString.split(':').map(Number);
+
+      if (
+        Number.isNaN(hours) ||
+        Number.isNaN(minutes) ||
+        hours < 0 ||
+        hours > 23 ||
+        minutes < 0 ||
+        minutes > 59
+      ) {
+        return null;
+      }
+
+      return (hours * 60) + minutes;
+    }
+
+    function getLocationOptionsHtml(selectedKey) {
+      const options = appState.locationStyles.map((style) => {
+        const isSelected = style.location_key === selectedKey ? 'selected' : '';
+        return `<option value="${escapeHtml(style.location_key)}" ${isSelected}>${escapeHtml(style.display_name)}</option>`;
+      }).join('');
+
+      return `<option value="">Select location</option>${options}`;
+    }
+
+    async function loadLocationStyles() {
+      const { data, error } = await supabaseClient
+        .from('program_location_styles')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      return { data, error };
+    }
+
+    async function loadLiveSchedule(scheduleDate) {
+      const { data, error } = await supabaseClient
+        .from('program_schedule_sets')
+        .select('*')
+        .eq('schedule_date', scheduleDate)
+        .eq('mode', 'live')
+        .maybeSingle();
+
+      return { data, error };
+    }
+
+    async function loadDraftSchedule(scheduleDate) {
+      const { data, error } = await supabaseClient
+        .from('program_schedule_sets')
+        .select('*')
+        .eq('schedule_date', scheduleDate)
+        .eq('mode', 'draft')
+        .maybeSingle();
+
+      return { data, error };
+    }
+
+    async function saveDraftSchedule() {
+      if (!appState.draftSchedule) {
+        return { error: { message: 'No draft schedule row is currently loaded.' } };
+      }
+
+      const payload = {
+        entries_json: appState.editableEntries,
+        saved_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabaseClient
+        .from('program_schedule_sets')
+        .update(payload)
+        .eq('id', appState.draftSchedule.id)
+        .eq('mode', 'draft')
+        .select()
+        .single();
+
+      return { data, error };
+    }
+
+    async function createEmptyDraftSchedule(scheduleDate) {
+      const payload = {
+        schedule_date: scheduleDate,
+        mode: 'draft',
+        timezone_name: 'America/Vancouver',
+        entries_json: [],
+        day_note: '',
+        saved_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabaseClient
+        .from('program_schedule_sets')
+        .insert(payload)
+        .select()
+        .single();
+
+      return { data, error };
+    }
+
+    function validateEntries() {
+      const summaryErrors = [];
+      const rowErrors = {};
+      const activeTimedRows = [];
+      const validLocationKeys = new Set(appState.locationStyles.map((style) => style.location_key));
+      const seenIds = new Set();
+
+      appState.editableEntries.forEach((entry, index) => {
+        const errors = [];
+        const rowNumber = index + 1;
+
+        const title = String(entry.title || '').trim();
+        const locationKey = String(entry.location_key || '').trim();
+        const startTime = String(entry.start_time || '').trim();
+        const endTime = String(entry.end_time || '').trim();
+
+        if (!entry.id) {
+          errors.push('Missing internal entry ID.');
+        } else if (seenIds.has(entry.id)) {
+          errors.push('Duplicate internal entry ID detected.');
+        } else {
+          seenIds.add(entry.id);
+        }
+
+        if (!title) {
+          errors.push('Title is required.');
+        }
+
+        if (!locationKey) {
+          errors.push('Location is required.');
+        } else if (!validLocationKeys.has(locationKey)) {
+          errors.push('Location is not recognized.');
+        }
+
+        const startMinutes = parseTimeToMinutes(startTime);
+        const endMinutes = parseTimeToMinutes(endTime);
+
+        if (!startTime) {
+          errors.push('Start time is required.');
+        } else if (startMinutes === null) {
+          errors.push('Start time is invalid.');
+        }
+
+        if (!endTime) {
+          errors.push('End time is required.');
+        } else if (endMinutes === null) {
+          errors.push('End time is invalid.');
+        }
+
+        if (startMinutes !== null && endMinutes !== null && startMinutes >= endMinutes) {
+          errors.push('End time must be later than start time.');
+        }
+
+        if (!entry.is_cancelled && startMinutes !== null && endMinutes !== null && startMinutes < endMinutes) {
+          activeTimedRows.push({
+            index,
+            rowNumber,
+            startMinutes,
+            endMinutes
+          });
+        }
+
+        if (errors.length) {
+          rowErrors[index] = errors;
+        }
+      });
+
+      activeTimedRows.sort((a, b) => a.startMinutes - b.startMinutes || a.endMinutes - b.endMinutes);
+
+      for (let i = 0; i < activeTimedRows.length - 1; i += 1) {
+        const current = activeTimedRows[i];
+        const next = activeTimedRows[i + 1];
+
+        if (current.endMinutes > next.startMinutes) {
+          const overlapMessageCurrent = `Overlaps with row ${next.rowNumber}.`;
+          const overlapMessageNext = `Overlaps with row ${current.rowNumber}.`;
+
+          rowErrors[current.index] = rowErrors[current.index] || [];
+          rowErrors[next.index] = rowErrors[next.index] || [];
+
+          if (!rowErrors[current.index].includes(overlapMessageCurrent)) {
+            rowErrors[current.index].push(overlapMessageCurrent);
+          }
+
+          if (!rowErrors[next.index].includes(overlapMessageNext)) {
+            rowErrors[next.index].push(overlapMessageNext);
+          }
+        }
+      }
+
+      Object.keys(rowErrors).forEach((indexKey) => {
+        const rowNumber = Number(indexKey) + 1;
+        rowErrors[indexKey].forEach((message) => {
+          summaryErrors.push(`Row ${rowNumber}: ${message}`);
+        });
+      });
+
+      return {
+        isValid: summaryErrors.length === 0,
+        summaryErrors,
+        rowErrors
+      };
+    }
+
+    function renderValidationPanel() {
+      const validation = appState.validation;
+
+      validationPanel.className = 'validation-panel';
+      validationList.innerHTML = '';
+
+      if (!appState.draftSchedule) {
+        validationPanel.style.display = 'none';
+        return;
+      }
+
+      if (validation.isValid) {
+        validationPanel.classList.add('is-valid');
+        validationTitle.textContent = 'Schedule currently passes validation.';
+        validationList.innerHTML = '<li>No validation errors found.</li>';
+        return;
+      }
+
+      validationPanel.classList.add('is-invalid');
+      validationTitle.textContent = 'Validation errors found. Fix these before saving or publishing.';
+      validationList.innerHTML = validation.summaryErrors
+        .map((message) => `<li>${escapeHtml(message)}</li>`)
+        .join('');
+    }
+
+    function renderScheduleSummary() {
+      if (!appState.draftSchedule) {
+        scheduleSummary.textContent = 'No draft schedule found for this date.';
+        return;
+      }
+
+      const entries = Array.isArray(appState.editableEntries)
+        ? appState.editableEntries
+        : [];
+
+      scheduleSummary.innerHTML = `
+        <strong>Date:</strong> ${escapeHtml(appState.draftSchedule.schedule_date)}<br>
+        <strong>Draft mode:</strong> ${escapeHtml(appState.draftSchedule.mode)}<br>
+        <strong>Timezone:</strong> ${escapeHtml(appState.draftSchedule.timezone_name)}<br>
+        <strong>Entries:</strong> ${entries.length}<br>
+        <strong>Day note:</strong> ${escapeHtml(appState.draftSchedule.day_note || '')}<br>
+        <strong>Draft saved at:</strong> ${escapeHtml(appState.draftSchedule.saved_at || '')}<br>
+        <strong>Live published at:</strong> ${escapeHtml(appState.liveSchedule?.published_at || 'Not yet published')}
+      `;
+    }
+
+    function updateDebugOutput() {
+      const result = {
+        selectedDate: getSelectedDate(),
+        locationStyles: appState.locationStyles,
+        liveSchedule: appState.liveSchedule,
+        draftSchedule: appState.draftSchedule,
+        editableEntries: appState.editableEntries,
+        validation: appState.validation
+      };
+
+      output.textContent = JSON.stringify(result, null, 2);
+    }
+
+    function updateActionButtonStates() {
+      const hasDraft = !!appState.draftSchedule;
+
+      createDraftButton.disabled = hasDraft;
+      addProgramButton.disabled = !hasDraft;
+      validateButton.disabled = !hasDraft;
+      saveDraftButton.disabled = !hasDraft;
+      publishButton.disabled = !hasDraft;
+    }
+
+    function refreshEditorView() {
+      appState.validation = validateEntries();
+      renderScheduleSummary();
+      renderValidationPanel();
+      renderEditableScheduleTable();
+      updateActionButtonStates();
+      updateDebugOutput();
+    }
+
+    function updateEntryField(index, field, value, options = {}) {
+      if (!appState.editableEntries[index]) return;
+
+      appState.editableEntries[index][field] = value;
+      setSaveStatus('Unsaved changes.', 'neutral');
+
+      if (options.validateNow) {
+        refreshEditorView();
+      } else {
+        updateDebugOutput();
+      }
+    }
+
+    function addProgramRow() {
+      if (!appState.draftSchedule) {
+        alert('Load or create a draft schedule first.');
+        return;
+      }
+
+      appState.editableEntries.push(createBlankEntry());
+      setSaveStatus('Unsaved changes.', 'neutral');
+      refreshEditorView();
+    }
+
+    function duplicateProgramRow(index) {
+      const sourceEntry = appState.editableEntries[index];
+      if (!sourceEntry) return;
+
+      const duplicate = {
+        ...cloneEntries([sourceEntry])[0],
+        id: generateEntryId()
+      };
+
+      appState.editableEntries.splice(index + 1, 0, duplicate);
+      setSaveStatus('Unsaved changes.', 'neutral');
+      refreshEditorView();
+    }
+
+    function deleteProgramRow(index) {
+      const entry = appState.editableEntries[index];
+      if (!entry) return;
+
+      const ok = window.confirm(`Delete program row "${entry.title || 'Untitled program'}"?`);
+      if (!ok) return;
+
+      appState.editableEntries.splice(index, 1);
+      setSaveStatus('Unsaved changes.', 'neutral');
+      refreshEditorView();
+    }
+
+    function getRowErrors(index) {
+      return appState.validation.rowErrors[index] || [];
+    }
+
+    function getRowErrorsHtml(index) {
+      const errors = getRowErrors(index);
+      if (!errors.length) return '';
+
+      const itemsHtml = errors
+        .map((message) => `<li>${escapeHtml(message)}</li>`)
+        .join('');
+
+      return `<ul class="row-error-list">${itemsHtml}</ul>`;
+    }
+
+    function renderEditableScheduleTable() {
+      if (!appState.draftSchedule) {
+        scheduleTableContainer.innerHTML = '<p class="muted">No draft schedule found for this date.</p>';
+        return;
+      }
+
+      if (!Array.isArray(appState.editableEntries) || !appState.editableEntries.length) {
+        scheduleTableContainer.innerHTML = '<p class="muted">This draft has no program entries yet. Use “Add Program” to begin.</p>';
+        return;
+      }
+
+      const rowsHtml = appState.editableEntries.map((entry, index) => {
+        const rowErrorsHtml = getRowErrorsHtml(index);
+        const hasErrors = !!getRowErrors(index).length;
+        const rowClass = hasErrors ? 'has-row-errors' : '';
+
+        return `
+          <tr class="${rowClass}">
+            <td>
+              <input type="time" value="${escapeHtml(entry.start_time || '')}" data-index="${index}" data-field="start_time">
+            </td>
+            <td>
+              <input type="time" value="${escapeHtml(entry.end_time || '')}" data-index="${index}" data-field="end_time">
+            </td>
+            <td>
+              <input type="text" value="${escapeHtml(entry.title || '')}" data-index="${index}" data-field="title">
+            </td>
+            <td>
+              <select data-index="${index}" data-field="location_key">
+                ${getLocationOptionsHtml(entry.location_key || '')}
+              </select>
+            </td>
+            <td class="checkbox-cell">
+              <input type="checkbox" ${entry.is_cancelled ? 'checked' : ''} data-index="${index}" data-field="is_cancelled">
+            </td>
+            <td>
+              <input type="text" value="${escapeHtml(entry.description || '')}" data-index="${index}" data-field="description">
+              ${rowErrorsHtml}
+            </td>
+            <td>
+              <div class="row-actions">
+                <button type="button" class="button-small" data-action="duplicate" data-index="${index}">Duplicate</button>
+                <button type="button" class="button-small" data-action="delete" data-index="${index}">Delete</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      scheduleTableContainer.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Start</th>
+              <th>End</th>
+              <th>Title</th>
+              <th>Location</th>
+              <th>Cancelled</th>
+              <th>Description / Row Errors</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      `;
+
+      bindEditableTableEvents();
+    }
+
+    function bindEditableTableEvents() {
+      const fields = scheduleTableContainer.querySelectorAll('input, select, textarea');
+
+      fields.forEach((fieldEl) => {
+        fieldEl.addEventListener('input', handleEditableFieldChange);
+        fieldEl.addEventListener('change', handleEditableFieldChange);
+        fieldEl.addEventListener('blur', handleEditableFieldChange);
+      });
+
+      const actionButtons = scheduleTableContainer.querySelectorAll('button[data-action]');
+
+      actionButtons.forEach((buttonEl) => {
+        buttonEl.addEventListener('click', handleRowActionClick);
+      });
+    }
+
+    function handleEditableFieldChange(event) {
+      const target = event.target;
+      const index = Number(target.dataset.index);
+      const field = target.dataset.field;
+
+      if (!Number.isInteger(index) || !field) return;
+
+      const value = target.type === 'checkbox' ? target.checked : target.value;
+      const shouldValidateNow =
+        event.type === 'change' ||
+        event.type === 'blur' ||
+        target.type === 'checkbox' ||
+        target.tagName === 'SELECT';
+
+      updateEntryField(index, field, value, { validateNow: shouldValidateNow });
+    }
+
+    function handleRowActionClick(event) {
+      const target = event.target;
+      const action = target.dataset.action;
+      const index = Number(target.dataset.index);
+
+      if (!Number.isInteger(index) || !action) return;
+
+      if (action === 'duplicate') {
+        duplicateProgramRow(index);
+        return;
+      }
+
+      if (action === 'delete') {
+        deleteProgramRow(index);
+      }
+    }
+
+    function handleValidateClick() {
+      appState.validation = validateEntries();
+      renderValidationPanel();
+      renderEditableScheduleTable();
+      updateDebugOutput();
+
+      if (appState.validation.isValid) {
+        setSaveStatus('Validation passed.', 'success');
+      } else {
+        setSaveStatus('Validation failed. Fix errors before saving.', 'error');
+      }
+    }
+
+    async function handleSaveDraft() {
+      if (!appState.draftSchedule) {
+        setSaveStatus('No draft row is loaded for this date.', 'error');
+        return;
+      }
+
+      appState.validation = validateEntries();
+      renderValidationPanel();
+      renderEditableScheduleTable();
+      updateDebugOutput();
+
+      if (!appState.validation.isValid) {
+        setSaveStatus('Save blocked. Fix validation errors first.', 'error');
+        return;
+      }
+
+      setSaveStatus('Saving draft...', 'neutral');
+      saveDraftButton.disabled = true;
+
+      const result = await saveDraftSchedule();
+
+      saveDraftButton.disabled = false;
+
+      if (result.error) {
+        setSaveStatus(`Save failed: ${result.error.message}`, 'error');
+        return;
+      }
+
+      appState.draftSchedule = result.data;
+      appState.editableEntries = cloneEntries(result.data.entries_json || []);
+      refreshEditorView();
+      setSaveStatus('Draft saved successfully.', 'success');
+    }
+
+    async function handleCreateDraft() {
+      console.log('Create Empty Draft clicked');
+
+      const selectedDate = getSelectedDate();
+
+      if (!selectedDate) {
+        setSaveStatus('Please choose a date first.', 'error');
+        return;
+      }
+
+      if (appState.draftSchedule) {
+        setSaveStatus('A draft already exists for this date.', 'neutral');
+        return;
+      }
+
+      createDraftButton.disabled = true;
+      setSaveStatus('Creating empty draft...', 'neutral');
+
+      try {
+        const result = await createEmptyDraftSchedule(selectedDate);
+
+        if (result.error) {
+          if (result.error.code === '23505') {
+            setSaveStatus('A draft for this date already exists. Reload the date.', 'error');
+          } else {
+            setSaveStatus(`Create draft failed: ${result.error.message}`, 'error');
+          }
+          createDraftButton.disabled = false;
+          return;
+        }
+
+        setSaveStatus('Empty draft created successfully.', 'success');
+        await loadAllData();
+      } catch (err) {
+        setSaveStatus(`Create draft failed: ${err.message || err}`, 'error');
+        createDraftButton.disabled = false;
+      }
+    }
+
+    async function publishDraftToLive() {
+      if (!appState.draftSchedule) {
+        return { error: { message: 'No draft schedule row is currently loaded.' } };
+      }
+
+      const nowIso = new Date().toISOString();
+
+      const payload = {
+        schedule_date: appState.draftSchedule.schedule_date,
+        mode: 'live',
+        timezone_name: appState.draftSchedule.timezone_name || 'America/Vancouver',
+        entries_json: appState.editableEntries,
+        day_note: appState.draftSchedule.day_note || '',
+        saved_at: nowIso,
+        published_at: nowIso
+      };
+
+      const { data, error } = await supabaseClient
+        .from('program_schedule_sets')
+        .upsert(payload, { onConflict: 'schedule_date,mode' })
+        .select()
+        .single();
+
+      return { data, error };
+    }
+
+    async function loadAllData() {
+      const selectedDate = getSelectedDate();
+
+      if (!selectedDate) {
+        scheduleSummary.textContent = 'Please choose a date.';
+        scheduleTableContainer.innerHTML = '';
+        output.textContent = 'No date selected.';
+        return;
+      }
+
+      output.textContent = 'Loading...';
+      scheduleSummary.textContent = 'Loading...';
+      scheduleTableContainer.innerHTML = '';
+      setSaveStatus('', 'neutral');
+
+      const locationStylesResult = await loadLocationStyles();
+      const liveScheduleResult = await loadLiveSchedule(selectedDate);
+      const draftScheduleResult = await loadDraftSchedule(selectedDate);
+
+      if (locationStylesResult.error) {
+        scheduleSummary.textContent = `Error loading location styles: ${locationStylesResult.error.message}`;
+        return;
+      }
+
+      if (liveScheduleResult.error) {
+        scheduleSummary.textContent = `Error loading live schedule: ${liveScheduleResult.error.message}`;
+        return;
+      }
+
+      if (draftScheduleResult.error) {
+        scheduleSummary.textContent = `Error loading draft schedule: ${draftScheduleResult.error.message}`;
+        return;
+      }
+
+      appState.locationStyles = locationStylesResult.data || [];
+      appState.liveSchedule = liveScheduleResult.data || null;
+      appState.draftSchedule = draftScheduleResult.data || null;
+      appState.editableEntries = cloneEntries(appState.draftSchedule?.entries_json || []);
+      if (!appState.draftSchedule) {
+        setSaveStatus('No draft exists for this date. Click "Create Empty Draft" to begin.', 'neutral');
+      } else {
+        setSaveStatus('', 'neutral');
+      }
+      appState.validation = {
+        isValid: true,
+        summaryErrors: [],
+        rowErrors: {}
+      };
+
+      refreshEditorView();
+    }
+
+    async function showCorrectPanel() {
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+
+        if (error) {
+          authPanel.style.display = 'block';
+          appPanel.style.display = 'none';
+          authMessage.textContent = 'Session check failed.';
+          showFatalError('Session check failed', error.message || '');
+          return;
+        }
+
+        const session = data?.session || null;
+
+        if (session) {
+          authPanel.style.display = 'none';
+          appPanel.style.display = 'block';
+          sessionStatus.textContent = `Signed in as ${session.user.email}`;
+          await loadAllData();
+        } else {
+          authPanel.style.display = 'block';
+          appPanel.style.display = 'none';
+          authMessage.textContent = 'Please sign in.';
+        }
+      } catch (err) {
+        authPanel.style.display = 'block';
+        appPanel.style.display = 'none';
+        showFatalError('Unexpected error in showCorrectPanel()', err?.message || String(err));
+      }
+    }
+
+    async function handleSignIn() {
+      authMessage.textContent = 'Signing in...';
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        authMessage.textContent = `Sign-in failed: ${error.message}`;
+        return;
+      }
+
+      authMessage.textContent = 'Sign-in successful.';
+      await showCorrectPanel();
+    }
+
+    async function handleSignOut() {
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        showFatalError('Sign-out failed', error.message || '');
+        return;
+      }
+
+      appState.locationStyles = [];
+      appState.liveSchedule = null;
+      appState.draftSchedule = null;
+      appState.editableEntries = [];
+      appState.validation = {
+        isValid: true,
+        summaryErrors: [],
+        rowErrors: {}
+      };
+
+      output.textContent = 'No data loaded yet.';
+      scheduleSummary.textContent = 'No schedule loaded yet.';
+      scheduleTableContainer.innerHTML = '';
+      validationPanel.style.display = 'none';
+      setSaveStatus('', 'neutral');
+      await showCorrectPanel();
+    }
+
+    async function handlePublish() {
+      if (!appState.draftSchedule) {
+        setSaveStatus('No draft row is loaded for this date.', 'error');
+        return;
+      }
+
+      appState.validation = validateEntries();
+      renderValidationPanel();
+      renderEditableScheduleTable();
+      updateDebugOutput();
+
+      if (!appState.validation.isValid) {
+        setSaveStatus('Publish blocked. Fix validation errors first.', 'error');
+        return;
+      }
+
+      const ok = window.confirm(
+        `Publish the draft schedule for ${appState.draftSchedule.schedule_date} to live?`
+      );
+
+      if (!ok) {
+        return;
+      }
+
+      setSaveStatus('Publishing to live...', 'neutral');
+      publishButton.disabled = true;
+
+      const result = await publishDraftToLive();
+
+      publishButton.disabled = false;
+
+      if (result.error) {
+        setSaveStatus(`Publish failed: ${result.error.message}`, 'error');
+        return;
+      }
+
+      appState.liveSchedule = result.data;
+      updateDebugOutput();
+      setSaveStatus('Draft published to live successfully.', 'success');
+    }
+
+    signInButton.addEventListener('click', handleSignIn);
+    reloadButton.addEventListener('click', loadAllData);
+    loadDateButton.addEventListener('click', loadAllData);
+    signOutButton.addEventListener('click', handleSignOut);
+    addProgramButton.addEventListener('click', addProgramRow);
+    validateButton.addEventListener('click', handleValidateClick);
+    saveDraftButton.addEventListener('click', handleSaveDraft);
+    createDraftButton.addEventListener('click', handleCreateDraft);
+    publishButton.addEventListener('click', handlePublish);
+
+    document.addEventListener('DOMContentLoaded', showCorrectPanel);
+  </script>
+</body>
+</html>
