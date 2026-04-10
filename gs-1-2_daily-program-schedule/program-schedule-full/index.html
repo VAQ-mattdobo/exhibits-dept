@@ -350,577 +350,349 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = 'https://csxuuwbtxgdpvskggcux.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_jPeweysUr7DZvFxG7F1-LQ_UR8MT1F9';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<script>
+const SUPABASE_URL = 'https://csxuuwbtxgdpvskggcux.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_jPeweysUr7DZvFxG7F1-LQ_UR8MT1F9';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const PAGE_SIZE = 10;
-    const LEFT_COLUMN_COUNT = 5;
-    const TIMEZONE_NAME = 'America/Vancouver';
-    const TILE_OPACITY = 0.80;
+const PAGE_SIZE = 10;
+const LEFT_COLUMN_COUNT = 5;
+const TIMEZONE_NAME = 'America/Vancouver';
+const TILE_OPACITY = 0.80;
 
-    const META_HOLD_MS = 3200;
-    const DESC_HOLD_MS = 3200;
+const META_HOLD_MS = 3200;
+const DESC_HOLD_MS = 3200;
 
-    const TRANSITION_DURATION_MS = 520;
-    const BOUNDARY_FUDGE_MS = 250;
+const TRANSITION_DURATION_MS = 520;
+const BOUNDARY_FUDGE_MS = 250;
 
-    const LAYOUT = {
-      leftX: 0,
-      rightX: 950,
-      startY: 0,
-      rowStep: 156
-    };
+const LAYOUT = {
+  leftX: 0,
+  rightX: 950,
+  startY: 0,
+  rowStep: 156
+};
 
-    const state = {
-      locationStyles: [],
-      liveSchedule: null,
-      allEntries: [],
-      visibleEntries: [],
-      tileElementsById: new Map(),
-      transitionTimerId: null,
-      lineTimerIds: []
-    };
+const state = {
+  locationStyles: [],
+  liveSchedule: null,
+  allEntries: [],
+  visibleEntries: [],
+  tileElementsById: new Map(),
+  transitionTimerId: null,
+  lineTimerIds: []
+};
 
-    const statusPanel = document.getElementById('status-panel');
-    const grid = document.getElementById('grid');
+const statusPanel = document.getElementById('status-panel');
+const grid = document.getElementById('grid');
 
-    function clearLineTimers() {
-      state.lineTimerIds.forEach((id) => clearTimeout(id));
-      state.lineTimerIds = [];
+function clearLineTimers() {
+  state.lineTimerIds.forEach(clearTimeout);
+  state.lineTimerIds = [];
+}
+
+function clearTransitionTimer() {
+  if (state.transitionTimerId) {
+    clearTimeout(state.transitionTimerId);
+    state.transitionTimerId = null;
+  }
+}
+
+function showStatus(message) {
+  clearLineTimers();
+  clearTransitionTimer();
+  statusPanel.hidden = false;
+  statusPanel.textContent = message;
+  grid.hidden = true;
+  grid.innerHTML = '';
+  state.tileElementsById.clear();
+}
+
+function showGrid() {
+  statusPanel.hidden = true;
+  grid.hidden = false;
+}
+
+function getCurrentVancouverParts() {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE_NAME,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  const parts = formatter.formatToParts(new Date());
+  const get = t => parts.find(p => p.type === t)?.value ?? '00';
+
+  return {
+    year: +get('year'),
+    month: +get('month'),
+    day: +get('day'),
+    hour: +get('hour'),
+    minute: +get('minute'),
+    second: +get('second')
+  };
+}
+
+function getCurrentMinutesInVancouver() {
+  const p = getCurrentVancouverParts();
+  return p.hour * 60 + p.minute;
+}
+
+function getMillisecondsUntilVancouverMinute(targetMinutes) {
+  const now = getCurrentVancouverParts();
+  const currentMinutes = now.hour * 60 + now.minute;
+
+  let delta = targetMinutes - currentMinutes;
+  if (delta < 0) delta += 1440;
+
+  const msRemaining = (60 - now.second) * 1000;
+
+  return delta === 0
+    ? msRemaining
+    : msRemaining + (delta - 1) * 60000;
+}
+
+function parseTimeToMinutes(t) {
+  if (!/^\d{2}:\d{2}$/.test(t)) return null;
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function formatTime12Hour(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const suffix = h >= 12 ? 'p.m.' : 'a.m.';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2,'0')} ${suffix}`;
+}
+
+function normalizeHexColor(hex) {
+  return /^#[0-9a-fA-F]{6}$/.test(hex || '') ? hex : '#446688';
+}
+
+function hexToRgba(hex, a) {
+  const h = normalizeHexColor(hex);
+  const r = parseInt(h.slice(1,3),16);
+  const g = parseInt(h.slice(3,5),16);
+  const b = parseInt(h.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function getTilePosition(i) {
+  return i < LEFT_COLUMN_COUNT
+    ? { left: LAYOUT.leftX, top: LAYOUT.startY + i * LAYOUT.rowStep }
+    : { left: LAYOUT.rightX, top: LAYOUT.startY + (i - LEFT_COLUMN_COUNT) * LAYOUT.rowStep };
+}
+
+function getVisibleEntries(entries, now) {
+  return entries
+    .filter(e => e.end_minutes === null || e.end_minutes > now)
+    .slice(0, PAGE_SIZE);
+}
+
+function getNextBoundaryMinutes(entries, now) {
+  return entries
+    .map(e => e.end_minutes)
+    .filter(m => m && m > now)
+    .sort((a,b)=>a-b)[0] ?? null;
+}
+
+function buildMetaLine(e) {
+  return `${formatTime12Hour(e.start_time)} @ ${e.location_name}`;
+}
+
+function scheduleLineSwap(slot) {
+  const toDesc = () => {
+    slot.classList.remove('show-meta');
+    slot.classList.add('show-description');
+  };
+  const toMeta = () => {
+    slot.classList.remove('show-description');
+    slot.classList.add('show-meta');
+  };
+
+  const t1 = setTimeout(() => {
+    toDesc();
+    const t2 = setTimeout(() => {
+      toMeta();
+      scheduleLineSwap(slot);
+    }, DESC_HOLD_MS + 380);
+    state.lineTimerIds.push(t2);
+  }, META_HOLD_MS);
+
+  state.lineTimerIds.push(t1);
+}
+
+function createTile(entry, index) {
+  const tile = document.createElement('article');
+  tile.className = 'program-tile';
+  tile.dataset.entryId = entry.id;
+
+  const pos = getTilePosition(index);
+
+  tile.style.left = pos.left + 'px';
+  tile.style.top = pos.top + 'px';
+  tile.style.background = hexToRgba(entry.hex_color, TILE_OPACITY);
+
+  tile.style.transition = `
+    left ${TRANSITION_DURATION_MS}ms cubic-bezier(0.22,1,0.36,1),
+    top ${TRANSITION_DURATION_MS}ms cubic-bezier(0.22,1,0.36,1),
+    opacity ${TRANSITION_DURATION_MS}ms ease,
+    transform ${TRANSITION_DURATION_MS}ms ease
+  `;
+
+  const icon = document.createElement('div');
+  icon.className = 'program-icon';
+
+  const img = document.createElement('img');
+  img.src = entry.icon_path;
+  icon.appendChild(img);
+
+  const content = document.createElement('div');
+  content.className = 'program-content';
+
+  const title = document.createElement('div');
+  title.className = 'program-title';
+  title.textContent = entry.title;
+
+  const slot = document.createElement('div');
+  slot.className = 'program-line-slot show-meta';
+
+  const meta = document.createElement('div');
+  meta.className = 'program-meta';
+  meta.textContent = buildMetaLine(entry);
+
+  const desc = document.createElement('div');
+  desc.className = 'program-description';
+  desc.textContent = entry.description;
+
+  slot.append(meta, desc);
+  content.append(title, slot);
+  tile.append(icon, content);
+
+  if (entry.description) scheduleLineSwap(slot);
+
+  return tile;
+}
+
+function reconcile(newEntries) {
+  clearLineTimers();
+
+  const oldIds = new Set(state.visibleEntries.map(e => e.id));
+  const newIds = new Set(newEntries.map(e => e.id));
+
+  // EXIT
+  oldIds.forEach(id => {
+    if (!newIds.has(id)) {
+      const t = state.tileElementsById.get(id);
+      if (!t) return;
+      t.style.transform = 'translateX(-180px)';
+      t.style.opacity = '0';
+      setTimeout(()=> {
+        t.remove();
+        state.tileElementsById.delete(id);
+      }, TRANSITION_DURATION_MS);
     }
+  });
 
-    function clearTransitionTimer() {
-      if (state.transitionTimerId) {
-        clearTimeout(state.transitionTimerId);
-        state.transitionTimerId = null;
-      }
-    }
+  newEntries.forEach((e, i) => {
+    const pos = getTilePosition(i);
+    const existing = state.tileElementsById.get(e.id);
 
-    function showStatus(message) {
-      clearLineTimers();
-      clearTransitionTimer();
-      statusPanel.hidden = false;
-      statusPanel.textContent = message;
-      grid.hidden = true;
-      grid.innerHTML = '';
-      state.tileElementsById.clear();
-    }
+    if (existing) {
+      existing.style.transitionDelay = `${i * 18}ms`;
+      existing.style.left = pos.left + 'px';
+      existing.style.top = pos.top + 'px';
+      existing.style.opacity = '1';
+      existing.style.transform = 'translate(0,0)';
+    } else {
+      const t = createTile(e, i);
+      t.style.opacity = '0';
+      t.style.transform = i >= 5 ? 'translateX(180px)' : 'translateY(12px)';
 
-    function showGrid() {
-      statusPanel.hidden = true;
-      grid.hidden = false;
-    }
+      grid.appendChild(t);
+      state.tileElementsById.set(e.id, t);
 
-    function getTodayInVancouver() {
-      const formatter = new Intl.DateTimeFormat('en-CA', {
-        timeZone: TIMEZONE_NAME,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
+      requestAnimationFrame(() => {
+        t.style.left = pos.left + 'px';
+        t.style.top = pos.top + 'px';
+        t.style.opacity = '1';
+        t.style.transform = 'translate(0,0)';
       });
-      return formatter.format(new Date());
     }
-
-    function getCurrentVancouverParts() {
-      const formatter = new Intl.DateTimeFormat('en-CA', {
-        timeZone: TIMEZONE_NAME,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      });
-
-      const parts = formatter.formatToParts(new Date());
-
-      const get = (type) => parts.find((p) => p.type === type)?.value ?? '00';
-
-      return {
-        year: Number(get('year')),
-        month: Number(get('month')),
-        day: Number(get('day')),
-        hour: Number(get('hour')),
-        minute: Number(get('minute')),
-        second: Number(get('second'))
-      };
-    }
-
-    function getCurrentMinutesInVancouver() {
-      const parts = getCurrentVancouverParts();
-      return (parts.hour * 60) + parts.minute;
-    }
-
-    function getMillisecondsUntilVancouverMinute(targetMinutes) {
-      const now = getCurrentVancouverParts();
-      const currentMinutes = (now.hour * 60) + now.minute;
-
-      let deltaMinutes = targetMinutes - currentMinutes;
-      if (deltaMinutes < 0) {
-        deltaMinutes += 24 * 60;
-      }
-
-      const secondsRemainingInCurrentMinute = 60 - now.second;
-      let totalMs = 0;
-
-      if (deltaMinutes === 0) {
-        totalMs = secondsRemainingInCurrentMinute * 1000;
-      } else {
-        totalMs =
-          (secondsRemainingInCurrentMinute * 1000) +
-          ((deltaMinutes - 1) * 60 * 1000);
-      }
-
-      return totalMs;
-    }
-
-    function formatTime12Hour(hhmm) {
-      if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return '';
-
-      const [rawHours, rawMinutes] = hhmm.split(':').map(Number);
-      const suffix = rawHours >= 12 ? 'p.m.' : 'a.m.';
-      const hour12 = rawHours % 12 === 0 ? 12 : rawHours % 12;
-      const minutes = String(rawMinutes).padStart(2, '0');
-
-      return `${hour12}:${minutes} ${suffix}`;
-    }
-
-    function parseTimeToMinutes(timeString) {
-      if (!timeString || !/^\d{2}:\d{2}$/.test(timeString)) return null;
-
-      const [hours, minutes] = timeString.split(':').map(Number);
-
-      if (
-        Number.isNaN(hours) ||
-        Number.isNaN(minutes) ||
-        hours < 0 || hours > 23 ||
-        minutes < 0 || minutes > 59
-      ) {
-        return null;
-      }
-
-      return (hours * 60) + minutes;
-    }
-
-    function normalizeHexColor(hex) {
-      if (!hex) return '';
-      const trimmed = String(hex).trim();
-      return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : '';
-    }
-
-    function hexToRgba(hex, alpha) {
-      const normalized = normalizeHexColor(hex);
-      if (!normalized) {
-        return `rgba(68, 102, 136, ${alpha})`;
-      }
-
-      const r = parseInt(normalized.slice(1, 3), 16);
-      const g = parseInt(normalized.slice(3, 5), 16);
-      const b = parseInt(normalized.slice(5, 7), 16);
-
-      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-
-    function buildLocationMap(locationStyles) {
-      const map = {};
-      for (const item of locationStyles) {
-        map[item.location_key] = item;
-      }
-      return map;
-    }
-
-    function buildIconPath(locationStyle) {
-      if (!locationStyle) return '';
-      const key = String(locationStyle.location_key || '').trim();
-      if (!key) return '';
-      return `./assets/icons/${key}.svg`;
-    }
-
-    async function loadLocationStyles() {
-      const { data, error } = await supabaseClient
-        .from('program_location_styles')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      return { data, error };
-    }
-
-    async function loadLiveScheduleForDate(scheduleDate) {
-      const { data, error } = await supabaseClient
-        .from('program_schedule_sets')
-        .select('*')
-        .eq('schedule_date', scheduleDate)
-        .eq('mode', 'live')
-        .maybeSingle();
-
-      return { data, error };
-    }
-
-    function prepareRenderableEntries(entries, locationStyles) {
-      const locationMap = buildLocationMap(locationStyles);
-
-      return (Array.isArray(entries) ? entries : [])
-        .filter((entry) => !entry.is_cancelled)
-        .map((entry) => {
-          const location = locationMap[entry.location_key] || null;
-          const startMinutes = parseTimeToMinutes(entry.start_time);
-          const endMinutes = parseTimeToMinutes(entry.end_time);
-          const nowMinutes = getCurrentMinutesInVancouver();
-          const descriptionText = String(entry.description || '').trim();
-
-          return {
-            id: entry.id || '',
-            title: entry.title || '',
-            start_time: entry.start_time || '',
-            end_time: entry.end_time || '',
-            start_minutes: startMinutes,
-            end_minutes: endMinutes,
-            description: descriptionText,
-            location_key: entry.location_key || '',
-            location_name: location?.display_name || entry.location_key || 'Unknown location',
-            icon_path: buildIconPath(location),
-            hex_color: normalizeHexColor(location?.hex_color) || '#446688',
-            is_active:
-              startMinutes !== null &&
-              endMinutes !== null &&
-              nowMinutes >= startMinutes &&
-              nowMinutes < endMinutes
-          };
-        })
-        .sort((a, b) => {
-          if (a.start_minutes === null && b.start_minutes === null) return 0;
-          if (a.start_minutes === null) return 1;
-          if (b.start_minutes === null) return -1;
-          if (a.start_minutes !== b.start_minutes) return a.start_minutes - b.start_minutes;
-
-          if (a.end_minutes === null && b.end_minutes === null) return 0;
-          if (a.end_minutes === null) return 1;
-          if (b.end_minutes === null) return -1;
-          return a.end_minutes - b.end_minutes;
-        });
-    }
-
-    function getVisibleEntries(entries, nowMinutes) {
-      return entries
-        .filter((entry) => entry.end_minutes === null || entry.end_minutes > nowMinutes)
-        .slice(0, PAGE_SIZE)
-        .map((entry) => ({
-          ...entry,
-          is_active:
-            entry.start_minutes !== null &&
-            entry.end_minutes !== null &&
-            nowMinutes >= entry.start_minutes &&
-            nowMinutes < entry.end_minutes
-        }));
-    }
-
-    function getNextBoundaryMinutes(visibleEntries, nowMinutes) {
-      const candidates = visibleEntries
-        .map((entry) => entry.end_minutes)
-        .filter((minutes) => minutes !== null && minutes > nowMinutes)
-        .sort((a, b) => a - b);
-
-      return candidates[0] ?? null;
-    }
-
-    function getTilePosition(index) {
-      if (index < LEFT_COLUMN_COUNT) {
-        return {
-          left: LAYOUT.leftX,
-          top: LAYOUT.startY + (index * LAYOUT.rowStep)
-        };
-      }
-
-      const rightIndex = index - LEFT_COLUMN_COUNT;
-      return {
-        left: LAYOUT.rightX,
-        top: LAYOUT.startY + (rightIndex * LAYOUT.rowStep)
-      };
-    }
-
-    function buildMetaLine(entry) {
-      return `${formatTime12Hour(entry.start_time)} @ ${entry.location_name}`;
-    }
-
-    function scheduleLineSwap(lineSlot) {
-      const showDescription = () => {
-        lineSlot.classList.remove('show-meta');
-        lineSlot.classList.add('show-description');
-      };
-
-      const showMeta = () => {
-        lineSlot.classList.remove('show-description');
-        lineSlot.classList.add('show-meta');
-      };
-
-      const first = setTimeout(() => {
-        showDescription();
-
-        const second = setTimeout(() => {
-          showMeta();
-          scheduleLineSwap(lineSlot);
-        }, DESC_HOLD_MS + 380);
-
-        state.lineTimerIds.push(second);
-      }, META_HOLD_MS);
-
-      state.lineTimerIds.push(first);
-    }
-
-    function createProgramTile(entry, index) {
-      const tile = document.createElement('article');
-      tile.className = 'program-tile';
-      tile.dataset.entryId = entry.id;
-
-      if (entry.is_active) {
-        tile.classList.add('active');
-      }
-
-      const position = getTilePosition(index);
-      tile.style.left = `${position.left}px`;
-      tile.style.top = `${position.top}px`;
-      tile.style.background = hexToRgba(entry.hex_color, TILE_OPACITY);
-      tile.style.transition = `left ${TRANSITION_DURATION_MS}ms ease, top ${TRANSITION_DURATION_MS}ms ease, opacity ${TRANSITION_DURATION_MS}ms ease, transform ${TRANSITION_DURATION_MS}ms ease`;
-
-      const iconRegion = document.createElement('div');
-      iconRegion.className = 'program-icon';
-
-      if (entry.icon_path) {
-        const img = document.createElement('img');
-        img.src = entry.icon_path;
-        img.alt = '';
-        img.loading = 'eager';
-        iconRegion.appendChild(img);
-      }
-
-      const content = document.createElement('div');
-      content.className = 'program-content';
-
-      const title = document.createElement('div');
-      title.className = 'program-title';
-      title.textContent = entry.title || 'Untitled Program';
-
-      const lineSlot = document.createElement('div');
-      lineSlot.className = 'program-line-slot show-meta';
-
-      const meta = document.createElement('div');
-      meta.className = 'program-meta';
-      meta.textContent = buildMetaLine(entry);
-
-      const description = document.createElement('div');
-      description.className = 'program-description';
-      description.textContent = entry.description || '';
-
-      lineSlot.appendChild(meta);
-      lineSlot.appendChild(description);
-
-      content.appendChild(title);
-      content.appendChild(lineSlot);
-
-      const debug = document.createElement('div');
-      debug.className = 'tile-debug';
-      debug.textContent = entry.location_key || '';
-
-      tile.appendChild(iconRegion);
-      tile.appendChild(content);
-      tile.appendChild(debug);
-
-      if (entry.description) {
-        scheduleLineSwap(lineSlot);
-      }
-
-      return tile;
-    }
-
-    function updateTileContent(tile, entry) {
-      tile.classList.toggle('active', !!entry.is_active);
-      tile.style.background = hexToRgba(entry.hex_color, TILE_OPACITY);
-
-      const title = tile.querySelector('.program-title');
-      const meta = tile.querySelector('.program-meta');
-      const description = tile.querySelector('.program-description');
-      const img = tile.querySelector('.program-icon img');
-      const lineSlot = tile.querySelector('.program-line-slot');
-
-      if (title) {
-        title.textContent = entry.title || 'Untitled Program';
-      }
-
-      if (meta) {
-        meta.textContent = buildMetaLine(entry);
-      }
-
-      if (description) {
-        description.textContent = entry.description || '';
-      }
-
-      if (img && entry.icon_path && img.getAttribute('src') !== entry.icon_path) {
-        img.setAttribute('src', entry.icon_path);
-      }
-
-      if (lineSlot) {
-        lineSlot.classList.remove('show-description');
-        lineSlot.classList.add('show-meta');
-        if (entry.description) {
-          scheduleLineSwap(lineSlot);
-        }
-      }
-    }
-
-    function reconcileVisibleEntries(newVisibleEntries) {
-      clearLineTimers();
-
-      const oldMap = new Map(state.visibleEntries.map((entry) => [entry.id, entry]));
-      const newMap = new Map(newVisibleEntries.map((entry) => [entry.id, entry]));
-
-      const oldIds = new Set(oldMap.keys());
-      const newIds = new Set(newMap.keys());
-
-      const exitingIds = [...oldIds].filter((id) => !newIds.has(id));
-      const enteringIds = [...newIds].filter((id) => !oldIds.has(id));
-      const stayingIds = [...newIds].filter((id) => oldIds.has(id));
-
-      exitingIds.forEach((id) => {
-        const tile = state.tileElementsById.get(id);
-        if (!tile) return;
-
-        tile.style.opacity = '0';
-        tile.style.transform = 'translateX(-60px)';
-
-        setTimeout(() => {
-          tile.remove();
-          state.tileElementsById.delete(id);
-        }, TRANSITION_DURATION_MS + 40);
-      });
-
-      newVisibleEntries.forEach((entry, index) => {
-        const position = getTilePosition(index);
-        const existingTile = state.tileElementsById.get(entry.id);
-
-        if (existingTile) {
-          updateTileContent(existingTile, entry);
-          existingTile.style.left = `${position.left}px`;
-          existingTile.style.top = `${position.top}px`;
-          existingTile.style.opacity = '1';
-          existingTile.style.transform = 'translateX(0)';
-        } else {
-          const tile = createProgramTile(entry, index);
-
-          if (index >= LEFT_COLUMN_COUNT) {
-            tile.style.opacity = '0';
-            tile.style.transform = 'translateX(40px)';
-          } else {
-            tile.style.opacity = '0';
-            tile.style.transform = 'translateY(10px)';
-          }
-
-          grid.appendChild(tile);
-          state.tileElementsById.set(entry.id, tile);
-
-          requestAnimationFrame(() => {
-            tile.style.left = `${position.left}px`;
-            tile.style.top = `${position.top}px`;
-            tile.style.opacity = '1';
-            tile.style.transform = 'translateX(0) translateY(0)';
-          });
-        }
-      });
-
-      state.visibleEntries = newVisibleEntries;
-      showGrid();
-    }
-
-    function scheduleNextBoundary() {
-      clearTransitionTimer();
-
-      const nowMinutes = getCurrentMinutesInVancouver();
-      const nextBoundary = getNextBoundaryMinutes(state.visibleEntries, nowMinutes);
-
-      if (nextBoundary === null) {
-        return;
-      }
-
-      const msUntilBoundary = getMillisecondsUntilVancouverMinute(nextBoundary) + BOUNDARY_FUDGE_MS;
-
-      state.transitionTimerId = setTimeout(() => {
-        refreshVisibleQueue();
-      }, msUntilBoundary);
-    }
-
-    function refreshVisibleQueue() {
-      const nowMinutes = getCurrentMinutesInVancouver();
-      const newVisibleEntries = getVisibleEntries(state.allEntries, nowMinutes);
-
-      if (!newVisibleEntries.length) {
-        showStatus('No programs scheduled today');
-        return;
-      }
-
-      reconcileVisibleEntries(newVisibleEntries);
-      scheduleNextBoundary();
-    }
-
-    async function initialize() {
-      showStatus('Loading program schedule...');
-
-      const today = getTodayInVancouver();
-
-      const [locationStylesResult, liveScheduleResult] = await Promise.all([
-        loadLocationStyles(),
-        loadLiveScheduleForDate(today)
-      ]);
-
-      if (locationStylesResult.error) {
-        console.error('Error loading location styles:', locationStylesResult.error);
-        showStatus('Schedule unavailable');
-        return;
-      }
-
-      if (liveScheduleResult.error) {
-        console.error('Error loading live schedule:', liveScheduleResult.error);
-        showStatus('Schedule unavailable');
-        return;
-      }
-
-      state.locationStyles = locationStylesResult.data || [];
-      state.liveSchedule = liveScheduleResult.data || null;
-
-      if (!state.liveSchedule || !Array.isArray(state.liveSchedule.entries_json)) {
-        showStatus('No programs scheduled today');
-        return;
-      }
-
-      state.allEntries = prepareRenderableEntries(
-        state.liveSchedule.entries_json,
-        state.locationStyles
-      );
-
-      const nowMinutes = getCurrentMinutesInVancouver();
-      const initialVisibleEntries = getVisibleEntries(state.allEntries, nowMinutes);
-
-      if (!initialVisibleEntries.length) {
-        showStatus('No programs scheduled today');
-        return;
-      }
-
-      grid.innerHTML = '';
-      state.tileElementsById.clear();
-      initialVisibleEntries.forEach((entry, index) => {
-        const tile = createProgramTile(entry, index);
-        grid.appendChild(tile);
-        state.tileElementsById.set(entry.id, tile);
-      });
-
-      state.visibleEntries = initialVisibleEntries;
-      showGrid();
-      scheduleNextBoundary();
-    }
-
-    document.addEventListener('DOMContentLoaded', initialize);
-  </script>
+  });
+
+  state.visibleEntries = newEntries;
+  showGrid();
+}
+
+function refreshQueue() {
+  const now = getCurrentMinutesInVancouver();
+  const visible = getVisibleEntries(state.allEntries, now);
+
+  if (!visible.length) return showStatus('No programs scheduled today');
+
+  reconcile(visible);
+
+  const next = getNextBoundaryMinutes(visible, now);
+  if (!next) return;
+
+  const ms = getMillisecondsUntilVancouverMinute(next) + BOUNDARY_FUDGE_MS;
+  state.transitionTimerId = setTimeout(refreshQueue, ms);
+}
+
+async function initialize() {
+  showStatus('Loading program schedule...');
+
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE_NAME }).format(new Date());
+
+  const [locRes, schedRes] = await Promise.all([
+    supabaseClient.from('program_location_styles').select('*').eq('is_active', true),
+    supabaseClient.from('program_schedule_sets').select('*').eq('schedule_date', today).eq('mode', 'live').maybeSingle()
+  ]);
+
+  if (locRes.error || schedRes.error || !schedRes.data) {
+    return showStatus('Schedule unavailable');
+  }
+
+  const locMap = Object.fromEntries(locRes.data.map(l => [l.location_key, l]));
+
+  state.allEntries = schedRes.data.entries_json
+    .filter(e => !e.is_cancelled)
+    .map(e => ({
+      ...e,
+      start_minutes: parseTimeToMinutes(e.start_time),
+      end_minutes: parseTimeToMinutes(e.end_time),
+      location_name: locMap[e.location_key]?.display_name || e.location_key,
+      icon_path: `./assets/icons/${e.location_key}.svg`,
+      hex_color: locMap[e.location_key]?.hex_color || '#446688'
+    }))
+    .sort((a,b)=>a.start_minutes - b.start_minutes);
+
+  grid.innerHTML = '';
+  state.tileElementsById.clear();
+
+  const now = getCurrentMinutesInVancouver();
+  const visible = getVisibleEntries(state.allEntries, now);
+
+  visible.forEach((e,i)=> {
+    const t = createTile(e,i);
+    grid.appendChild(t);
+    state.tileElementsById.set(e.id, t);
+  });
+
+  state.visibleEntries = visible;
+  showGrid();
+  refreshQueue();
+}
+
+document.addEventListener('DOMContentLoaded', initialize);
+</script>
+  
 </body>
 </html>
