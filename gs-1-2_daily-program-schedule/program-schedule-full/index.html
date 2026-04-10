@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <meta name="viewport" content="width=1920, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no" />
   <title>VAQ Program Schedule Full</title>
+
+<!--
+  Target container: 1920 x 810 px
+  Scale fix applied for Kuusoft environment rendering oversized.
+  Shared asset path note:
+  This page uses the repo-level ../assets/ folder for common fonts and imagery.
+  Update these paths if the hosted folder structure changes later.
+-->
 
   <style>
     @font-face {
@@ -355,7 +363,9 @@
 
     const META_HOLD_MS = 3200;
     const DESC_HOLD_MS = 3200;
-    const PAGE_ROTATION_MS = 9000;
+
+    const TRANSITION_DURATION_MS = 520;
+    const BOUNDARY_FUDGE_MS = 250;
 
     const LAYOUT = {
       leftX: 0,
@@ -367,10 +377,10 @@
     const state = {
       locationStyles: [],
       liveSchedule: null,
-      renderedEntries: [],
-      pages: [],
-      currentPageIndex: 0,
-      pageTimerId: null,
+      allEntries: [],
+      visibleEntries: [],
+      tileElementsById: new Map(),
+      transitionTimerId: null,
       lineTimerIds: []
     };
 
@@ -382,20 +392,21 @@
       state.lineTimerIds = [];
     }
 
-    function clearPageTimer() {
-      if (state.pageTimerId) {
-        clearTimeout(state.pageTimerId);
-        state.pageTimerId = null;
+    function clearTransitionTimer() {
+      if (state.transitionTimerId) {
+        clearTimeout(state.transitionTimerId);
+        state.transitionTimerId = null;
       }
     }
 
     function showStatus(message) {
       clearLineTimers();
-      clearPageTimer();
+      clearTransitionTimer();
       statusPanel.hidden = false;
       statusPanel.textContent = message;
       grid.hidden = true;
       grid.innerHTML = '';
+      state.tileElementsById.clear();
     }
 
     function showGrid() {
@@ -413,19 +424,58 @@
       return formatter.format(new Date());
     }
 
-    function getCurrentMinutesInVancouver() {
-      const formatter = new Intl.DateTimeFormat('en-GB', {
+    function getCurrentVancouverParts() {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: TIMEZONE_NAME,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
+        second: '2-digit',
         hour12: false
       });
 
       const parts = formatter.formatToParts(new Date());
-      const hour = Number(parts.find((p) => p.type === 'hour')?.value ?? '0');
-      const minute = Number(parts.find((p) => p.type === 'minute')?.value ?? '0');
 
-      return (hour * 60) + minute;
+      const get = (type) => parts.find((p) => p.type === type)?.value ?? '00';
+
+      return {
+        year: Number(get('year')),
+        month: Number(get('month')),
+        day: Number(get('day')),
+        hour: Number(get('hour')),
+        minute: Number(get('minute')),
+        second: Number(get('second'))
+      };
+    }
+
+    function getCurrentMinutesInVancouver() {
+      const parts = getCurrentVancouverParts();
+      return (parts.hour * 60) + parts.minute;
+    }
+
+    function getMillisecondsUntilVancouverMinute(targetMinutes) {
+      const now = getCurrentVancouverParts();
+      const currentMinutes = (now.hour * 60) + now.minute;
+
+      let deltaMinutes = targetMinutes - currentMinutes;
+      if (deltaMinutes < 0) {
+        deltaMinutes += 24 * 60;
+      }
+
+      const secondsRemainingInCurrentMinute = 60 - now.second;
+      let totalMs = 0;
+
+      if (deltaMinutes === 0) {
+        totalMs = secondsRemainingInCurrentMinute * 1000;
+      } else {
+        totalMs =
+          (secondsRemainingInCurrentMinute * 1000) +
+          ((deltaMinutes - 1) * 60 * 1000);
+      }
+
+      return totalMs;
     }
 
     function formatTime12Hour(hhmm) {
@@ -513,7 +563,6 @@
 
     function prepareRenderableEntries(entries, locationStyles) {
       const locationMap = buildLocationMap(locationStyles);
-      const nowMinutes = getCurrentMinutesInVancouver();
 
       return (Array.isArray(entries) ? entries : [])
         .filter((entry) => !entry.is_cancelled)
@@ -521,6 +570,7 @@
           const location = locationMap[entry.location_key] || null;
           const startMinutes = parseTimeToMinutes(entry.start_time);
           const endMinutes = parseTimeToMinutes(entry.end_time);
+          const nowMinutes = getCurrentMinutesInVancouver();
           const descriptionText = String(entry.description || '').trim();
 
           return {
@@ -528,6 +578,8 @@
             title: entry.title || '',
             start_time: entry.start_time || '',
             end_time: entry.end_time || '',
+            start_minutes: startMinutes,
+            end_minutes: endMinutes,
             description: descriptionText,
             location_key: entry.location_key || '',
             location_name: location?.display_name || entry.location_key || 'Unknown location',
@@ -541,30 +593,39 @@
           };
         })
         .sort((a, b) => {
-          const aMinutes = parseTimeToMinutes(a.start_time);
-          const bMinutes = parseTimeToMinutes(b.start_time);
+          if (a.start_minutes === null && b.start_minutes === null) return 0;
+          if (a.start_minutes === null) return 1;
+          if (b.start_minutes === null) return -1;
+          if (a.start_minutes !== b.start_minutes) return a.start_minutes - b.start_minutes;
 
-          if (aMinutes === null && bMinutes === null) return 0;
-          if (aMinutes === null) return 1;
-          if (bMinutes === null) return -1;
-          if (aMinutes !== bMinutes) return aMinutes - bMinutes;
-
-          const aEnd = parseTimeToMinutes(a.end_time);
-          const bEnd = parseTimeToMinutes(b.end_time);
-
-          if (aEnd === null && bEnd === null) return 0;
-          if (aEnd === null) return 1;
-          if (bEnd === null) return -1;
-          return aEnd - bEnd;
+          if (a.end_minutes === null && b.end_minutes === null) return 0;
+          if (a.end_minutes === null) return 1;
+          if (b.end_minutes === null) return -1;
+          return a.end_minutes - b.end_minutes;
         });
     }
 
-    function paginateEntries(entries, pageSize) {
-      const pages = [];
-      for (let i = 0; i < entries.length; i += pageSize) {
-        pages.push(entries.slice(i, i + pageSize));
-      }
-      return pages;
+    function getVisibleEntries(entries, nowMinutes) {
+      return entries
+        .filter((entry) => entry.end_minutes === null || entry.end_minutes > nowMinutes)
+        .slice(0, PAGE_SIZE)
+        .map((entry) => ({
+          ...entry,
+          is_active:
+            entry.start_minutes !== null &&
+            entry.end_minutes !== null &&
+            nowMinutes >= entry.start_minutes &&
+            nowMinutes < entry.end_minutes
+        }));
+    }
+
+    function getNextBoundaryMinutes(visibleEntries, nowMinutes) {
+      const candidates = visibleEntries
+        .map((entry) => entry.end_minutes)
+        .filter((minutes) => minutes !== null && minutes > nowMinutes)
+        .sort((a, b) => a - b);
+
+      return candidates[0] ?? null;
     }
 
     function getTilePosition(index) {
@@ -586,9 +647,35 @@
       return `${formatTime12Hour(entry.start_time)} @ ${entry.location_name}`;
     }
 
+    function scheduleLineSwap(lineSlot) {
+      const showDescription = () => {
+        lineSlot.classList.remove('show-meta');
+        lineSlot.classList.add('show-description');
+      };
+
+      const showMeta = () => {
+        lineSlot.classList.remove('show-description');
+        lineSlot.classList.add('show-meta');
+      };
+
+      const first = setTimeout(() => {
+        showDescription();
+
+        const second = setTimeout(() => {
+          showMeta();
+          scheduleLineSwap(lineSlot);
+        }, DESC_HOLD_MS + 380);
+
+        state.lineTimerIds.push(second);
+      }, META_HOLD_MS);
+
+      state.lineTimerIds.push(first);
+    }
+
     function createProgramTile(entry, index) {
       const tile = document.createElement('article');
       tile.className = 'program-tile';
+      tile.dataset.entryId = entry.id;
 
       if (entry.is_active) {
         tile.classList.add('active');
@@ -598,7 +685,7 @@
       tile.style.left = `${position.left}px`;
       tile.style.top = `${position.top}px`;
       tile.style.background = hexToRgba(entry.hex_color, TILE_OPACITY);
-      tile.style.animationDelay = `${index * 35}ms`;
+      tile.style.transition = `left ${TRANSITION_DURATION_MS}ms ease, top ${TRANSITION_DURATION_MS}ms ease, opacity ${TRANSITION_DURATION_MS}ms ease, transform ${TRANSITION_DURATION_MS}ms ease`;
 
       const iconRegion = document.createElement('div');
       iconRegion.className = 'program-icon';
@@ -650,77 +737,132 @@
       return tile;
     }
 
-    function scheduleLineSwap(lineSlot) {
-      const showDescription = () => {
-        lineSlot.classList.remove('show-meta');
-        lineSlot.classList.add('show-description');
-      };
+    function updateTileContent(tile, entry) {
+      tile.classList.toggle('active', !!entry.is_active);
+      tile.style.background = hexToRgba(entry.hex_color, TILE_OPACITY);
 
-      const showMeta = () => {
+      const title = tile.querySelector('.program-title');
+      const meta = tile.querySelector('.program-meta');
+      const description = tile.querySelector('.program-description');
+      const img = tile.querySelector('.program-icon img');
+      const lineSlot = tile.querySelector('.program-line-slot');
+
+      if (title) {
+        title.textContent = entry.title || 'Untitled Program';
+      }
+
+      if (meta) {
+        meta.textContent = buildMetaLine(entry);
+      }
+
+      if (description) {
+        description.textContent = entry.description || '';
+      }
+
+      if (img && entry.icon_path && img.getAttribute('src') !== entry.icon_path) {
+        img.setAttribute('src', entry.icon_path);
+      }
+
+      if (lineSlot) {
         lineSlot.classList.remove('show-description');
         lineSlot.classList.add('show-meta');
-      };
-
-      const first = setTimeout(() => {
-        showDescription();
-
-        const second = setTimeout(() => {
-          showMeta();
+        if (entry.description) {
           scheduleLineSwap(lineSlot);
-        }, DESC_HOLD_MS + 380);
-
-        state.lineTimerIds.push(second);
-      }, META_HOLD_MS);
-
-      state.lineTimerIds.push(first);
+        }
+      }
     }
 
-    function fadeGridOut() {
-      return new Promise((resolve) => {
-        grid.classList.add('is-fading');
-        window.setTimeout(resolve, 460);
-      });
-    }
-
-    function renderPage(pageEntries) {
+    function reconcileVisibleEntries(newVisibleEntries) {
       clearLineTimers();
-      grid.innerHTML = '';
 
-      pageEntries.forEach((entry, index) => {
-        grid.appendChild(createProgramTile(entry, index));
+      const oldMap = new Map(state.visibleEntries.map((entry) => [entry.id, entry]));
+      const newMap = new Map(newVisibleEntries.map((entry) => [entry.id, entry]));
+
+      const oldIds = new Set(oldMap.keys());
+      const newIds = new Set(newMap.keys());
+
+      const exitingIds = [...oldIds].filter((id) => !newIds.has(id));
+      const enteringIds = [...newIds].filter((id) => !oldIds.has(id));
+      const stayingIds = [...newIds].filter((id) => oldIds.has(id));
+
+      exitingIds.forEach((id) => {
+        const tile = state.tileElementsById.get(id);
+        if (!tile) return;
+
+        tile.style.opacity = '0';
+        tile.style.transform = 'translateX(-60px)';
+
+        setTimeout(() => {
+          tile.remove();
+          state.tileElementsById.delete(id);
+        }, TRANSITION_DURATION_MS + 40);
       });
 
-      grid.classList.remove('is-fading');
+      newVisibleEntries.forEach((entry, index) => {
+        const position = getTilePosition(index);
+        const existingTile = state.tileElementsById.get(entry.id);
+
+        if (existingTile) {
+          updateTileContent(existingTile, entry);
+          existingTile.style.left = `${position.left}px`;
+          existingTile.style.top = `${position.top}px`;
+          existingTile.style.opacity = '1';
+          existingTile.style.transform = 'translateX(0)';
+        } else {
+          const tile = createProgramTile(entry, index);
+
+          if (index >= LEFT_COLUMN_COUNT) {
+            tile.style.opacity = '0';
+            tile.style.transform = 'translateX(40px)';
+          } else {
+            tile.style.opacity = '0';
+            tile.style.transform = 'translateY(10px)';
+          }
+
+          grid.appendChild(tile);
+          state.tileElementsById.set(entry.id, tile);
+
+          requestAnimationFrame(() => {
+            tile.style.left = `${position.left}px`;
+            tile.style.top = `${position.top}px`;
+            tile.style.opacity = '1';
+            tile.style.transform = 'translateX(0) translateY(0)';
+          });
+        }
+      });
+
+      state.visibleEntries = newVisibleEntries;
       showGrid();
     }
 
-    function scheduleNextPage() {
-      clearPageTimer();
+    function scheduleNextBoundary() {
+      clearTransitionTimer();
 
-      if (state.pages.length <= 1) {
+      const nowMinutes = getCurrentMinutesInVancouver();
+      const nextBoundary = getNextBoundaryMinutes(state.visibleEntries, nowMinutes);
+
+      if (nextBoundary === null) {
         return;
       }
 
-      state.pageTimerId = setTimeout(async () => {
-        await fadeGridOut();
+      const msUntilBoundary = getMillisecondsUntilVancouverMinute(nextBoundary) + BOUNDARY_FUDGE_MS;
 
-        state.currentPageIndex = (state.currentPageIndex + 1) % state.pages.length;
-        renderPage(state.pages[state.currentPageIndex]);
-        scheduleNextPage();
-      }, PAGE_ROTATION_MS);
+      state.transitionTimerId = setTimeout(() => {
+        refreshVisibleQueue();
+      }, msUntilBoundary);
     }
 
-    function renderSchedule(entries) {
-      if (!entries.length) {
+    function refreshVisibleQueue() {
+      const nowMinutes = getCurrentMinutesInVancouver();
+      const newVisibleEntries = getVisibleEntries(state.allEntries, nowMinutes);
+
+      if (!newVisibleEntries.length) {
         showStatus('No programs scheduled today');
         return;
       }
 
-      state.pages = paginateEntries(entries, PAGE_SIZE);
-      state.currentPageIndex = 0;
-
-      renderPage(state.pages[0]);
-      scheduleNextPage();
+      reconcileVisibleEntries(newVisibleEntries);
+      scheduleNextBoundary();
     }
 
     async function initialize() {
@@ -753,12 +895,30 @@
         return;
       }
 
-      state.renderedEntries = prepareRenderableEntries(
+      state.allEntries = prepareRenderableEntries(
         state.liveSchedule.entries_json,
         state.locationStyles
       );
 
-      renderSchedule(state.renderedEntries);
+      const nowMinutes = getCurrentMinutesInVancouver();
+      const initialVisibleEntries = getVisibleEntries(state.allEntries, nowMinutes);
+
+      if (!initialVisibleEntries.length) {
+        showStatus('No programs scheduled today');
+        return;
+      }
+
+      grid.innerHTML = '';
+      state.tileElementsById.clear();
+      initialVisibleEntries.forEach((entry, index) => {
+        const tile = createProgramTile(entry, index);
+        grid.appendChild(tile);
+        state.tileElementsById.set(entry.id, tile);
+      });
+
+      state.visibleEntries = initialVisibleEntries;
+      showGrid();
+      scheduleNextBoundary();
     }
 
     document.addEventListener('DOMContentLoaded', initialize);
