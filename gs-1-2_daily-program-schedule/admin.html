@@ -3,108 +3,575 @@
 <head>
   <meta charset="utf-8">
   <title>VAQ Program Schedule 2026 - Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 24px;
-      max-width: 1280px;
+    :root {
+      --vaq-green: #7d9b2d;
+      --vaq-blue: #64a5c3;
+      --vaq-orange: #e6782d;
+      --vaq-grey: #646e78;
+
+      --vaq-green-dark: #6f8a27;
+      --vaq-blue-dark: #4f8ead;
+      --vaq-orange-dark: #cf6824;
+      --vaq-grey-dark: #525b64;
+
+      --vaq-green-soft: #f2f7e7;
+      --vaq-blue-soft: #eef6fa;
+      --vaq-orange-soft: #fdf2ea;
+      --vaq-grey-soft: #f3f5f7;
+
+      --bg: #eef3f6;
+      --panel: #ffffff;
+      --panel-soft: #f8fafb;
+      --report-panel: #eaf1f4;
+      --report-panel-dark: #dbe6eb;
+      --line: #d7e0e5;
+      --line-strong: #bcc9d1;
+      --text: #243341;
+      --text-soft: #596876;
+      --text-heading: #2c3c49;
+
+      --primary: var(--vaq-green);
+      --primary-hover: var(--vaq-green-dark);
+      --primary-soft: var(--vaq-green-soft);
+
+      --secondary: var(--vaq-blue);
+      --secondary-hover: var(--vaq-blue-dark);
+      --secondary-soft: var(--vaq-blue-soft);
+
+      --accent: var(--vaq-orange);
+      --accent-hover: var(--vaq-orange-dark);
+      --accent-soft: var(--vaq-orange-soft);
+
+      --neutral: var(--vaq-grey);
+      --neutral-hover: var(--vaq-grey-dark);
+      --neutral-soft: var(--vaq-grey-soft);
+
+      --success: var(--vaq-green-dark);
+      --success-soft: var(--vaq-green-soft);
+      --warning: var(--vaq-orange-dark);
+      --warning-soft: var(--vaq-orange-soft);
+      --danger: #b33a3a;
+      --danger-soft: #fff4f4;
+      --shadow: 0 10px 28px rgba(44, 60, 73, 0.08);
+      --radius: 16px;
+      --radius-sm: 10px;
     }
 
-    h1, h2, h3 {
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      padding: 28px;
+    }
+
+    h1, h2, h3, h4 {
       margin-top: 0;
+      color: var(--text-heading);
+    }
+
+    p {
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    .page-shell {
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 22px;
+    }
+
+    .page-title {
+      margin-bottom: 6px;
+      font-size: 2rem;
+      line-height: 1.15;
+    }
+
+    .page-subtitle {
+      margin: 0;
+      max-width: 860px;
+      font-size: 1rem;
     }
 
     .panel {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
       margin-bottom: 20px;
     }
 
+    .panel-soft {
+      background: var(--panel-soft);
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .section-heading h2,
+    .section-heading h3 {
+      margin-bottom: 4px;
+    }
+
+    .section-heading p {
+      margin: 0;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--secondary-soft);
+      color: var(--secondary-hover);
+      font-weight: 700;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .editing-date-message {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--secondary-soft);
+      border: 1px solid #cfe0e9;
+      color: var(--secondary-hover);
+      font-weight: 700;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
     .controls-row,
-    .table-toolbar {
+    .tools-grid,
+    .toolbar-cluster,
+    .tools-actions,
+    .utility-row {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       align-items: end;
-      margin-bottom: 16px;
     }
 
-    label {
+    label,
+    .field-block {
       display: block;
-      margin-bottom: 10px;
+      min-width: 0;
+    }
+
+    .field-block {
+      flex: 1 1 180px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .field-help {
+      margin-top: 6px;
+      font-size: 0.88rem;
+      color: var(--text-soft);
     }
 
     input,
     select,
     textarea {
       width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      box-sizing: border-box;
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #fff;
       font: inherit;
+      color: var(--text);
+      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
     }
 
-    input[type="date"] {
-      max-width: 220px;
-    }
-
-    input[type="time"] {
-      min-width: 110px;
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(100, 165, 195, 0.16);
     }
 
     input[type="checkbox"] {
       width: auto;
-      margin-top: 0;
-      transform: scale(1.15);
+      margin: 0;
+      transform: scale(1.1);
+    }
+
+    textarea {
+      min-height: 102px;
+      resize: vertical;
+    }
+
+    .checkbox-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--text-soft);
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      min-height: 44px;
     }
 
     button {
-      padding: 10px 14px;
+      appearance: none;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 11px 14px;
+      min-height: 44px;
       cursor: pointer;
       font: inherit;
+      font-weight: 700;
+      transition: transform 100ms ease, background 120ms ease, border-color 120ms ease, color 120ms ease, opacity 120ms ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .button-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .button-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    
+    .button-secondary {
+      background: var(--secondary);
+      color: #fff;
+      border-color: var(--secondary);
+    }
+
+    .button-secondary:hover:not(:disabled) {
+      background: var(--secondary-hover);
+      border-color: var(--secondary-hover);
+    }
+
+    .button-neutral {
+      background: var(--neutral-soft);
+      color: var(--neutral-hover);
+      border-color: var(--line);
+    }
+
+    .button-neutral:hover:not(:disabled) {
+      background: #e8edf0;
+    }
+
+    .button-accent {
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+      border-color: #f1cfba;
+    }
+
+    .button-accent:hover:not(:disabled) {
+      background: #f7e7dc;
+    }
+
+    .button-danger {
+      background: #fff;
+      color: var(--danger);
+      border-color: #e4b7b7;
+    }
+
+    .button-confirm-delete {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .button-confirm-delete:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
     }
 
     .button-small {
-      padding: 6px 10px;
-      font-size: 0.95rem;
+      min-height: 34px;
+      padding: 7px 10px;
+      font-size: 0.92rem;
+      border-radius: 8px;
     }
 
-    pre {
-      white-space: pre-wrap;
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .button-row > button,
+    .toolbar-cluster > button,
+    .tools-actions > button,
+    .controls-row > button {
+      flex: 1 1 210px;
+    }
+
+    .controls-row > .field-block {
+      flex: 1 1 220px;
+    }
+
+    .summary-card {
+      background: linear-gradient(180deg, var(--report-panel) 0%, var(--report-panel-dark) 100%);
+      border: 1px solid #c4d4dc;
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--text-heading);
+    }
+
+    .summary-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .summary-date {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary-stat {
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid #cddbe1;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .summary-stat-label {
+      display: block;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--neutral);
+      margin-bottom: 5px;
+    }
+
+    .summary-stat-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1f2d3a;
+      line-height: 1.35;
       word-break: break-word;
-      background: #f4f4f4;
-      padding: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    }
+
+    .summary-note {
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      line-height: 1.5;
+      color: var(--text-soft);
+    }
+
+    .summary-note strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text-heading);
+    }
+
+
+    .accordion-panel {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .accordion-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 20px;
+      color: inherit;
+      text-align: left;
+    }
+
+    .accordion-toggle:hover:not(:disabled) {
+      transform: none;
+      background: #f6f9fb;
+    }
+
+    .accordion-toggle-text {
+      display: grid;
+      gap: 4px;
+    }
+
+    .accordion-chevron {
+      flex: 0 0 auto;
+      font-size: 1rem;
+      color: var(--neutral);
+      transition: transform 160ms ease;
+    }
+
+    .accordion-panel.is-open .accordion-chevron {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .accordion-panel.is-open .accordion-content {
+      display: block;
+    }
+
+    .validation-panel {
+      display: none;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border: 1px solid #e1c26d;
+      background: var(--warning-soft);
+    }
+
+    .validation-panel.is-valid {
+      display: block;
+      border-color: #9ed1b0;
+      background: var(--success-soft);
+    }
+
+    .validation-panel.is-invalid {
+      display: block;
+      border-color: #e3b1b1;
+      background: var(--danger-soft);
+    }
+
+    .validation-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .validation-list,
+    .row-error-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .row-error-list {
+      margin-top: 8px;
+      color: #982d2d;
+      font-size: 0.9rem;
+    }
+
+    .save-status {
+      min-height: 24px;
+      padding: 6px 0 2px;
+      font-weight: 700;
+    }
+
+    .save-status.success {
+      color: var(--success);
+    }
+
+    .save-status.error {
+      color: var(--danger);
+    }
+
+    .save-status.neutral {
+      color: var(--text-soft);
+    }
+
+    .table-wrap {
       overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 16px;
+      min-width: 1180px;
     }
 
     th,
     td {
-      border: 1px solid #ccc;
-      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      padding: 12px;
       text-align: left;
       vertical-align: top;
     }
 
     th {
-      background: #f4f4f4;
+      background: #f3f6f8;
+      color: var(--neutral-hover);
+      font-size: 0.92rem;
+    }
+
+    tbody tr:hover {
+      background: #fbfdff;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
     }
 
     .muted {
-      color: #666;
-    }
-
-    .status {
-      font-weight: bold;
-      margin-bottom: 12px;
+      color: var(--text-soft);
     }
 
     .checkbox-cell {
@@ -112,16 +579,8 @@
       vertical-align: middle;
     }
 
-    .row-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .small-note {
-      font-size: 0.92rem;
-      color: #555;
-      margin-top: 8px;
+    .has-row-errors {
+      background: #fff8f8;
     }
 
     .time-control-group {
@@ -133,147 +592,275 @@
       min-width: 68px;
     }
 
-    .validation-panel {
-      display: none;
-      border: 1px solid #d9a400;
-      background: #fff9e6;
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
+    .location-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .validation-panel.is-valid {
-      display: block;
-      border-color: #1f8f4e;
-      background: #eefbf2;
+    .location-chip {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      background: #d9e3ec;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
     }
 
-    .validation-panel.is-invalid {
-      display: block;
-      border-color: #c62828;
-      background: #fff3f3;
+    .location-chip.is-empty {
+      background: repeating-linear-gradient(
+        45deg,
+        #e2e8ef,
+        #e2e8ef 4px,
+        #f5f8fb 4px,
+        #f5f8fb 8px
+      );
     }
 
-    .validation-title {
-      font-weight: bold;
-      margin-bottom: 8px;
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .validation-list {
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .row-error-list {
-      margin-top: 8px;
-      margin-bottom: 0;
-      padding-left: 18px;
-      color: #b00020;
+    .small-note {
       font-size: 0.92rem;
+      color: var(--text-soft);
+      margin-top: 10px;
     }
 
-    .has-row-errors {
-      background: #fff8f8;
+    .stack-sm {
+      display: grid;
+      gap: 10px;
     }
 
-    .save-status {
-      margin-top: 8px;
-      font-weight: bold;
-    }
-
-    .save-status.success {
-      color: #1f8f4e;
-    }
-
-    .save-status.error {
-      color: #b00020;
-    }
-
-    .save-status.neutral {
-      color: #555;
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #f7f9fb;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow-x: auto;
+      margin: 0;
     }
 
     #error-panel {
       display: none;
-      border-color: #b00020;
-      background: #fff5f6;
+      border-color: #dfb9b9;
+      background: #fff7f7;
     }
 
     #auth-panel {
       display: block;
+      max-width: 520px;
+      margin: 0 auto;
     }
 
     #app-panel {
       display: none;
     }
+
+    @media (max-width: 1100px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(160px, 1fr));
+      }
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 16px;
+      }
+
+      .panel {
+        padding: 16px;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-topline {
+        align-items: start;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="page-shell">
+    <header class="page-header">
+      <h1 class="page-title">VAQ Program Schedule Admin</h1>
+      <p class="page-subtitle">Manage draft schedules, copy forward proven day structures, validate timing conflicts, and publish the live version used by the full program schedule sign.</p>
+    </header>
 
-  <h1>VAQ Program Schedule Admin</h1>
-
-  <div id="error-panel" class="panel">
-    <h2>Page Error</h2>
-    <pre id="error-output"></pre>
-  </div>
-
-  <div id="auth-panel" class="panel">
-    <h2>Sign In</h2>
-
-    <label>
-      Email
-      <input type="email" id="email-input" autocomplete="username">
-    </label>
-
-    <label>
-      Password
-      <input type="password" id="password-input" autocomplete="current-password">
-    </label>
-
-    <button id="sign-in-button" type="button">Sign In</button>
-
-    <div id="auth-message" class="status">Please sign in.</div>
-  </div>
-
-  <div id="app-panel" class="panel">
-    <h2>Session Active</h2>
-
-    <div id="session-status" class="status"></div>
-
-    <div class="controls-row">
-      <label>
-        Schedule Date
-        <input type="date" id="schedule-date-input">
-      </label>
-
-      <button id="load-date-button" type="button">Load Date</button>
-      <button id="reload-button" type="button">Reload Data</button>
-      <button id="sign-out-button" type="button">Sign Out</button>
+    <div id="error-panel" class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Page Error</h2>
+          <p>An unexpected script or loading error occurred.</p>
+        </div>
+      </div>
+      <pre id="error-output"></pre>
     </div>
 
-    <h3>Schedule Summary</h3>
-    <div id="schedule-summary" class="muted">No schedule loaded yet.</div>
+    <div id="auth-panel" class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Sign In</h2>
+          <p>Use an authorised VAQ schedule editor account.</p>
+        </div>
+      </div>
 
-    <h3>Draft Schedule Entries</h3>
+      <div class="stack-sm">
+        <label>
+          <span class="field-label">Email</span>
+          <input type="email" id="email-input" autocomplete="username">
+        </label>
 
-    <div id="validation-panel" class="validation-panel">
-      <div id="validation-title" class="validation-title"></div>
-      <ul id="validation-list" class="validation-list"></ul>
+        <label>
+          <span class="field-label">Password</span>
+          <input type="password" id="password-input" autocomplete="current-password">
+        </label>
+
+        <div class="button-row">
+          <button id="sign-in-button" type="button" class="button-primary">Sign In</button>
+        </div>
+
+        <div id="auth-message" class="save-status neutral">Please sign in.</div>
+      </div>
     </div>
 
-    <div class="table-toolbar">
-      <button id="create-draft-button" type="button">Create Empty Draft</button>
-      <button id="add-program-button" type="button">Add Program</button>
-      <button id="validate-button" type="button">Validate Schedule</button>
-      <button id="save-draft-button" type="button">Save Draft</button>
-      <button id="publish-button" type="button">Publish to Live</button>
+    <div id="app-panel">
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <h2>Session Active</h2>
+            <p>Choose a date, load its draft, and work from there.</p>
+          </div>
+          <div id="session-status" class="status-pill"></div>
+        </div>
+
+        <div id="editing-date-message" class="editing-date-message">
+          Choose a schedule date to begin editing.
+        </div>
+
+        <div class="controls-row">
+          <label class="field-block" style="max-width: 220px;">
+            <span class="field-label">Schedule Date</span>
+            <input type="date" id="schedule-date-input">
+          </label>
+
+          <button id="load-date-button" type="button" class="button-secondary">Load Date</button>
+          <button id="reload-button" type="button" class="button-neutral">Reload Data</button>
+          <button id="sign-out-button" type="button" class="button-accent">Sign Out</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <h3>Schedule Summary</h3>
+            <p>A quick read on what is loaded and what is live.</p>
+          </div>
+        </div>
+        <div id="schedule-summary" class="summary-card">No schedule loaded yet.</div>
+      </section>
+
+      <section class="panel accordion-panel panel-soft" id="schedule-tools-panel">
+        <button id="schedule-tools-toggle" type="button" class="accordion-toggle" aria-expanded="false" aria-controls="schedule-tools-content">
+          <span class="accordion-toggle-text">
+            <span class="field-label" style="margin-bottom:0;">Schedule Tools</span>
+            <span class="muted">Copy from another date or repeat a validated draft into future weeks.</span>
+          </span>
+          <span class="accordion-chevron" aria-hidden="true">▾</span>
+        </button>
+
+        <div id="schedule-tools-content" class="accordion-content">
+          <div class="grid-2">
+            <div class="panel panel-soft" style="margin:0; box-shadow:none;">
+              <h4>Copy Tools</h4>
+              <div class="tools-grid">
+                <label class="field-block">
+                  <span class="field-label">Source Date</span>
+                  <input type="date" id="copy-source-date-input">
+                  <div class="field-help">Draft is preferred. Live is used if no draft exists.</div>
+                </label>
+              </div>
+              <div class="tools-actions" style="margin-top:12px;">
+                <button id="copy-from-date-button" type="button" class="button-secondary">Copy from Date</button>
+                <button id="copy-last-week-button" type="button" class="button-secondary">Copy Same Weekday from Last Week</button>
+              </div>
+            </div>
+
+            <div class="panel panel-soft" style="margin:0; box-shadow:none;">
+              <h4>Repeat Weekly</h4>
+              <div class="tools-grid">
+                <label class="field-block">
+                  <span class="field-label">Repeat Until</span>
+                  <input type="date" id="repeat-until-date-input">
+                </label>
+
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="repeat-overwrite-checkbox">
+                  Overwrite existing drafts
+                </label>
+              </div>
+              <div class="tools-actions" style="margin-top:12px;">
+                <button id="repeat-weekly-button" type="button" class="button-secondary">Repeat Weekly Until Date</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <h3>Day Note</h3>
+            <p>Optional note for closures, special messaging, or day-specific context.</p>
+          </div>
+        </div>
+
+        <label>
+          <span class="field-label">Displayed Day Note</span>
+          <textarea id="day-note-input" placeholder="Example: B.C. Family Day hours in effect. Sea Lions Talk moved to the upper plaza due to weather."></textarea>
+        </label>
+        <div class="field-help">This note saves with the draft and is carried to live when published.</div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <h3>Draft Schedule Entries</h3>
+            <p>Edit program rows below, then validate, save, and publish.</p>
+          </div>
+        </div>
+
+        <div id="validation-panel" class="validation-panel">
+          <div id="validation-title" class="validation-title"></div>
+          <ul id="validation-list" class="validation-list"></ul>
+        </div>
+
+        <div class="toolbar-cluster">
+          <button id="create-draft-button" type="button" class="button-neutral">Create Empty Draft</button>
+          <button id="add-program-button" type="button" class="button-secondary">Add Program</button>
+          <button id="validate-button" type="button" class="button-accent">Validate Schedule</button>
+          <button id="save-draft-button" type="button" class="button-primary">Save Draft</button>
+          <button id="publish-button" type="button" class="button-secondary">Publish to Live</button>
+        </div>
+
+        <div id="save-status" class="save-status neutral"></div>
+
+        <div id="schedule-table-container"></div>
+        <div class="small-note">Edits remain local until you save. Publishing pushes the currently loaded draft contents to the live row for this date.</div>
+      </section>
     </div>
-
-    <div id="save-status" class="save-status neutral"></div>
-
-    <div id="schedule-table-container"></div>
-    <div class="small-note">Changes below are editable and can now be saved to the draft row. Publish is not implemented yet.</div>
-
   </div>
 
   <script>
@@ -281,6 +868,12 @@
       const panel = document.getElementById('error-panel');
       const output = document.getElementById('error-output');
       panel.style.display = 'block';
+      output.textContent = [
+        event.message || 'Unexpected error',
+        event.filename ? `File: ${event.filename}` : '',
+        typeof event.lineno === 'number' ? `Line: ${event.lineno}` : '',
+        typeof event.colno === 'number' ? `Column: ${event.colno}` : ''
+      ].filter(Boolean).join('\n');
     });
   </script>
 
@@ -290,7 +883,7 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_jPeweysUr7DZvFxG7F1-LQ_UR8MT1F9';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const DEFAULT_DATE = '2026-04-07';
+    const DEFAULT_DATE = getTodayInVancouverYmd();
 
     const appState = {
       locationStyles: [],
@@ -301,48 +894,108 @@
         isValid: true,
         summaryErrors: [],
         rowErrors: {}
-      }
+      },
+      pendingDeleteIndex: null,
+      deleteConfirmTimerId: null
     };
 
     const DEBUG = false;
-    const errorPanel = document.getElementById('error-panel');
-    const errorOutput = document.getElementById('error-output');
-    const authPanel = document.getElementById('auth-panel');
-    const appPanel = document.getElementById('app-panel');
-    const authMessage = document.getElementById('auth-message');
-    const sessionStatus = document.getElementById('session-status');
-    const scheduleSummary = document.getElementById('schedule-summary');
-    const scheduleTableContainer = document.getElementById('schedule-table-container');
-    const validationPanel = document.getElementById('validation-panel');
-    const validationTitle = document.getElementById('validation-title');
-    const validationList = document.getElementById('validation-list');
-    const saveStatus = document.getElementById('save-status');
-    const emailInput = document.getElementById('email-input');
-    const passwordInput = document.getElementById('password-input');
-    const signInButton = document.getElementById('sign-in-button');
-    const reloadButton = document.getElementById('reload-button');
-    const signOutButton = document.getElementById('sign-out-button');
-    const loadDateButton = document.getElementById('load-date-button');
-    const scheduleDateInput = document.getElementById('schedule-date-input');
-    const addProgramButton = document.getElementById('add-program-button');
-    const validateButton = document.getElementById('validate-button');
-    const saveDraftButton = document.getElementById('save-draft-button');
-    const createDraftButton = document.getElementById('create-draft-button');
-    const publishButton = document.getElementById('publish-button');
 
-    scheduleDateInput.value = DEFAULT_DATE;
+    const ui = {
+      errorPanel: document.getElementById('error-panel'),
+      errorOutput: document.getElementById('error-output'),
+      authPanel: document.getElementById('auth-panel'),
+      appPanel: document.getElementById('app-panel'),
+      authMessage: document.getElementById('auth-message'),
+      sessionStatus: document.getElementById('session-status'),
+      editingDateMessage: document.getElementById('editing-date-message'),
+      scheduleSummary: document.getElementById('schedule-summary'),
+      scheduleTableContainer: document.getElementById('schedule-table-container'),
+      validationPanel: document.getElementById('validation-panel'),
+      validationTitle: document.getElementById('validation-title'),
+      validationList: document.getElementById('validation-list'),
+      saveStatus: document.getElementById('save-status'),
+      emailInput: document.getElementById('email-input'),
+      passwordInput: document.getElementById('password-input'),
+      signInButton: document.getElementById('sign-in-button'),
+      reloadButton: document.getElementById('reload-button'),
+      signOutButton: document.getElementById('sign-out-button'),
+      loadDateButton: document.getElementById('load-date-button'),
+      scheduleDateInput: document.getElementById('schedule-date-input'),
+      addProgramButton: document.getElementById('add-program-button'),
+      validateButton: document.getElementById('validate-button'),
+      saveDraftButton: document.getElementById('save-draft-button'),
+      createDraftButton: document.getElementById('create-draft-button'),
+      publishButton: document.getElementById('publish-button'),
+      copySourceDateInput: document.getElementById('copy-source-date-input'),
+      copyFromDateButton: document.getElementById('copy-from-date-button'),
+      copyLastWeekButton: document.getElementById('copy-last-week-button'),
+      repeatUntilDateInput: document.getElementById('repeat-until-date-input'),
+      repeatOverwriteCheckbox: document.getElementById('repeat-overwrite-checkbox'),
+      repeatWeeklyButton: document.getElementById('repeat-weekly-button'),
+      dayNoteInput: document.getElementById('day-note-input'),
+      scheduleToolsPanel: document.getElementById('schedule-tools-panel'),
+      scheduleToolsToggle: document.getElementById('schedule-tools-toggle')
+    };
+
+    ui.scheduleDateInput.value = DEFAULT_DATE;
+
+    function setScheduleToolsOpen(isOpen) {
+      ui.scheduleToolsPanel.classList.toggle('is-open', !!isOpen);
+      ui.scheduleToolsToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    function toggleScheduleTools() {
+      const isOpen = ui.scheduleToolsPanel.classList.contains('is-open');
+      setScheduleToolsOpen(!isOpen);
+    }
 
     function showFatalError(message, detail = '') {
-      errorPanel.style.display = 'block';
+      ui.errorPanel.style.display = 'block';
+      ui.errorOutput.textContent = detail ? `${message}\n\n${detail}` : message;
     }
 
     function setSaveStatus(message, type = 'neutral') {
-      saveStatus.textContent = message;
-      saveStatus.className = `save-status ${type}`;
+      ui.saveStatus.textContent = message;
+      ui.saveStatus.className = `save-status ${type}`;
     }
 
     function getSelectedDate() {
-      return scheduleDateInput.value;
+      return ui.scheduleDateInput.value;
+    }
+
+    function getWeeklyDatesUntil(startYmd, endYmd) {
+      const results = [];
+
+      if (!startYmd || !endYmd) {
+        return results;
+      }
+
+      let nextDate = shiftYmdDateByDays(startYmd, 7);
+
+      while (nextDate && nextDate <= endYmd) {
+        results.push(nextDate);
+        nextDate = shiftYmdDateByDays(nextDate, 7);
+      }
+
+      return results;
+    }
+
+    function formatDateToYmd(dateObj) {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function shiftYmdDateByDays(ymd, daysToAdd) {
+      if (!ymd) return '';
+
+      const [year, month, day] = ymd.split('-').map(Number);
+      const dateObj = new Date(year, month - 1, day);
+      dateObj.setDate(dateObj.getDate() + daysToAdd);
+
+      return formatDateToYmd(dateObj);
     }
 
     function cloneEntries(entries) {
@@ -504,6 +1157,34 @@
       return (hours * 60) + minutes;
     }
 
+    function formatStoredTimeForDisplay(time24) {
+      if (!time24 || !/^\d{2}:\d{2}$/.test(time24)) {
+        return '—';
+      }
+
+      const parts = parseStoredTimeToUiParts(time24);
+      if (!parts.hour12 || !parts.minute || !parts.period) {
+        return '—';
+      }
+
+      return `${parts.hour12}:${parts.minute} ${parts.period}`;
+    }
+
+    function getTodayInVancouverYmd() {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Vancouver',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+
+      return formatter.format(new Date());
+    }
+
+    function getLocationStyleByKey(locationKey) {
+      return appState.locationStyles.find((style) => style.location_key === locationKey) || null;
+    }
+
     function getLocationOptionsHtml(selectedKey) {
       const options = appState.locationStyles.map((style) => {
         const isSelected = style.location_key === selectedKey ? 'selected' : '';
@@ -511,6 +1192,77 @@
       }).join('');
 
       return `<option value="">Select location</option>${options}`;
+    }
+
+    function getLocationCellHtml(index, selectedKey) {
+      const style = getLocationStyleByKey(selectedKey);
+      const color = style?.hex_color || '';
+      const chipClass = color ? 'location-chip' : 'location-chip is-empty';
+
+      return `
+        <div class="location-select-wrap">
+          <span class="${chipClass}" style="${color ? `background:${escapeHtml(color)};` : ''}" aria-hidden="true"></span>
+          <select data-index="${index}" data-field="location_key">
+            ${getLocationOptionsHtml(selectedKey || '')}
+          </select>
+        </div>
+      `;
+    }
+
+    async function loadDraftForDate(scheduleDate) {
+      if (!scheduleDate) {
+        return { data: null, error: { message: 'No date provided.' } };
+      }
+
+      const result = await supabaseClient
+        .from('program_schedule_sets')
+        .select('*')
+        .eq('schedule_date', scheduleDate)
+        .eq('mode', 'draft')
+        .maybeSingle();
+
+      return {
+        data: result.data || null,
+        error: result.error || null
+      };
+    }
+
+    async function loadScheduleForDateWithPriority(scheduleDate) {
+      if (!scheduleDate) {
+        return { data: null, sourceMode: null, error: { message: 'No source date provided.' } };
+      }
+
+      const draftResult = await supabaseClient
+        .from('program_schedule_sets')
+        .select('*')
+        .eq('schedule_date', scheduleDate)
+        .eq('mode', 'draft')
+        .maybeSingle();
+
+      if (draftResult.error) {
+        return { data: null, sourceMode: null, error: draftResult.error };
+      }
+
+      if (draftResult.data) {
+        return { data: draftResult.data, sourceMode: 'draft', error: null };
+      }
+
+      const liveResult = await supabaseClient
+        .from('program_schedule_sets')
+        .select('*')
+        .eq('schedule_date', scheduleDate)
+        .eq('mode', 'live')
+        .maybeSingle();
+
+      if (liveResult.error) {
+        return { data: null, sourceMode: null, error: liveResult.error };
+      }
+
+      if (liveResult.data) {
+        return { data: liveResult.data, sourceMode: 'live', error: null };
+      }
+
+      return { data: null, sourceMode: null, error: null };
     }
 
     async function loadLocationStyles() {
@@ -545,6 +1297,75 @@
       return { data, error };
     }
 
+    async function ensureDraftExists(scheduleDate) {
+      if (!scheduleDate) {
+        return { data: null, error: { message: 'No target date provided.' } };
+      }
+
+      const existingResult = await supabaseClient
+        .from('program_schedule_sets')
+        .select('*')
+        .eq('schedule_date', scheduleDate)
+        .eq('mode', 'draft')
+        .maybeSingle();
+
+      if (existingResult.error) {
+        return { data: null, error: existingResult.error };
+      }
+
+      if (existingResult.data) {
+        return { data: existingResult.data, error: null };
+      }
+
+      const createResult = await supabaseClient
+        .from('program_schedule_sets')
+        .insert({
+          schedule_date: scheduleDate,
+          mode: 'draft',
+          timezone_name: 'America/Vancouver',
+          entries_json: [],
+          day_note: '',
+          saved_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (createResult.error) {
+        return { data: null, error: createResult.error };
+      }
+
+      return { data: createResult.data, error: null };
+    }
+
+    async function overwriteDraftFromSource(targetDraftId, sourceSchedule) {
+      if (!targetDraftId) {
+        return { data: null, error: { message: 'Missing target draft ID.' } };
+      }
+
+      if (!sourceSchedule) {
+        return { data: null, error: { message: 'Missing source schedule.' } };
+      }
+
+      const payload = {
+        entries_json: Array.isArray(sourceSchedule.entries_json)
+          ? JSON.parse(JSON.stringify(sourceSchedule.entries_json))
+          : [],
+        day_note: sourceSchedule.day_note || '',
+        timezone_name: sourceSchedule.timezone_name || 'America/Vancouver',
+        saved_at: new Date().toISOString()
+      };
+
+      const result = await supabaseClient
+        .from('program_schedule_sets')
+        .update(payload)
+        .eq('id', targetDraftId)
+        .eq('mode', 'draft')
+        .select()
+        .single();
+
+      return { data: result.data || null, error: result.error || null };
+    }
+
     async function saveDraftSchedule() {
       if (!appState.draftSchedule) {
         return { error: { message: 'No draft schedule row is currently loaded.' } };
@@ -552,6 +1373,7 @@
 
       const payload = {
         entries_json: appState.editableEntries,
+        day_note: ui.dayNoteInput.value.trim(),
         saved_at: new Date().toISOString()
       };
 
@@ -692,46 +1514,100 @@
     function renderValidationPanel() {
       const validation = appState.validation;
 
-      validationPanel.className = 'validation-panel';
-      validationList.innerHTML = '';
+      ui.validationPanel.className = 'validation-panel';
+      ui.validationList.innerHTML = '';
 
       if (!appState.draftSchedule) {
-        validationPanel.style.display = 'none';
+        ui.validationPanel.style.display = 'none';
         return;
       }
 
       if (validation.isValid) {
-        validationPanel.classList.add('is-valid');
-        validationTitle.textContent = 'Schedule currently passes validation.';
-        validationList.innerHTML = '<li>No validation errors found.</li>';
+        ui.validationPanel.classList.add('is-valid');
+        ui.validationTitle.textContent = 'Schedule currently passes validation.';
+        ui.validationList.innerHTML = '<li>No validation errors found.</li>';
         return;
       }
 
-      validationPanel.classList.add('is-invalid');
-      validationTitle.textContent = 'Validation errors found. Fix these before saving or publishing.';
-      validationList.innerHTML = validation.summaryErrors
+      ui.validationPanel.classList.add('is-invalid');
+      ui.validationTitle.textContent = 'Validation errors found. Fix these before saving or publishing.';
+      ui.validationList.innerHTML = validation.summaryErrors
         .map((message) => `<li>${escapeHtml(message)}</li>`)
         .join('');
     }
 
     function renderScheduleSummary() {
       if (!appState.draftSchedule) {
-        scheduleSummary.textContent = 'No draft schedule found for this date.';
+        ui.scheduleSummary.innerHTML = `
+          <div class="summary-topline">
+            <div class="summary-date">No draft loaded</div>
+            <span class="status-pill">Awaiting draft</span>
+          </div>
+          <div class="summary-note">
+            <strong>What to do next</strong>
+            Load a date with an existing draft, or create a new empty draft for the selected date.
+          </div>
+        `;
         return;
       }
 
-      const entries = Array.isArray(appState.editableEntries)
-        ? appState.editableEntries
-        : [];
+      const entries = Array.isArray(appState.editableEntries) ? appState.editableEntries : [];
+      const activeEntries = entries.filter((entry) => !entry.is_cancelled);
+      const cancelledEntries = entries.filter((entry) => !!entry.is_cancelled);
+      const firstStart = [...activeEntries]
+        .filter((entry) => entry.start_time)
+        .sort((a, b) => String(a.start_time).localeCompare(String(b.start_time)))[0];
+      const lastEnd = [...activeEntries]
+        .filter((entry) => entry.end_time)
+        .sort((a, b) => String(a.end_time).localeCompare(String(b.end_time))).slice(-1)[0];
+      const publishedText = appState.liveSchedule?.published_at || 'Not yet published';
+      const draftSavedText = appState.draftSchedule.saved_at || 'Not yet saved';
 
-      scheduleSummary.innerHTML = `
-        <strong>Date:</strong> ${escapeHtml(appState.draftSchedule.schedule_date)}<br>
-        <strong>Draft mode:</strong> ${escapeHtml(appState.draftSchedule.mode)}<br>
-        <strong>Timezone:</strong> ${escapeHtml(appState.draftSchedule.timezone_name)}<br>
-        <strong>Entries:</strong> ${entries.length}<br>
-        <strong>Day note:</strong> ${escapeHtml(appState.draftSchedule.day_note || '')}<br>
-        <strong>Draft saved at:</strong> ${escapeHtml(appState.draftSchedule.saved_at || '')}<br>
-        <strong>Live published at:</strong> ${escapeHtml(appState.liveSchedule?.published_at || 'Not yet published')}
+      ui.scheduleSummary.innerHTML = `
+        <div class="summary-topline">
+          <div class="summary-date">${escapeHtml(appState.draftSchedule.schedule_date)}</div>
+          <span class="status-pill">${appState.liveSchedule ? 'Live version exists' : 'Draft only'}</span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-stat">
+            <span class="summary-stat-label">Programs</span>
+            <div class="summary-stat-value">${entries.length}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Active</span>
+            <div class="summary-stat-value">${activeEntries.length}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Cancelled</span>
+            <div class="summary-stat-value">${cancelledEntries.length}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Timezone</span>
+            <div class="summary-stat-value">${escapeHtml(appState.draftSchedule.timezone_name || 'America/Vancouver')}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">First Start</span>
+            <div class="summary-stat-value">${escapeHtml(formatStoredTimeForDisplay(firstStart?.start_time || ''))}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Last End</span>
+            <div class="summary-stat-value">${escapeHtml(formatStoredTimeForDisplay(lastEnd?.end_time || ''))}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Draft Saved</span>
+            <div class="summary-stat-value">${escapeHtml(draftSavedText)}</div>
+          </div>
+          <div class="summary-stat">
+            <span class="summary-stat-label">Live Published</span>
+            <div class="summary-stat-value">${escapeHtml(publishedText)}</div>
+          </div>
+        </div>
+
+        <div class="summary-note">
+          <strong>Day Note</strong>
+          ${escapeHtml(ui.dayNoteInput.value.trim() || 'None')}
+        </div>
       `;
     }
 
@@ -753,20 +1629,39 @@
     function updateActionButtonStates() {
       const hasDraft = !!appState.draftSchedule;
 
-      createDraftButton.disabled = hasDraft;
-      addProgramButton.disabled = !hasDraft;
-      validateButton.disabled = !hasDraft;
-      saveDraftButton.disabled = !hasDraft;
-      publishButton.disabled = !hasDraft;
+      ui.createDraftButton.disabled = hasDraft;
+      ui.addProgramButton.disabled = !hasDraft;
+      ui.validateButton.disabled = !hasDraft;
+      ui.saveDraftButton.disabled = !hasDraft;
+      ui.publishButton.disabled = !hasDraft;
+      ui.dayNoteInput.disabled = !hasDraft;
     }
 
     function refreshEditorView() {
       appState.validation = validateEntries();
+
+      updateEditingDateMessage();
       renderScheduleSummary();
       renderValidationPanel();
       renderEditableScheduleTable();
       updateActionButtonStates();
       updateDebugOutput();
+    }
+
+    function updateEditingDateMessage() {
+      const selectedDate = getSelectedDate();
+
+      if (!selectedDate) {
+        ui.editingDateMessage.textContent = 'Choose a schedule date to begin editing.';
+        return;
+      }
+
+      if (!appState.draftSchedule) {
+        ui.editingDateMessage.textContent = `Selected date: ${selectedDate}. No draft exists yet for this date.`;
+        return;
+      }
+
+      ui.editingDateMessage.textContent = `Editing draft schedule for ${selectedDate}.`;
     }
 
     function updateTimeFieldPart(index, field, part, partValue, options = {}) {
@@ -790,6 +1685,7 @@
       if (options.validateNow) {
         refreshEditorView();
       } else {
+        renderScheduleSummary();
         updateDebugOutput();
       }
     }
@@ -803,8 +1699,16 @@
       if (options.validateNow) {
         refreshEditorView();
       } else {
+        renderScheduleSummary();
         updateDebugOutput();
       }
+    }
+
+    function handleDayNoteInput() {
+      if (!appState.draftSchedule) return;
+      setSaveStatus('Unsaved changes.', 'neutral');
+      renderScheduleSummary();
+      updateDebugOutput();
     }
 
     function addProgramRow() {
@@ -827,18 +1731,58 @@
         id: generateEntryId()
       };
 
+      clearPendingDeleteState();
       appState.editableEntries.splice(index + 1, 0, duplicate);
       setSaveStatus('Unsaved changes.', 'neutral');
       refreshEditorView();
+    }
+
+    function clearPendingDeleteState(options = {}) {
+      if (appState.deleteConfirmTimerId) {
+        window.clearTimeout(appState.deleteConfirmTimerId);
+        appState.deleteConfirmTimerId = null;
+      }
+
+      const hadPendingDelete = appState.pendingDeleteIndex !== null;
+      appState.pendingDeleteIndex = null;
+
+      if (options.refresh && hadPendingDelete) {
+        renderEditableScheduleTable();
+      }
+    }
+
+    function armDeleteConfirmation(index) {
+      const isSameRow = appState.pendingDeleteIndex === index;
+
+      if (appState.deleteConfirmTimerId) {
+        window.clearTimeout(appState.deleteConfirmTimerId);
+        appState.deleteConfirmTimerId = null;
+      }
+
+      appState.pendingDeleteIndex = index;
+      appState.deleteConfirmTimerId = window.setTimeout(() => {
+        appState.pendingDeleteIndex = null;
+        appState.deleteConfirmTimerId = null;
+        renderEditableScheduleTable();
+      }, 4000);
+
+      renderEditableScheduleTable();
+
+      if (!isSameRow) {
+        setSaveStatus('Press delete again to confirm.', 'neutral');
+      }
     }
 
     function deleteProgramRow(index) {
       const entry = appState.editableEntries[index];
       if (!entry) return;
 
-      const ok = window.confirm(`Delete program row "${entry.title || 'Untitled program'}"?`);
-      if (!ok) return;
+      if (appState.pendingDeleteIndex !== index) {
+        armDeleteConfirmation(index);
+        return;
+      }
 
+      clearPendingDeleteState();
       appState.editableEntries.splice(index, 1);
       setSaveStatus('Unsaved changes.', 'neutral');
       refreshEditorView();
@@ -861,12 +1805,12 @@
 
     function renderEditableScheduleTable() {
       if (!appState.draftSchedule) {
-        scheduleTableContainer.innerHTML = '<p class="muted">No draft schedule found for this date.</p>';
+        ui.scheduleTableContainer.innerHTML = '<p class="muted">No draft schedule found for this date.</p>';
         return;
       }
 
       if (!Array.isArray(appState.editableEntries) || !appState.editableEntries.length) {
-        scheduleTableContainer.innerHTML = '<p class="muted">This draft has no program entries yet. Use “Add Program” to begin.</p>';
+        ui.scheduleTableContainer.innerHTML = '<p class="muted">This draft has no program entries yet. Use “Add Program” to begin.</p>';
         return;
       }
 
@@ -874,22 +1818,17 @@
         const rowErrorsHtml = getRowErrorsHtml(index);
         const hasErrors = !!getRowErrors(index).length;
         const rowClass = hasErrors ? 'has-row-errors' : '';
+        const isConfirmingDelete = appState.pendingDeleteIndex === index;
 
         return `
           <tr class="${rowClass}">
-            <td>
-              ${getTimeControlHtml(index, 'start_time', entry.start_time || '')}
-            </td>
-            <td>
-              ${getTimeControlHtml(index, 'end_time', entry.end_time || '')}
-            </td>
+            <td>${getTimeControlHtml(index, 'start_time', entry.start_time || '')}</td>
+            <td>${getTimeControlHtml(index, 'end_time', entry.end_time || '')}</td>
             <td>
               <input type="text" value="${escapeHtml(entry.title || '')}" data-index="${index}" data-field="title">
             </td>
             <td>
-              <select data-index="${index}" data-field="location_key">
-                ${getLocationOptionsHtml(entry.location_key || '')}
-              </select>
+              ${getLocationCellHtml(index, entry.location_key || '')}
             </td>
             <td class="checkbox-cell">
               <input type="checkbox" ${entry.is_cancelled ? 'checked' : ''} data-index="${index}" data-field="is_cancelled">
@@ -900,52 +1839,258 @@
             </td>
             <td>
               <div class="row-actions">
-                <button type="button" class="button-small" data-action="duplicate" data-index="${index}">Duplicate</button>
-                <button type="button" class="button-small" data-action="delete" data-index="${index}">Delete</button>
+                <button type="button" class="button-secondary button-small" data-action="duplicate" data-index="${index}">Duplicate</button>
+                <button type="button" class="${isConfirmingDelete ? 'button-confirm-delete' : 'button-danger'} button-small" data-action="delete" data-index="${index}">${isConfirmingDelete ? 'Confirm?' : 'Delete'}</button>
               </div>
             </td>
           </tr>
         `;
       }).join('');
 
-      scheduleTableContainer.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Start</th>
-              <th>End</th>
-              <th>Title</th>
-              <th>Location</th>
-              <th>Cancelled</th>
-              <th>Description / Row Errors</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>${rowsHtml}</tbody>
-        </table>
+      ui.scheduleTableContainer.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Title</th>
+                <th>Location</th>
+                <th>Cancelled</th>
+                <th>Description / Row Errors</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
       `;
-
-      bindEditableTableEvents();
     }
 
-    function bindEditableTableEvents() {
-      const fields = scheduleTableContainer.querySelectorAll('input, select, textarea');
+    async function handleRepeatWeeklyUntilDate() {
+      const sourceDate = getSelectedDate();
+      const endDate = ui.repeatUntilDateInput.value;
+      const overwriteExisting = ui.repeatOverwriteCheckbox.checked;
 
-      fields.forEach((fieldEl) => {
-        fieldEl.addEventListener('input', handleEditableFieldChange);
-        fieldEl.addEventListener('change', handleEditableFieldChange);
-        fieldEl.addEventListener('blur', handleEditableFieldChange);
-      });
+      if (!sourceDate) {
+        setSaveStatus('Choose a source schedule date first.', 'error');
+        return;
+      }
 
-      const actionButtons = scheduleTableContainer.querySelectorAll('button[data-action]');
+      if (!appState.draftSchedule) {
+        setSaveStatus('Load or create the source draft before repeating it.', 'error');
+        return;
+      }
 
-      actionButtons.forEach((buttonEl) => {
-        buttonEl.addEventListener('click', handleRowActionClick);
-      });
+      if (!endDate) {
+        setSaveStatus('Choose a repeat-until date.', 'error');
+        return;
+      }
+
+      if (endDate <= sourceDate) {
+        setSaveStatus('Repeat-until date must be later than the selected schedule date.', 'error');
+        return;
+      }
+
+      appState.validation = validateEntries();
+      renderValidationPanel();
+      renderEditableScheduleTable();
+      updateDebugOutput();
+
+      if (!appState.validation.isValid) {
+        setSaveStatus('Please fix the validation issues in this draft before repeating it.', 'error');
+        return;
+      }
+
+      const targetDates = getWeeklyDatesUntil(sourceDate, endDate);
+
+      if (!targetDates.length) {
+        setSaveStatus('No weekly dates were generated from that date range.', 'error');
+        return;
+      }
+
+      const confirmMessage = overwriteExisting
+        ? `Repeat this draft weekly through ${endDate}? Existing drafts in the target dates will be overwritten.`
+        : `Repeat this draft weekly through ${endDate}? Existing drafts in the target dates will be skipped.`;
+
+      const confirmed = window.confirm(confirmMessage);
+
+      if (!confirmed) {
+        setSaveStatus('Repeat weekly cancelled.', 'neutral');
+        return;
+      }
+
+      ui.repeatWeeklyButton.disabled = true;
+      setSaveStatus('Repeating weekly schedule...', 'neutral');
+
+      let createdCount = 0;
+      let updatedCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+
+      for (const targetDate of targetDates) {
+        const existingDraftResult = await loadDraftForDate(targetDate);
+
+        if (existingDraftResult.error) {
+          console.error(`Error checking existing draft for ${targetDate}:`, existingDraftResult.error);
+          errorCount += 1;
+          continue;
+        }
+
+        if (existingDraftResult.data && !overwriteExisting) {
+          skippedCount += 1;
+          continue;
+        }
+
+        let targetDraft = existingDraftResult.data;
+
+        if (!targetDraft) {
+          const ensureResult = await ensureDraftExists(targetDate);
+
+          if (ensureResult.error) {
+            console.error(`Error creating draft for ${targetDate}:`, ensureResult.error);
+            errorCount += 1;
+            continue;
+          }
+
+          targetDraft = ensureResult.data;
+          createdCount += 1;
+        } else {
+          updatedCount += 1;
+        }
+
+        const writeResult = await overwriteDraftFromSource(targetDraft.id, {
+          entries_json: appState.editableEntries,
+          day_note: ui.dayNoteInput.value.trim(),
+          timezone_name: appState.draftSchedule.timezone_name || 'America/Vancouver'
+        });
+
+        if (writeResult.error) {
+          console.error(`Error writing repeated draft for ${targetDate}:`, writeResult.error);
+          errorCount += 1;
+
+          if (!existingDraftResult.data && createdCount > 0) {
+            createdCount -= 1;
+          } else if (existingDraftResult.data && overwriteExisting && updatedCount > 0) {
+            updatedCount -= 1;
+          }
+
+          continue;
+        }
+      }
+
+      ui.repeatWeeklyButton.disabled = false;
+
+      const summaryParts = [
+        `Created ${createdCount}`,
+        `Updated ${updatedCount}`,
+        `Skipped ${skippedCount}`,
+        `Errors ${errorCount}`
+      ];
+
+      setSaveStatus(`Repeat weekly complete. ${summaryParts.join(' · ')}`, errorCount ? 'error' : 'success');
+    }
+
+    function handleLoginKeydown(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleSignIn();
+      }
+    }
+
+    async function handleCopySameWeekdayFromLastWeek() {
+      const targetDate = getSelectedDate();
+
+      if (!targetDate) {
+        setSaveStatus('Choose a target date first.', 'error');
+        return;
+      }
+
+      const sourceDate = shiftYmdDateByDays(targetDate, -7);
+
+      if (!sourceDate) {
+        setSaveStatus('Could not determine last week’s matching date.', 'error');
+        return;
+      }
+
+      ui.copySourceDateInput.value = sourceDate;
+      await handleCopyFromDate();
+    }
+
+    async function handleCopyFromDate() {
+      const targetDate = getSelectedDate();
+      const sourceDate = ui.copySourceDateInput.value;
+
+      if (!targetDate) {
+        setSaveStatus('Choose a target date first.', 'error');
+        return;
+      }
+
+      if (!sourceDate) {
+        setSaveStatus('Choose a source date first.', 'error');
+        return;
+      }
+
+      if (sourceDate === targetDate) {
+        setSaveStatus('Source date and target date cannot be the same.', 'error');
+        return;
+      }
+
+      setSaveStatus('Loading source schedule...', 'neutral');
+
+      const sourceResult = await loadScheduleForDateWithPriority(sourceDate);
+
+      if (sourceResult.error) {
+        setSaveStatus(`Could not load source schedule: ${sourceResult.error.message}`, 'error');
+        return;
+      }
+
+      if (!sourceResult.data) {
+        setSaveStatus('No source schedule found on that date.', 'error');
+        return;
+      }
+
+      const targetDraftResult = await ensureDraftExists(targetDate);
+
+      if (targetDraftResult.error) {
+        setSaveStatus(`Could not prepare target draft: ${targetDraftResult.error.message}`, 'error');
+        return;
+      }
+
+      const overwriteOk = window.confirm(
+        `Copy ${sourceResult.sourceMode} schedule from ${sourceDate} into ${targetDate}? This will overwrite the current draft for ${targetDate}.`
+      );
+
+      if (!overwriteOk) {
+        setSaveStatus('Copy cancelled.', 'neutral');
+        return;
+      }
+
+      setSaveStatus('Copying schedule...', 'neutral');
+
+      const copyResult = await overwriteDraftFromSource(
+        targetDraftResult.data.id,
+        sourceResult.data
+      );
+
+      if (copyResult.error) {
+        setSaveStatus(`Copy failed: ${copyResult.error.message}`, 'error');
+        return;
+      }
+
+      setSaveStatus(
+        `Copied ${sourceResult.sourceMode} schedule from ${sourceDate} into ${targetDate}.`,
+        'success'
+      );
+
+      await loadAllData();
     }
 
     function handleEditableFieldChange(event) {
+      clearPendingDeleteState({ refresh: true });
       const target = event.target;
+      if (!target.matches('[data-index][data-field]')) return;
+
       const index = Number(target.dataset.index);
       const field = target.dataset.field;
       const timePart = target.dataset.timePart || '';
@@ -975,9 +2120,11 @@
     }
 
     function handleRowActionClick(event) {
-      const target = event.target;
-      const action = target.dataset.action;
-      const index = Number(target.dataset.index);
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+
+      const action = button.dataset.action;
+      const index = Number(button.dataset.index);
 
       if (!Number.isInteger(index) || !action) return;
 
@@ -1006,7 +2153,7 @@
 
     async function handleSaveDraft() {
       if (!appState.draftSchedule) {
-        setSaveStatus('No draft row is loaded for this date.', 'error');
+        setSaveStatus('There is no draft for this date yet.', 'error');
         return;
       }
 
@@ -1021,11 +2168,11 @@
       }
 
       setSaveStatus('Saving draft...', 'neutral');
-      saveDraftButton.disabled = true;
+      ui.saveDraftButton.disabled = true;
 
       const result = await saveDraftSchedule();
 
-      saveDraftButton.disabled = false;
+      ui.saveDraftButton.disabled = false;
 
       if (result.error) {
         setSaveStatus(`Save failed: ${result.error.message}`, 'error');
@@ -1034,13 +2181,12 @@
 
       appState.draftSchedule = result.data;
       appState.editableEntries = cloneEntries(result.data.entries_json || []);
+      ui.dayNoteInput.value = result.data.day_note || '';
       refreshEditorView();
       setSaveStatus('Draft saved successfully.', 'success');
     }
 
     async function handleCreateDraft() {
-      console.log('Create Empty Draft clicked');
-
       const selectedDate = getSelectedDate();
 
       if (!selectedDate) {
@@ -1053,7 +2199,7 @@
         return;
       }
 
-      createDraftButton.disabled = true;
+      ui.createDraftButton.disabled = true;
       setSaveStatus('Creating empty draft...', 'neutral');
 
       try {
@@ -1065,7 +2211,7 @@
           } else {
             setSaveStatus(`Create draft failed: ${result.error.message}`, 'error');
           }
-          createDraftButton.disabled = false;
+          ui.createDraftButton.disabled = false;
           return;
         }
 
@@ -1073,7 +2219,7 @@
         await loadAllData();
       } catch (err) {
         setSaveStatus(`Create draft failed: ${err.message || err}`, 'error');
-        createDraftButton.disabled = false;
+        ui.createDraftButton.disabled = false;
       }
     }
 
@@ -1089,7 +2235,7 @@
         mode: 'live',
         timezone_name: appState.draftSchedule.timezone_name || 'America/Vancouver',
         entries_json: appState.editableEntries,
-        day_note: appState.draftSchedule.day_note || '',
+        day_note: ui.dayNoteInput.value.trim(),
         saved_at: nowIso,
         published_at: nowIso
       };
@@ -1104,16 +2250,29 @@
     }
 
     async function loadAllData() {
+      clearPendingDeleteState();
       const selectedDate = getSelectedDate();
 
       if (!selectedDate) {
-        scheduleSummary.textContent = 'Please choose a date.';
-        scheduleTableContainer.innerHTML = '';
+        ui.scheduleSummary.textContent = 'Please choose a date.';
+        ui.scheduleTableContainer.innerHTML = '';
+        ui.dayNoteInput.value = '';
         return;
       }
 
-      scheduleSummary.textContent = 'Loading...';
-      scheduleTableContainer.innerHTML = '';
+      updateEditingDateMessage();
+
+      if (!ui.copySourceDateInput.value) {
+        ui.copySourceDateInput.value = shiftYmdDateByDays(selectedDate, -7);
+      }
+
+      if (!ui.repeatUntilDateInput.value && selectedDate) {
+        ui.repeatUntilDateInput.value = shiftYmdDateByDays(selectedDate, 28);
+      }
+
+      ui.scheduleSummary.textContent = 'Loading...';
+      ui.scheduleTableContainer.innerHTML = '';
+      ui.dayNoteInput.value = '';
       setSaveStatus('', 'neutral');
 
       const locationStylesResult = await loadLocationStyles();
@@ -1121,17 +2280,17 @@
       const draftScheduleResult = await loadDraftSchedule(selectedDate);
 
       if (locationStylesResult.error) {
-        scheduleSummary.textContent = `Error loading location styles: ${locationStylesResult.error.message}`;
+        ui.scheduleSummary.textContent = `Error loading location styles: ${locationStylesResult.error.message}`;
         return;
       }
 
       if (liveScheduleResult.error) {
-        scheduleSummary.textContent = `Error loading live schedule: ${liveScheduleResult.error.message}`;
+        ui.scheduleSummary.textContent = `Error loading live schedule: ${liveScheduleResult.error.message}`;
         return;
       }
 
       if (draftScheduleResult.error) {
-        scheduleSummary.textContent = `Error loading draft schedule: ${draftScheduleResult.error.message}`;
+        ui.scheduleSummary.textContent = `Error loading draft schedule: ${draftScheduleResult.error.message}`;
         return;
       }
 
@@ -1139,11 +2298,14 @@
       appState.liveSchedule = liveScheduleResult.data || null;
       appState.draftSchedule = draftScheduleResult.data || null;
       appState.editableEntries = cloneEntries(appState.draftSchedule?.entries_json || []);
+      ui.dayNoteInput.value = appState.draftSchedule?.day_note || '';
+
       if (!appState.draftSchedule) {
         setSaveStatus('No draft exists for this date. Click "Create Empty Draft" to begin.', 'neutral');
       } else {
         setSaveStatus('', 'neutral');
       }
+
       appState.validation = {
         isValid: true,
         summaryErrors: [],
@@ -1158,9 +2320,9 @@
         const { data, error } = await supabaseClient.auth.getSession();
 
         if (error) {
-          authPanel.style.display = 'block';
-          appPanel.style.display = 'none';
-          authMessage.textContent = 'Session check failed.';
+          ui.authPanel.style.display = 'block';
+          ui.appPanel.style.display = 'none';
+          ui.authMessage.textContent = 'Session check failed.';
           showFatalError('Session check failed', error.message || '');
           return;
         }
@@ -1168,27 +2330,32 @@
         const session = data?.session || null;
 
         if (session) {
-          authPanel.style.display = 'none';
-          appPanel.style.display = 'block';
-          sessionStatus.textContent = `Signed in as ${session.user.email}`;
+          ui.authPanel.style.display = 'none';
+          ui.appPanel.style.display = 'block';
+          ui.sessionStatus.textContent = `Signed in as ${session.user.email}`;
+
+          if (!ui.scheduleDateInput.value) {
+            ui.scheduleDateInput.value = DEFAULT_DATE;
+          }
+
           await loadAllData();
         } else {
-          authPanel.style.display = 'block';
-          appPanel.style.display = 'none';
-          authMessage.textContent = 'Please sign in.';
+          ui.authPanel.style.display = 'block';
+          ui.appPanel.style.display = 'none';
+          ui.authMessage.textContent = 'Please sign in.';
         }
       } catch (err) {
-        authPanel.style.display = 'block';
-        appPanel.style.display = 'none';
+        ui.authPanel.style.display = 'block';
+        ui.appPanel.style.display = 'none';
         showFatalError('Unexpected error in showCorrectPanel()', err?.message || String(err));
       }
     }
 
     async function handleSignIn() {
-      authMessage.textContent = 'Signing in...';
+      ui.authMessage.textContent = 'Signing in...';
 
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
+      const email = ui.emailInput.value.trim();
+      const password = ui.passwordInput.value;
 
       const { error } = await supabaseClient.auth.signInWithPassword({
         email,
@@ -1196,11 +2363,11 @@
       });
 
       if (error) {
-        authMessage.textContent = `Sign-in failed: ${error.message}`;
+        ui.authMessage.textContent = `Sign-in failed: ${error.message}`;
         return;
       }
 
-      authMessage.textContent = 'Sign-in successful.';
+      ui.authMessage.textContent = 'Sign-in successful.';
       await showCorrectPanel();
     }
 
@@ -1222,9 +2389,10 @@
         rowErrors: {}
       };
 
-      scheduleSummary.textContent = 'No schedule loaded yet.';
-      scheduleTableContainer.innerHTML = '';
-      validationPanel.style.display = 'none';
+      ui.scheduleSummary.textContent = 'No schedule loaded yet.';
+      ui.scheduleTableContainer.innerHTML = '';
+      ui.dayNoteInput.value = '';
+      ui.validationPanel.style.display = 'none';
       setSaveStatus('', 'neutral');
       await showCorrectPanel();
     }
@@ -1254,11 +2422,11 @@
       }
 
       setSaveStatus('Publishing to live...', 'neutral');
-      publishButton.disabled = true;
+      ui.publishButton.disabled = true;
 
       const result = await publishDraftToLive();
 
-      publishButton.disabled = false;
+      ui.publishButton.disabled = false;
 
       if (result.error) {
         setSaveStatus(`Publish failed: ${result.error.message}`, 'error');
@@ -1267,20 +2435,40 @@
 
       appState.liveSchedule = result.data;
       updateDebugOutput();
+      renderScheduleSummary();
       setSaveStatus('Draft published to live successfully.', 'success');
     }
 
-    signInButton.addEventListener('click', handleSignIn);
-    reloadButton.addEventListener('click', loadAllData);
-    loadDateButton.addEventListener('click', loadAllData);
-    signOutButton.addEventListener('click', handleSignOut);
-    addProgramButton.addEventListener('click', addProgramRow);
-    validateButton.addEventListener('click', handleValidateClick);
-    saveDraftButton.addEventListener('click', handleSaveDraft);
-    createDraftButton.addEventListener('click', handleCreateDraft);
-    publishButton.addEventListener('click', handlePublish);
+    function bindCoreEvents() {
+      ui.signInButton.addEventListener('click', handleSignIn);
+      ui.reloadButton.addEventListener('click', loadAllData);
+      ui.loadDateButton.addEventListener('click', loadAllData);
+      ui.signOutButton.addEventListener('click', handleSignOut);
+      ui.addProgramButton.addEventListener('click', addProgramRow);
+      ui.validateButton.addEventListener('click', handleValidateClick);
+      ui.saveDraftButton.addEventListener('click', handleSaveDraft);
+      ui.createDraftButton.addEventListener('click', handleCreateDraft);
+      ui.publishButton.addEventListener('click', handlePublish);
+      ui.copyFromDateButton.addEventListener('click', handleCopyFromDate);
+      ui.copyLastWeekButton.addEventListener('click', handleCopySameWeekdayFromLastWeek);
+      ui.repeatWeeklyButton.addEventListener('click', handleRepeatWeeklyUntilDate);
+      ui.dayNoteInput.addEventListener('input', handleDayNoteInput);
+      ui.emailInput.addEventListener('keydown', handleLoginKeydown);
+      ui.passwordInput.addEventListener('keydown', handleLoginKeydown);
+    }
 
-    document.addEventListener('DOMContentLoaded', showCorrectPanel);
+    function bindTableDelegatedEvents() {
+      ui.scheduleTableContainer.addEventListener('input', handleEditableFieldChange);
+      ui.scheduleTableContainer.addEventListener('change', handleEditableFieldChange);
+      ui.scheduleTableContainer.addEventListener('blur', handleEditableFieldChange, true);
+      ui.scheduleTableContainer.addEventListener('click', handleRowActionClick);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      bindCoreEvents();
+      bindTableDelegatedEvents();
+      showCorrectPanel();
+    });
   </script>
 </body>
 </html>
