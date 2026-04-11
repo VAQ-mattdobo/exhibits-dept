@@ -124,6 +124,15 @@
       margin-top: 8px;
     }
 
+    .time-control-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .time-control-group select {
+      min-width: 68px;
+    }
+
     .validation-panel {
       display: none;
       border: 1px solid #d9a400;
@@ -265,8 +274,6 @@
     <div id="schedule-table-container"></div>
     <div class="small-note">Changes below are editable and can now be saved to the draft row. Publish is not implemented yet.</div>
 
-    <h3>Raw Data Debug</h3>
-    <pre id="load-test-output">No data loaded yet.</pre>
   </div>
 
   <script>
@@ -274,7 +281,6 @@
       const panel = document.getElementById('error-panel');
       const output = document.getElementById('error-output');
       panel.style.display = 'block';
-      output.textContent = `${event.message}\n\n${event.filename}:${event.lineno}:${event.colno}`;
     });
   </script>
 
@@ -298,13 +304,13 @@
       }
     };
 
+    const DEBUG = false;
     const errorPanel = document.getElementById('error-panel');
     const errorOutput = document.getElementById('error-output');
     const authPanel = document.getElementById('auth-panel');
     const appPanel = document.getElementById('app-panel');
     const authMessage = document.getElementById('auth-message');
     const sessionStatus = document.getElementById('session-status');
-    const output = document.getElementById('load-test-output');
     const scheduleSummary = document.getElementById('schedule-summary');
     const scheduleTableContainer = document.getElementById('schedule-table-container');
     const validationPanel = document.getElementById('validation-panel');
@@ -328,7 +334,6 @@
 
     function showFatalError(message, detail = '') {
       errorPanel.style.display = 'block';
-      errorOutput.textContent = detail ? `${message}\n\n${detail}` : message;
     }
 
     function setSaveStatus(message, type = 'neutral') {
@@ -358,6 +363,115 @@
         description: '',
         is_cancelled: false
       };
+    }
+
+    function getTimeControlHtml(index, field, storedTime) {
+      const parts = parseStoredTimeToUiParts(storedTime);
+
+      return `
+        <div class="time-control-group">
+          <select data-index="${index}" data-field="${field}" data-time-part="hour">
+            ${getHourOptionsHtml(parts.hour12)}
+          </select>
+          <select data-index="${index}" data-field="${field}" data-time-part="minute">
+            ${getMinuteOptionsHtml(parts.minute)}
+          </select>
+          <select data-index="${index}" data-field="${field}" data-time-part="period">
+            ${getPeriodOptionsHtml(parts.period)}
+          </select>
+        </div>
+      `;
+    }
+
+    function pad2(value) {
+      return String(value).padStart(2, '0');
+    }
+
+    function getHourOptionsHtml(selectedValue) {
+      let html = '<option value="">Hr</option>';
+
+      for (let hour = 1; hour <= 12; hour += 1) {
+        const value = String(hour);
+        const selected = value === String(selectedValue || '') ? 'selected' : '';
+        html += `<option value="${value}" ${selected}>${value}</option>`;
+      }
+
+      return html;
+    }
+
+    function getMinuteOptionsHtml(selectedValue) {
+      let html = '<option value="">Min</option>';
+
+      for (let minute = 0; minute <= 59; minute += 1) {
+        const value = pad2(minute);
+        const selected = value === String(selectedValue || '') ? 'selected' : '';
+        html += `<option value="${value}" ${selected}>${value}</option>`;
+      }
+
+      return html;
+    }
+
+    function getPeriodOptionsHtml(selectedValue) {
+      const safeValue = String(selectedValue || '');
+
+      return `
+        <option value="">--</option>
+        <option value="a.m." ${safeValue === 'a.m.' ? 'selected' : ''}>a.m.</option>
+        <option value="p.m." ${safeValue === 'p.m.' ? 'selected' : ''}>p.m.</option>
+      `;
+    }
+
+    function parseStoredTimeToUiParts(time24) {
+      if (!time24 || !/^\d{2}:\d{2}$/.test(time24)) {
+        return {
+          hour12: '',
+          minute: '',
+          period: ''
+        };
+      }
+
+      const [hours24, minutes] = time24.split(':').map(Number);
+      const period = hours24 >= 12 ? 'p.m.' : 'a.m.';
+      const hour12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+
+      return {
+        hour12: String(hour12),
+        minute: pad2(minutes),
+        period
+      };
+    }
+
+    function convertUiPartsToStoredTime(hour12, minute, period) {
+      const safeHour = String(hour12 || '').trim();
+      const safeMinute = String(minute || '').trim();
+      const safePeriod = String(period || '').trim();
+
+      if (!safeHour || !safeMinute || !safePeriod) {
+        return '';
+      }
+
+      const hourNum = Number(safeHour);
+      const minuteNum = Number(safeMinute);
+
+      if (
+        Number.isNaN(hourNum) ||
+        Number.isNaN(minuteNum) ||
+        hourNum < 1 ||
+        hourNum > 12 ||
+        minuteNum < 0 ||
+        minuteNum > 59 ||
+        (safePeriod !== 'a.m.' && safePeriod !== 'p.m.')
+      ) {
+        return '';
+      }
+
+      let hours24 = hourNum % 12;
+
+      if (safePeriod === 'p.m.') {
+        hours24 += 12;
+      }
+
+      return `${pad2(hours24)}:${pad2(minuteNum)}`;
     }
 
     function escapeHtml(value) {
@@ -622,6 +736,8 @@
     }
 
     function updateDebugOutput() {
+      if (!DEBUG) return;
+
       const result = {
         selectedDate: getSelectedDate(),
         locationStyles: appState.locationStyles,
@@ -631,7 +747,7 @@
         validation: appState.validation
       };
 
-      output.textContent = JSON.stringify(result, null, 2);
+      console.log('Program Schedule Admin Debug:', result);
     }
 
     function updateActionButtonStates() {
@@ -651,6 +767,31 @@
       renderEditableScheduleTable();
       updateActionButtonStates();
       updateDebugOutput();
+    }
+
+    function updateTimeFieldPart(index, field, part, partValue, options = {}) {
+      const entry = appState.editableEntries[index];
+      if (!entry) return;
+
+      const currentParts = parseStoredTimeToUiParts(entry[field] || '');
+
+      if (part === 'hour') currentParts.hour12 = partValue;
+      if (part === 'minute') currentParts.minute = partValue;
+      if (part === 'period') currentParts.period = partValue;
+
+      entry[field] = convertUiPartsToStoredTime(
+        currentParts.hour12,
+        currentParts.minute,
+        currentParts.period
+      );
+
+      setSaveStatus('Unsaved changes.', 'neutral');
+
+      if (options.validateNow) {
+        refreshEditorView();
+      } else {
+        updateDebugOutput();
+      }
     }
 
     function updateEntryField(index, field, value, options = {}) {
@@ -737,10 +878,10 @@
         return `
           <tr class="${rowClass}">
             <td>
-              <input type="time" value="${escapeHtml(entry.start_time || '')}" data-index="${index}" data-field="start_time">
+              ${getTimeControlHtml(index, 'start_time', entry.start_time || '')}
             </td>
             <td>
-              <input type="time" value="${escapeHtml(entry.end_time || '')}" data-index="${index}" data-field="end_time">
+              ${getTimeControlHtml(index, 'end_time', entry.end_time || '')}
             </td>
             <td>
               <input type="text" value="${escapeHtml(entry.title || '')}" data-index="${index}" data-field="title">
@@ -807,17 +948,30 @@
       const target = event.target;
       const index = Number(target.dataset.index);
       const field = target.dataset.field;
+      const timePart = target.dataset.timePart || '';
 
       if (!Number.isInteger(index) || !field) return;
 
-      const value = target.type === 'checkbox' ? target.checked : target.value;
       const shouldValidateNow =
-        event.type === 'change' ||
         event.type === 'blur' ||
+        event.type === 'change' ||
         target.type === 'checkbox' ||
         target.tagName === 'SELECT';
 
-      updateEntryField(index, field, value, { validateNow: shouldValidateNow });
+      if (timePart) {
+        updateTimeFieldPart(index, field, timePart, target.value, {
+          validateNow: event.type === 'blur' || event.type === 'change'
+        });
+        return;
+      }
+
+      const value = target.type === 'checkbox' ? target.checked : target.value;
+
+      updateEntryField(index, field, value, {
+        validateNow: shouldValidateNow && target.tagName !== 'INPUT'
+          ? true
+          : (event.type === 'blur' || event.type === 'change')
+      });
     }
 
     function handleRowActionClick(event) {
@@ -955,11 +1109,9 @@
       if (!selectedDate) {
         scheduleSummary.textContent = 'Please choose a date.';
         scheduleTableContainer.innerHTML = '';
-        output.textContent = 'No date selected.';
         return;
       }
 
-      output.textContent = 'Loading...';
       scheduleSummary.textContent = 'Loading...';
       scheduleTableContainer.innerHTML = '';
       setSaveStatus('', 'neutral');
@@ -1070,7 +1222,6 @@
         rowErrors: {}
       };
 
-      output.textContent = 'No data loaded yet.';
       scheduleSummary.textContent = 'No schedule loaded yet.';
       scheduleTableContainer.innerHTML = '';
       validationPanel.style.display = 'none';
