@@ -195,13 +195,44 @@
     }
 
     .editing-date-message {
-      margin-bottom: 16px;
+      margin: 4px 0 0;
       padding: 12px 14px;
       border-radius: 12px;
       background: var(--secondary-soft);
       border: 1px solid #cfe0e9;
       color: var(--secondary-hover);
       font-weight: 700;
+    }
+
+    .schedule-date-panel-top {
+      margin-bottom: 16px;
+    }
+
+    .schedule-date-panel-top h2 {
+      margin-bottom: 6px;
+    }
+
+    .top-auth-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .top-session-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 9px 12px;
+      border: 1px solid #cfe0e9;
+      border-radius: 10px;
+      background: var(--secondary-soft);
+      color: var(--secondary-hover);
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .grid-2 {
@@ -941,7 +972,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1180px;
+      min-width: 980px;
     }
 
     th,
@@ -1062,6 +1093,33 @@
 
     .col-description {
       width: 20%;
+    }
+
+    .time-stack,
+    .title-location-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stacked-field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .stacked-field-label {
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .col-time {
+      width: 24%;
+    }
+
+    .col-title-location {
+      width: 44%;
     }
 
     .col-actions {
@@ -1267,7 +1325,7 @@
       }
 
       .table-wrap table {
-        min-width: 1040px;
+        min-width: 920px;
       }
 
       .time-control-group {
@@ -1341,7 +1399,7 @@
       }
 
       .table-wrap table {
-        min-width: 1040px;
+        min-width: 920px;
       }
 
       .time-control-group {
@@ -1434,7 +1492,7 @@
       }
 
       .table-wrap table {
-        min-width: 1040px;
+        min-width: 920px;
       }
 
       th,
@@ -1487,10 +1545,10 @@
           <h1 class="page-title">VAQ Program Schedule Admin</h1>
           <p class="page-subtitle">Manage draft schedules, copy forward proven day structures, validate required fields and timing format, and publish the live version used by the full program schedule sign.</p>
         </div>
-        <button id="top-sign-out-button" type="button" class="top-sign-out-button" style="display:none"><span class="signout-x" aria-hidden="true">✖</span><span>Sign Out</span></button>
-      </div>
-      <div class="page-brand-lockup">
-        <img src="assets/vaq-full-logo.svg" alt="Vancouver Aquarium" class="page-brand-logo page-brand-logo-header">
+        <div id="top-auth-group" class="top-auth-group" style="display:none">
+          <div id="session-status" class="top-session-status"></div>
+          <button id="top-sign-out-button" type="button" class="top-sign-out-button"><span class="signout-x" aria-hidden="true">✖</span><span>Sign Out</span></button>
+        </div>
       </div>
     </header>
 
@@ -1534,17 +1592,12 @@
     </div>
 
     <div id="app-panel">
-      <section class="panel">
-        <div class="section-heading">
+      <section class="panel schedule-date-panel">
+        <div class="schedule-date-panel-top">
           <div>
-            <h2>Session Active</h2>
-            <p>Choose a date, load its draft, and work from there.</p>
+            <h2>Schedule Date</h2>
+            <p id="editing-date-message" class="editing-date-message">Choose a schedule date to begin editing.</p>
           </div>
-          <div id="session-status" class="status-pill"></div>
-        </div>
-
-        <div id="editing-date-message" class="editing-date-message">
-          Choose a schedule date to begin editing.
         </div>
 
         <div class="controls-row">
@@ -1636,7 +1689,7 @@
       <section class="panel">
         <div class="section-heading">
           <div>
-            <h3>🗓️ Draft Schedule Entries</h3>
+            <h3>🗓️ Schedule Editor</h3>
             <p>Edit program rows below, then validate, save, and publish.</p>
           </div>
         </div>
@@ -1737,6 +1790,7 @@
       saveDayNoteButton: document.getElementById('save-day-note-button'),
       scheduleToolsPanel: document.getElementById('schedule-tools-panel'),
       scheduleToolsToggle: document.getElementById('schedule-tools-toggle'),
+      topAuthGroup: document.getElementById('top-auth-group'),
       topSignOutButton: document.getElementById('top-sign-out-button')
     };
 
@@ -1812,13 +1866,15 @@
       return `entry_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     }
 
-    function createBlankEntry() {
+    function createBlankEntry(startTime = '') {
+      const resolvedStartTime = startTime || '09:00';
+
       return {
         id: generateEntryId(),
         title: '',
         location_key: '',
-        start_time: '',
-        end_time: '',
+        start_time: resolvedStartTime,
+        end_time: addMinutesToStoredTime(resolvedStartTime, 15),
         description: '',
         is_cancelled: false
       };
@@ -1879,7 +1935,7 @@
     function getMinuteOptionsHtml(selectedValue) {
       let html = '<option value="">Min</option>';
 
-      for (let minute = 0; minute <= 59; minute += 1) {
+      for (let minute = 0; minute <= 55; minute += 5) {
         const value = pad2(minute);
         const selected = value === String(selectedValue || '') ? 'selected' : '';
         html += `<option value="${value}" ${selected}>${value}</option>`;
@@ -1979,6 +2035,47 @@
       }
 
       return (hours * 60) + minutes;
+    }
+
+
+    function addMinutesToStoredTime(timeString, minutesToAdd) {
+      const startMinutes = parseTimeToMinutes(timeString);
+
+      if (startMinutes === null) {
+        return '';
+      }
+
+      const totalMinutes = Math.min((24 * 60) - 1, Math.max(0, startMinutes + minutesToAdd));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      return `${pad2(hours)}:${pad2(minutes)}`;
+    }
+
+    function getLatestProgramStartTime() {
+      const validStarts = appState.editableEntries
+        .map((entry) => entry.start_time || '')
+        .filter((timeString) => parseTimeToMinutes(timeString) !== null)
+        .sort((a, b) => parseTimeToMinutes(b) - parseTimeToMinutes(a));
+
+      return validStarts[0] || '09:00';
+    }
+
+    function sortEditableEntries() {
+      appState.editableEntries.sort((a, b) => {
+        const aStart = parseTimeToMinutes(a.start_time || '') ?? 99999;
+        const bStart = parseTimeToMinutes(b.start_time || '') ?? 99999;
+
+        if (aStart !== bStart) {
+          return aStart - bStart;
+        }
+
+        return String(a.title || '').trim().localeCompare(
+          String(b.title || '').trim(),
+          undefined,
+          { sensitivity: 'base' }
+        );
+      });
     }
 
     function formatStoredTimeForDisplay(time24) {
@@ -2219,13 +2316,12 @@
 
         const titleText = entry.title ? escapeHtml(entry.title) : 'Untitled program';
         const cancelText = entry.is_cancelled ? ' <em>(cancelled)</em>' : '';
-        const descText = entry.description ? `<div>${escapeHtml(entry.description)}</div>` : '';
         const strongClass = isEntryHappeningNow(entry, scheduleDate) ? ' class="is-happening-now"' : '';
 
         return `
           <div class="summary-mini-row">
             <div class="summary-mini-meta">${escapeHtml(metaParts.join(' @ '))}</div>
-            <div class="summary-mini-text"><strong${strongClass}>${titleText}</strong>${cancelText}${descText}</div>
+            <div class="summary-mini-text"><strong${strongClass}>${titleText}</strong>${cancelText}</div>
           </div>
         `;
       }).join('');
@@ -2465,6 +2561,7 @@
             delete cleanedEntry[key];
           }
         });
+        cleanedEntry.description = '';
         return cleanedEntry;
       });
     }
@@ -2768,6 +2865,14 @@
 
       entry[field] = completedStoredTime || '';
 
+      if (field === 'end_time' && completedStoredTime) {
+        entry.__endTimeManuallyEdited = true;
+      }
+
+      if (field === 'start_time' && completedStoredTime && !entry.__endTimeManuallyEdited) {
+        entry.end_time = addMinutesToStoredTime(completedStoredTime, 15);
+      }
+
       setSaveStatus('Unsaved changes.', 'neutral');
 
       if (options.validateNow) {
@@ -2805,7 +2910,12 @@
         return;
       }
 
-      appState.editableEntries.push(createBlankEntry());
+      const defaultStartTime = appState.editableEntries.length
+        ? getLatestProgramStartTime()
+        : '09:00';
+
+      appState.editableEntries.push(createBlankEntry(defaultStartTime));
+      sortEditableEntries();
       setSaveStatus('Unsaved changes.', 'neutral');
       refreshEditorView();
     }
@@ -2821,6 +2931,7 @@
 
       clearPendingDeleteState();
       appState.editableEntries.splice(index + 1, 0, duplicate);
+      sortEditableEntries();
       setSaveStatus('Unsaved changes.', 'neutral');
       refreshEditorView();
     }
@@ -2939,16 +3050,29 @@
 
         return `
           <tr class="schedule-row ${rowClass}" data-row-index="${index}">
-            <td data-label="Start">${getTimeControlHtml(index, 'start_time', entry.start_time || '')}</td>
-            <td data-label="End">${getTimeControlHtml(index, 'end_time', entry.end_time || '')}</td>
-            <td class="col-title" data-label="Title">
-              <input class="row-title-input" type="text" value="${escapeHtml(entry.title || '')}" data-index="${index}" data-field="title">
+            <td class="col-time" data-label="Time">
+              <div class="time-stack">
+                <div class="stacked-field">
+                  <span class="stacked-field-label">Start</span>
+                  ${getTimeControlHtml(index, 'start_time', entry.start_time || '')}
+                </div>
+                <div class="stacked-field">
+                  <span class="stacked-field-label">End</span>
+                  ${getTimeControlHtml(index, 'end_time', entry.end_time || '')}
+                </div>
+              </div>
             </td>
-            <td data-label="Location">
-              ${getLocationCellHtml(index, entry.location_key || '')}
-            </td>
-            <td class="col-description" data-label="Optional Description">
-              <input class="row-description-input" type="text" value="${escapeHtml(entry.description || '')}" data-index="${index}" data-field="description">
+            <td class="col-title-location" data-label="Title & Location">
+              <div class="title-location-stack">
+                <div class="stacked-field">
+                  <span class="stacked-field-label">Title</span>
+                  <input class="row-title-input" type="text" value="${escapeHtml(entry.title || '')}" data-index="${index}" data-field="title">
+                </div>
+                <div class="stacked-field">
+                  <span class="stacked-field-label">Location</span>
+                  ${getLocationCellHtml(index, entry.location_key || '')}
+                </div>
+              </div>
               ${rowErrorsHtml}
             </td>
             <td class="checkbox-cell" data-label="Cancelled">
@@ -2969,11 +3093,8 @@
           <table>
             <thead>
               <tr>
-                <th>Start</th>
-                <th>End</th>
-                <th class="col-title">Title</th>
-                <th>Location</th>
-                <th class="col-description">Optional Description</th>
+                <th class="col-time">Time</th>
+                <th class="col-title-location">Title &amp; Location</th>
                 <th>Cancelled</th>
                 <th class="col-actions">Actions</th>
               </tr>
@@ -3009,6 +3130,7 @@
         return;
       }
 
+      sortEditableEntries();
       appState.validation = validateEntries();
       renderValidationPanel();
       renderEditableScheduleTable();
@@ -3261,6 +3383,7 @@
     }
 
     function handleValidateClick() {
+      sortEditableEntries();
       appState.validation = validateEntries();
       renderValidationPanel();
       renderEditableScheduleTable();
@@ -3279,6 +3402,7 @@
         return;
       }
 
+      sortEditableEntries();
       appState.validation = validateEntries();
       renderValidationPanel();
       renderEditableScheduleTable();
@@ -3356,7 +3480,7 @@
         schedule_date: appState.draftSchedule.schedule_date,
         mode: 'live',
         timezone_name: appState.draftSchedule.timezone_name || 'America/Vancouver',
-        entries_json: appState.editableEntries,
+        entries_json: getSanitizedEditableEntries(),
         day_note: ui.dayNoteInput.value.trim(),
         saved_at: nowIso,
         published_at: nowIso
@@ -3445,7 +3569,7 @@
         if (error) {
           ui.authPanel.style.display = 'block';
           ui.appPanel.style.display = 'none';
-          if (ui.topSignOutButton) ui.topSignOutButton.style.display = 'none';
+          if (ui.topAuthGroup) ui.topAuthGroup.style.display = 'none';
           ui.authMessage.textContent = 'Session check failed.';
           showFatalError('Session check failed', error.message || '');
           return;
@@ -3456,7 +3580,7 @@
         if (session) {
           ui.authPanel.style.display = 'none';
           ui.appPanel.style.display = 'block';
-          if (ui.topSignOutButton) ui.topSignOutButton.style.display = 'inline-flex';
+          if (ui.topAuthGroup) ui.topAuthGroup.style.display = 'inline-flex';
           ui.sessionStatus.textContent = `Signed in as ${session.user.email}`;
 
           if (!ui.scheduleDateInput.value) {
@@ -3467,13 +3591,13 @@
         } else {
           ui.authPanel.style.display = 'block';
           ui.appPanel.style.display = 'none';
-          if (ui.topSignOutButton) ui.topSignOutButton.style.display = 'none';
+          if (ui.topAuthGroup) ui.topAuthGroup.style.display = 'none';
           ui.authMessage.textContent = 'Please sign in.';
         }
       } catch (err) {
         ui.authPanel.style.display = 'block';
         ui.appPanel.style.display = 'none';
-        if (ui.topSignOutButton) ui.topSignOutButton.style.display = 'none';
+        if (ui.topAuthGroup) ui.topAuthGroup.style.display = 'none';
         showFatalError('Unexpected error in showCorrectPanel()', err?.message || String(err));
       }
     }
@@ -3532,6 +3656,7 @@
         return;
       }
 
+      sortEditableEntries();
       appState.validation = validateEntries();
       renderValidationPanel();
       renderEditableScheduleTable();
