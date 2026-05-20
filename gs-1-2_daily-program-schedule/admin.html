@@ -1549,7 +1549,7 @@
 
     .page-title-block {
       width: 100%;
-      max-width: 860px;
+      max-width: 1120px;
       margin: 0 auto;
       text-align: left;
     }
@@ -1731,6 +1731,30 @@
     .row-actions > button {
       min-width: 0;
       width: 100%;
+    }
+
+    .editor-bottom-jump {
+      display: none;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .editor-bottom-jump.is-visible {
+      display: flex;
+    }
+
+    .editor-bottom-jump-button {
+      background: #f6f9fb;
+      border-color: var(--line);
+      color: var(--neutral-hover);
+      min-width: 240px;
+      padding-left: 18px;
+      padding-right: 18px;
+    }
+
+    .editor-bottom-jump-button:hover:not(:disabled) {
+      background: #edf3f6;
+      border-color: var(--line-strong);
     }
 
     @media (max-width: 980px) {
@@ -1961,7 +1985,7 @@
           <ul id="validation-list" class="validation-list"></ul>
         </div>
 
-        <div class="toolbar-cluster">
+        <div id="schedule-editor-actions" class="toolbar-cluster">
           <button id="create-draft-button" type="button" class="button-neutral">Create Empty Draft</button>
           <button id="add-program-button" type="button" class="button-secondary">Add Program</button>
           <button id="validate-button" type="button" class="button-accent">Validate Schedule</button>
@@ -1973,6 +1997,9 @@
 
         <div id="schedule-table-container"></div>
         <div class="small-note">🫧 Friendly reminder: your edits stay here on this page until you hit <strong>Save Draft</strong>. When you choose <strong>Publish Live</strong>, you are sending the currently loaded draft to the live schedule for this date.</div>
+        <div id="editor-bottom-jump" class="editor-bottom-jump">
+          <button id="editor-bottom-jump-button" type="button" class="editor-bottom-jump-button">↑ Back to Save / Publish buttons</button>
+        </div>
       </section>
     </div>
   </div>
@@ -2027,6 +2054,8 @@
       editingDateMessage: document.getElementById('editing-date-message'),
       scheduleSummary: document.getElementById('schedule-summary'),
       scheduleTableContainer: document.getElementById('schedule-table-container'),
+      editorBottomJump: document.getElementById('editor-bottom-jump'),
+      editorBottomJumpButton: document.getElementById('editor-bottom-jump-button'),
       validationPanel: document.getElementById('validation-panel'),
       validationTitle: document.getElementById('validation-title'),
       validationList: document.getElementById('validation-list'),
@@ -3074,6 +3103,26 @@
       ui.saveDayNoteButton.disabled = !hasDraft;
     }
 
+    function renderEditorBottomJump() {
+      if (!ui.editorBottomJump) return;
+
+      const entryCount = Array.isArray(appState.editableEntries)
+        ? appState.editableEntries.length
+        : 0;
+
+      ui.editorBottomJump.classList.toggle('is-visible', entryCount >= 6);
+    }
+
+    function scrollToEditorActions() {
+      const target = document.getElementById('schedule-editor-actions');
+      if (!target) return;
+
+      target.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+
     function refreshEditorView() {
       appState.validation = validateEntries();
 
@@ -3081,6 +3130,7 @@
       renderScheduleSummary();
       renderValidationPanel();
       renderEditableScheduleTable();
+      renderEditorBottomJump();
       updateActionButtonStates();
       updateDebugOutput();
     }
@@ -3785,6 +3835,7 @@
 
       ui.scheduleSummary.textContent = 'Loading...';
       ui.scheduleTableContainer.innerHTML = '';
+      if (ui.editorBottomJump) ui.editorBottomJump.classList.remove('is-visible');
       ui.dayNoteInput.value = '';
       setSaveStatus('&nbsp;', 'neutral');
 
@@ -3970,6 +4021,7 @@
       if (ui.createDraftButton) ui.createDraftButton.addEventListener('click', handleCreateDraft);
       if (ui.publishButton) ui.publishButton.addEventListener('click', handlePublish);
       if (ui.topSignOutButton) ui.topSignOutButton.addEventListener('click', handleSignOut);
+      if (ui.editorBottomJumpButton) ui.editorBottomJumpButton.addEventListener('click', scrollToEditorActions);
       if (ui.copyFromDateButton) ui.copyFromDateButton.addEventListener('click', handleCopyFromDate);
       if (ui.copyLastWeekButton) ui.copyLastWeekButton.addEventListener('click', handleCopySameWeekdayFromLastWeek);
       if (ui.repeatWeeklyButton) ui.repeatWeeklyButton.addEventListener('click', handleRepeatWeeklyUntilDate);
