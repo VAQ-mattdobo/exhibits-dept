@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=768, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no" />
-  <title>VAQ Solid Panel - Membership (Blue)</title>
+  <title>VAQ Solid Panel - Membership (Blue/Wide)</title>
 
-<!-- Scale fix applied for Kuusoft environment rendering oversized. -->
+  <!-- Scale fix applied for Kuusoft environment rendering oversized. -->
 
   <style>
     html, body {
@@ -17,8 +17,10 @@
     }
 
     .panel {
+      position: relative;
       width: 768px;
       height: 1080px;
+      overflow: hidden;
       background-color: #64a5c3;
 
       display: flex;
@@ -28,10 +30,26 @@
       color: transparent; /* invisible but forces render */
       font-size: 1px;
     }
+
+    .down-arrow {
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      width: calc(100% - 120px);
+      max-width: 668px;
+      height: auto;
+      opacity: 0.65;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 
 <body>
-  <div class="panel">&nbsp;</div>
+  <div class="panel">
+    <img class="down-arrow" src="../assets/down-arrow.svg" alt="" aria-hidden="true">
+    &nbsp;
+  </div>
 </body>
 </html>
