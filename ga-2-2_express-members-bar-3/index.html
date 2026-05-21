@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=384, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no" />
+  <title>VAQ Solid Panel - Members & Express (Orange/Narrow) 1 of 2</title>
+
+<!-- Scale fix applied for Kuusoft environment rendering oversized. -->
+
+  <style>
+    html, body {
+      width: 384px;
+      height: 1080px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .panel {
+      position: relative;
+      width: 384px;
+      height: 1080px;
+      overflow: hidden;
+      background-color: #e6782d;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: transparent; /* invisible but forces render */
+      font-size: 1px;
+    }
+
+    .down-arrow {
+      position: absolute;
+      left: 100%;
+      top: 53%;
+      width: auto;
+      height: calc(100% - 160px);
+      opacity: 0.65;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transform: translate(-45%, -50%);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="panel">
+    <img class="down-arrow" src="../assets/down-arrow.svg" alt="" aria-hidden="true">
+    &nbsp;
+  </div>
+</body>
+</html>
