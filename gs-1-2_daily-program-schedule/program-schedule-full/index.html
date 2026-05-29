@@ -45,7 +45,9 @@
 
     const TRANSITION_DURATION_MS = 520;
     const BOUNDARY_FUDGE_MS = 250;
-    const DATA_REFRESH_MS = 10000;
+    // Database polling interval for live schedule updates.
+    // 25000 = 25 seconds.
+    const DATA_REFRESH_MS = 25000;
 
     const PUBLIC_NO_SCHEDULE_MESSAGE = "Stay tuned! We're still setting up today’s schedule... 🐟";
     const LOAD_ERROR_MESSAGE = 'Program schedule could not be loaded right now.';
