@@ -90,8 +90,8 @@
           </select>
         </label>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button id="batch-publish-button" class="accent" type="button">Publish Selected Dates</button>
-          <button id="batch-cancel-button" class="neutral" type="button">Save and Close</button>
+          <button id="batch-publish-button" class="accent" type="button">Publish Selected Dates Live</button>
+          <button id="batch-cancel-button" class="neutral" type="button">Save Drafts and Close</button>
         </div>
       </div>
 
@@ -868,7 +868,7 @@
     const selectedFilmId = ui.filmSelect?.value || '';
 
     const targetDates =
-      appState.isBatchMode && appState.batchSelectedDates?.length
+      appState.batchMode && appState.batchSelectedDates?.length
         ? appState.batchSelectedDates
         : appState.selectedDate
           ? [appState.selectedDate]
@@ -889,7 +889,7 @@
       return;
     }
 
-    if (!appState.isBatchEditing) {
+    if (!appState.batchMode) {
       const existingActiveShowtimes = appState.draftShowtimes.filter((row) => !row.is_cancelled).length;
 
       if (existingActiveShowtimes > 0) {
@@ -913,6 +913,8 @@
           p_film_id: selectedFilmId,
           p_load_template_id: selectedLoadId
         });
+
+        if (error) throw error;
       }
 
       clearLoadCaches();
@@ -2204,80 +2206,172 @@
     }
   }
 
-  async function applyBatchLoadToDrafts() {
-    const selectedLoadId = ui.batchLoadSelect?.value || '';
-    const selectedFilmId = ui.filmSelect?.value || '';
+  function getBatchDraftSelection() {
+    return {
+      selectedDates: [...(appState.batchSelectedDates || [])],
+      selectedFilmId: ui.filmSelect?.value || '',
+      selectedLoadId: ui.batchLoadSelect?.value || ''
+    };
+  }
 
-    if (!selectedLoadId) return;
+  async function applyBatchLoadToDrafts(options = {}) {
+    const {
+      askForConfirmation = true,
+      showSuccessMessage = true
+    } = options;
+
+    const {
+      selectedDates,
+      selectedFilmId,
+      selectedLoadId
+    } = getBatchDraftSelection();
+
+    if (!selectedDates.length) {
+      alert('No batch dates selected.');
+      return { ok: false, reason: 'no-dates' };
+    }
 
     if (!selectedFilmId) {
-      alert('Select a film before applying a batch load.');
-      ui.batchLoadSelect.value = '';
-      return;
+      alert('Select a film before saving this batch.');
+      return { ok: false, reason: 'no-film' };
     }
 
-    if (!appState.batchSelectedDates.length) {
-      alert('No batch dates selected.');
-      ui.batchLoadSelect.value = '';
-      return;
+    if (!selectedLoadId) {
+      alert('Choose a load for the selected dates before saving this batch.');
+      return { ok: false, reason: 'no-load' };
     }
 
-    const confirmed = window.confirm(
-      `Apply this load and save drafts for ${appState.batchSelectedDates.length} selected date(s)? Existing draft showtimes on those days will be replaced.`
-    );
+    if (askForConfirmation) {
+      const confirmed = window.confirm(
+        `Save drafts for ${selectedDates.length} selected date(s)? Existing draft showtimes on those days will be replaced.`
+      );
 
-    if (!confirmed) {
-      ui.batchLoadSelect.value = '';
-      return;
-    }
-
-    for (const dateStr of appState.batchSelectedDates) {
-      const { error } = await supabaseClient.rpc('generate_draft_schedule_from_load', {
-        p_schedule_date: dateStr,
-        p_film_id: selectedFilmId,
-        p_load_template_id: selectedLoadId
-      });
-
-      if (error) {
-        console.error('Failed to apply batch load:', dateStr, error);
-        alert(`Could not apply load to ${dateStr}: ${error.message}`);
-        return;
+      if (!confirmed) {
+        return { ok: false, reason: 'cancelled' };
       }
     }
 
-    clearLoadCaches();
+    ui.batchCancelButton.disabled = true;
+    ui.batchPublishButton.disabled = true;
 
-    await fetchCalendarDayStates();
+    const failedDates = [];
 
-    if (appState.selectedDate) {
-      await fetchScheduleStateForDate(appState.selectedDate);
+    try {
+      for (const dateStr of selectedDates) {
+        const { error } = await supabaseClient.rpc('generate_draft_schedule_from_load', {
+          p_schedule_date: dateStr,
+          p_film_id: selectedFilmId,
+          p_load_template_id: selectedLoadId
+        });
+
+        if (error) {
+          failedDates.push(`${dateStr}: ${error.message}`);
+        }
+      }
+
+      if (failedDates.length) {
+        alert(
+          `Some drafts could not be saved:\n\n${failedDates.join('\n')}`
+        );
+
+        return {
+          ok: false,
+          reason: 'partial-failure',
+          failedDates
+        };
+      }
+
+      clearLoadCaches();
+
+      await fetchCalendarDayStates();
+
+      if (appState.selectedDate) {
+        await fetchScheduleStateForDate(appState.selectedDate);
+      }
+
+      renderDraftShowtimes();
+      updateCalendarIndicators();
+      updateHeaderAndSummary();
+      updatePublishState();
+      updateBatchUi();
+
+      if (showSuccessMessage && ui.batchSummaryText) {
+        ui.batchSummaryText.textContent =
+          `Drafts saved for ${selectedDates.length} selected date(s). You can publish now, or choose Save Drafts and Close to return later.`;
+      }
+
+      return {
+        ok: true,
+        savedCount: selectedDates.length
+      };
+    } catch (err) {
+      console.error('Failed to apply batch load:', err);
+      alert(`Could not save batch drafts: ${err.message || err}`);
+
+      return {
+        ok: false,
+        reason: 'error',
+        error: err
+      };
+    } finally {
+      ui.batchCancelButton.disabled = false;
+      ui.batchPublishButton.disabled = false;
     }
+  }
 
-    renderDraftShowtimes();
-    updateCalendarIndicators();
-    updateHeaderAndSummary();
-    updatePublishState();
-    updateBatchUi();
+  async function saveBatchDraftsAndClose() {
+    const result = await applyBatchLoadToDrafts({
+      askForConfirmation: true,
+      showSuccessMessage: false
+    });
 
-    ui.batchSummaryText.textContent =
-      `Drafts saved for ${appState.batchSelectedDates.length} selected date(s). You can publish now, or choose Save and Close to return later.`;
+    if (!result?.ok) return;
+
+    cancelBatchMode();
+    alert(`Saved drafts for ${result.savedCount} selected date(s).`);
   }
 
   async function publishBatchDates() {
-    const selectedDates = appState.batchSelectedDates || [];
+    const {
+      selectedDates,
+      selectedFilmId,
+      selectedLoadId
+    } = getBatchDraftSelection();
 
     if (!selectedDates.length) {
       alert('No batch dates selected.');
       return;
     }
 
+    if (!selectedFilmId) {
+      alert('Select a film before publishing this batch.');
+      return;
+    }
+
+    if (!selectedLoadId) {
+      alert('Choose a load for the selected dates before publishing this batch.');
+      return;
+    }
+
     const confirmed = window.confirm(
-      `Publish ${selectedDates.length} selected date(s) live? Drafts must already have a film and active showtimes.`
+      `Generate or refresh drafts and publish ${selectedDates.length} selected date(s) live? Existing draft showtimes on those days will be replaced.`
     );
 
     if (!confirmed) return;
 
     ui.batchPublishButton.disabled = true;
+    ui.batchCancelButton.disabled = true;
+
+    const draftResult = await applyBatchLoadToDrafts({
+      askForConfirmation: false,
+      showSuccessMessage: false
+    });
+
+    if (!draftResult?.ok) {
+      ui.batchPublishButton.disabled = false;
+      ui.batchCancelButton.disabled = false;
+      return;
+    }
 
     const failedDates = [];
 
@@ -2324,6 +2418,7 @@
       alert(`Could not publish batch: ${err.message || err}`);
     } finally {
       ui.batchPublishButton.disabled = false;
+      ui.batchCancelButton.disabled = false;
       updateBatchUi();
     }
   }
@@ -2462,6 +2557,11 @@
 
           renderFilmPreview(filmId);
 
+          if (appState.batchMode) {
+            updateBatchUi();
+            return;
+          }
+
           await saveDraftFilmAssignment(filmId);
         });
 
@@ -2597,9 +2697,16 @@
 
     if (ui.loadSelect && !ui.loadSelect.dataset.bound) {
       ui.loadSelect.addEventListener('change', () => {
-      renderLoadPreview(ui.loadSelect.value || '');
-      updateSelectedLoadDot(ui.loadSelect.value || '');
-    });
+        const loadId = ui.loadSelect.value || '';
+
+        renderLoadPreview(loadId);
+        updateSelectedLoadDot(loadId);
+
+        if (appState.batchMode && ui.batchLoadSelect) {
+          ui.batchLoadSelect.value = loadId;
+          updateBatchUi();
+        }
+      });
 
       ui.loadSelect.dataset.bound = 'true';
     }
@@ -2616,7 +2723,7 @@
 
     // Batch controls
     if (ui.batchCancelButton && !ui.batchCancelButton.dataset.bound) {
-      ui.batchCancelButton.addEventListener('click', cancelBatchMode);
+      ui.batchCancelButton.addEventListener('click', saveBatchDraftsAndClose);
       ui.batchCancelButton.dataset.bound = 'true';
     }
 
@@ -2626,7 +2733,17 @@
     }
 
     if (ui.batchLoadSelect && !ui.batchLoadSelect.dataset.bound) {
-      ui.batchLoadSelect.addEventListener('change', applyBatchLoadToDrafts);
+      ui.batchLoadSelect.addEventListener('change', () => {
+        const loadId = ui.batchLoadSelect.value || '';
+
+        if (ui.loadSelect) {
+          ui.loadSelect.value = loadId;
+        }
+
+        renderLoadPreview(loadId);
+        updateSelectedLoadDot(loadId);
+        updateBatchUi();
+      });
       ui.batchLoadSelect.dataset.bound = 'true';
     }
 
