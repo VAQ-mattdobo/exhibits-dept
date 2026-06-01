@@ -163,10 +163,13 @@
 
     .amenity-marker {
       width: var(--amenity-marker-size);
+      height: var(--amenity-marker-size);
+      object-fit: contain;
     }
 
     .guest-services-marker {
       width: var(--guest-services-marker-size);
+      height: var(--guest-services-marker-size);
     }
 
     .direction-label {
@@ -238,22 +241,22 @@
 
     .gallery-legend-column {
       display: grid;
-      width: 330px;
-      gap: 5px;
+      width: 360px;
+      gap: 1px;
     }
 
     .gallery-legend-item {
       display: grid;
-      grid-template-columns: 38px minmax(0, 1fr);
+      grid-template-columns: 68px minmax(0, 1fr);
       align-items: center;
       column-gap: 8px;
-      min-height: 32px;
+      min-height: 42px;
     }
 
     .gallery-legend-icon {
       display: block;
-      width: 34px;
-      height: 30px;
+      width: 64px;
+      height: 42px;
       background-color: var(--gallery-icon-color);
       -webkit-mask-image: var(--gallery-icon-url);
       mask-image: var(--gallery-icon-url);
@@ -405,6 +408,18 @@
     const GALLERY_ICON_BASE_PATH =
       "../gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/";
 
+    /*
+      Map-specific icon filename overrides:
+      This guarantees that an older database export cannot reintroduce a
+      deprecated Amazon Gallery SVG filename.
+    */
+    const GALLERY_ICON_FILENAME_OVERRIDES = {
+      "amazon-gallery": "amazon-gallery.svg"
+    };
+
+    const AMENITY_CLUSTER_GAP_PX = 2;
+    const AMENITY_LAYOUT_MAX_ITERATIONS = 120;
+
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_PUBLISHABLE_KEY
@@ -425,13 +440,13 @@
         logo:                   { x: 82.3, y: 2.5,  anchor: "top-left" },
         qrBlock:                { x: 81.0, y: 55.0, anchor: "top-left" },
         legendHeading:          { x: 5.0,  y: 63.5, anchor: "top-left" },
-        galleryLegendLeft:      { x: 12.5, y: 67.5, anchor: "top-left" },
-        galleryLegendRight:     { x: 46.4, y: 67.5, anchor: "top-left" },
+        galleryLegendLeft:      { x: 12.5, y: 66.4, anchor: "top-left" },
+        galleryLegendRight:     { x: 46.4, y: 66.4, anchor: "top-left" },
         amenityLegend:          { x: 79.8, y: 67.9, anchor: "top-left" },
         footer:                 { x: 50.0, y: 97.3, anchor: "centre" },
-        exitArrow:              { x: 82.0, y: 32.2, anchor: "centre" },
+        exitArrow:              { x: 81.0, y: 32.2, anchor: "centre" },
         exitLabel:              { x: 85.9, y: 32.2, anchor: "centre" },
-        enterArrow:             { x: 82.0, y: 35.0, anchor: "centre" },
+        enterArrow:             { x: 81.0, y: 35.0, anchor: "centre" },
         enterLabel:             { x: 85.9, y: 35.0, anchor: "centre" },
         youAreHereLegend:       { x: 75.6, y: 18.3, anchor: "centre" }
       },
@@ -688,8 +703,9 @@
       return image;
     }
 
-    function getGalleryIconUrl(iconPath) {
-      const filename = String(iconPath || "").split("/").pop();
+    function getGalleryIconUrl(iconPath, locationKey = "") {
+      const overrideFilename = GALLERY_ICON_FILENAME_OVERRIDES[locationKey];
+      const filename = overrideFilename || String(iconPath || "").split("/").pop();
       return `${GALLERY_ICON_BASE_PATH}${filename}`;
     }
 
@@ -773,10 +789,140 @@
        8. MAP OVERLAYS
        ====================================================================== */
 
+    function getAmenityMarkerSizePx(marker) {
+      return marker.className === "guest-services-marker"
+        ? 28
+        : 26;
+    }
+
+    /*
+      Tight amenity groups are resolved dynamically at render time.
+
+      The declared x/y values remain the geographic source anchors. Icons are
+      shifted only when their visible rectangles would touch or overlap. Each
+      collision is resolved along the smallest axis of movement, producing
+      compact, pixel-aligned clusters while preserving as much illustrated-map
+      artwork as possible beneath the overlays.
+    */
+    function resolveAmenityMarkerLayout(markers) {
+      const canvasWidth = 1080;
+      const canvasHeight = 1440;
+
+      const layout = markers.map((marker) => ({
+        ...marker,
+        sourceX: marker.x,
+        sourceY: marker.y,
+        px: (marker.x / 100) * canvasWidth,
+        py: (marker.y / 100) * canvasHeight,
+        sizePx: getAmenityMarkerSizePx(marker)
+      }));
+
+      function separateTouchingPairs() {
+        let moved = false;
+
+        for (let i = 0; i < layout.length; i += 1) {
+          for (let j = i + 1; j < layout.length; j += 1) {
+            const a = layout[i];
+            const b = layout[j];
+            const requiredDistance =
+              ((a.sizePx + b.sizePx) / 2) + AMENITY_CLUSTER_GAP_PX;
+
+            const dx = b.px - a.px;
+            const dy = b.py - a.py;
+            const overlapX = requiredDistance - Math.abs(dx);
+            const overlapY = requiredDistance - Math.abs(dy);
+
+            if (overlapX <= 0 || overlapY <= 0) continue;
+
+            moved = true;
+
+            if (overlapX <= overlapY) {
+              const direction = dx === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dx);
+              const shift = (overlapX / 2) + 0.05;
+              a.px -= direction * shift;
+              b.px += direction * shift;
+            } else {
+              const direction = dy === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dy);
+              const shift = (overlapY / 2) + 0.05;
+              a.py -= direction * shift;
+              b.py += direction * shift;
+            }
+          }
+        }
+
+        return moved;
+      }
+
+      for (let pass = 0; pass < AMENITY_LAYOUT_MAX_ITERATIONS; pass += 1) {
+        if (!separateTouchingPairs()) break;
+      }
+
+      /*
+        Snap resolved centres to whole pixels, then make a final integer-pixel
+        pass so icons retain a true visible gap rather than merely a
+        sub-pixel separation.
+      */
+      layout.forEach((marker) => {
+        marker.px = Math.round(marker.px);
+        marker.py = Math.round(marker.py);
+      });
+
+      for (let pass = 0; pass < AMENITY_LAYOUT_MAX_ITERATIONS; pass += 1) {
+        let moved = false;
+
+        for (let i = 0; i < layout.length; i += 1) {
+          for (let j = i + 1; j < layout.length; j += 1) {
+            const a = layout[i];
+            const b = layout[j];
+            const requiredDistance =
+              ((a.sizePx + b.sizePx) / 2) + AMENITY_CLUSTER_GAP_PX;
+
+            const dx = b.px - a.px;
+            const dy = b.py - a.py;
+            const overlapX = requiredDistance - Math.abs(dx);
+            const overlapY = requiredDistance - Math.abs(dy);
+
+            if (overlapX <= 0 || overlapY <= 0) continue;
+
+            moved = true;
+
+            if (overlapX <= overlapY) {
+              const direction = dx === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dx);
+              const shift = Math.ceil(overlapX / 2);
+              a.px -= direction * shift;
+              b.px += direction * shift;
+            } else {
+              const direction = dy === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dy);
+              const shift = Math.ceil(overlapY / 2);
+              a.py -= direction * shift;
+              b.py += direction * shift;
+            }
+          }
+        }
+
+        if (!moved) break;
+      }
+
+      return layout.map((marker) => ({
+        ...marker,
+        x: (marker.px / canvasWidth) * 100,
+        y: (marker.py / canvasHeight) * 100
+      }));
+    }
+
     function renderAmenityMarkers() {
       const layer = document.getElementById("amenity-marker-layer");
+      const resolvedMarkers = resolveAmenityMarkerLayout(AMENITY_MARKERS);
 
-      AMENITY_MARKERS.forEach((marker) => {
+      resolvedMarkers.forEach((marker) => {
         const type = AMENITY_TYPES[marker.type];
         if (!type) {
           console.warn(`Unknown amenity type: ${marker.type}`);
@@ -860,7 +1006,7 @@
         icon.style.setProperty("--gallery-icon-color", style.hex_color);
         icon.style.setProperty(
           "--gallery-icon-url",
-          `url("${getGalleryIconUrl(style.icon_path)}")`
+          `url("${getGalleryIconUrl(style.icon_path, legendItem.key)}")`
         );
 
         const pill = document.createElement("div");
