@@ -254,7 +254,15 @@
       display: block;
       width: 34px;
       height: 30px;
-      object-fit: contain;
+      background-color: var(--gallery-icon-color);
+      -webkit-mask-image: var(--gallery-icon-url);
+      mask-image: var(--gallery-icon-url);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      mask-size: contain;
     }
 
     .gallery-legend-pill {
@@ -617,7 +625,7 @@
       { location_key: "dragons-2026",              display_name: "Dragons Exhibit",                 hex_color: "#d89b2d", icon_path: "./assets/icons/dragons-2026.svg",                  sort_order: 80 },
       { location_key: "exploration",               display_name: "Exploration",                     hex_color: "#dfc822", icon_path: "./assets/icons/exploration.svg",                   sort_order: 90 },
       { location_key: "frogs-forever",             display_name: "Frogs Forever?",                  hex_color: "#c0d731", icon_path: "./assets/icons/frogs-forever.svg",                 sort_order: 100 },
-      { location_key: "amazon-gallery",            display_name: "Amazon Gallery",                  hex_color: "#1ca95b", icon_path: "./assets/icons/graham-amazon.svg",                 sort_order: 110 },
+      { location_key: "amazon-gallery",            display_name: "Amazon Gallery",                  hex_color: "#1ca95b", icon_path: "./assets/icons/amazon-gallery.svg",                 sort_order: 110 },
       { location_key: "immotion-vr",               display_name: "Immotion VR",                     hex_color: "#29367a", icon_path: "./assets/icons/immotion-vr.svg",                   sort_order: 120 },
       { location_key: "pacific-canada",            display_name: "Pacific Canada",                  hex_color: "#56c5d0", icon_path: "./assets/icons/pacific-canada.svg",                sort_order: 130 },
       { location_key: "sea-otters",                display_name: "Sea Otters",                      hex_color: "#8fbeda", icon_path: "./assets/icons/sea-otters.svg",                    sort_order: 140 },
@@ -651,7 +659,7 @@
         { key: "immotion-vr",      label: "Immotion VR" },
         { key: "clownfish-cove",   label: "Clownfish Cove" },
         { key: "the-tropics",      label: "The Tropics" },
-        { key: "amazon-gallery",   label: "Graham Amazon" },
+        { key: "amazon-gallery",   label: "Amazon Gallery" },
         { key: "dragons-2026",     label: "Dragons" },
         { key: "amazing-axolotls", label: "Amazing Axolotls!" }
       ]
@@ -847,7 +855,14 @@
         const item = document.createElement("div");
         item.className = "gallery-legend-item";
 
-        const icon = makeImage(getGalleryIconUrl(style.icon_path), "gallery-legend-icon");
+        const icon = document.createElement("span");
+        icon.className = "gallery-legend-icon";
+        icon.style.setProperty("--gallery-icon-color", style.hex_color);
+        icon.style.setProperty(
+          "--gallery-icon-url",
+          `url("${getGalleryIconUrl(style.icon_path)}")`
+        );
+
         const pill = document.createElement("div");
         pill.className = "gallery-legend-pill";
         pill.style.backgroundColor = style.hex_color;
