@@ -408,15 +408,6 @@
     const GALLERY_ICON_BASE_PATH =
       "../gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/";
 
-    /*
-      Map-specific icon filename overrides:
-      This guarantees that an older database export cannot reintroduce a
-      deprecated Amazon Gallery SVG filename.
-    */
-    const GALLERY_ICON_FILENAME_OVERRIDES = {
-      "amazon-gallery": "amazon-gallery.svg"
-    };
-
     const AMENITY_CLUSTER_GAP_PX = 2;
     const AMENITY_LAYOUT_MAX_ITERATIONS = 120;
 
@@ -703,9 +694,8 @@
       return image;
     }
 
-    function getGalleryIconUrl(iconPath, locationKey = "") {
-      const overrideFilename = GALLERY_ICON_FILENAME_OVERRIDES[locationKey];
-      const filename = overrideFilename || String(iconPath || "").split("/").pop();
+    function getGalleryIconUrl(iconPath) {
+      const filename = String(iconPath || "").split("/").pop();
       return `${GALLERY_ICON_BASE_PATH}${filename}`;
     }
 
@@ -1006,7 +996,7 @@
         icon.style.setProperty("--gallery-icon-color", style.hex_color);
         icon.style.setProperty(
           "--gallery-icon-url",
-          `url("${getGalleryIconUrl(style.icon_path, legendItem.key)}")`
+          `url("${getGalleryIconUrl(style.icon_path)}")`
         );
 
         const pill = document.createElement("div");
