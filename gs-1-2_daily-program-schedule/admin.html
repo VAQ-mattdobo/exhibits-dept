@@ -863,15 +863,38 @@
       align-items: end;
     }
 
-    #schedule-tools-content .tools-actions > button {
+    #schedule-tools-content .button-tool-copy {
+      background: var(--secondary);
+      border-color: var(--secondary);
+      color: #fff;
+    }
+
+    #schedule-tools-content .button-tool-copy:hover:not(:disabled) {
+      background: var(--secondary-hover);
+      border-color: var(--secondary-hover);
+    }
+
+    #schedule-tools-content .button-tool-repeat {
       background: #8f6bb3;
       border-color: #8f6bb3;
       color: #fff;
     }
 
-    #schedule-tools-content .tools-actions > button:hover:not(:disabled) {
+    #schedule-tools-content .button-tool-repeat:hover:not(:disabled) {
       background: #7c599f;
       border-color: #7c599f;
+    }
+
+    .schedule-tool-card-publish {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid #c7d7a8;
+    }
+
+    .schedule-tool-card-publish .field-help {
+      margin-top: 0;
+      margin-bottom: 12px;
+      max-width: 780px;
     }
 
     #schedule-tools-content h4 {
@@ -1928,8 +1951,8 @@
                 </label>
               </div>
               <div class="tools-actions" style="margin-top:12px;">
-                <button id="copy-from-date-button" type="button" class="button-secondary">Copy from Date</button>
-                <button id="copy-last-week-button" type="button" class="button-secondary">Copy Same Weekday from Last Week</button>
+                <button id="copy-from-date-button" type="button" class="button-tool-copy">Copy from Date</button>
+                <button id="copy-last-week-button" type="button" class="button-tool-copy">Copy Same Weekday from Last Week</button>
               </div>
             </div>
 
@@ -1947,8 +1970,20 @@
                 </label>
               </div>
               <div class="tools-actions" style="margin-top:12px;">
-                <button id="repeat-weekly-button" type="button" class="button-secondary">Repeat Weekly Until Date</button>
+                <button id="repeat-weekly-button" type="button" class="button-tool-repeat">Repeat Weekly Until Date</button>
               </div>
+            </div>
+          </div>
+          <div class="schedule-tool-card schedule-tool-card-publish">
+            <h4>Publish Prepared Schedules</h4>
+            <div class="field-help">
+              Publishes every saved, populated draft that does not already have a live version.
+              Empty drafts are skipped. Existing live schedules are never overwritten.
+            </div>
+            <div class="tools-actions">
+              <button id="publish-all-drafts-button" type="button" class="button-publish-live">
+                Publish All Drafts
+              </button>
             </div>
           </div>
         </div>
@@ -2077,6 +2112,7 @@
       repeatUntilDateInput: document.getElementById('repeat-until-date-input'),
       repeatOverwriteCheckbox: document.getElementById('repeat-overwrite-checkbox'),
       repeatWeeklyButton: document.getElementById('repeat-weekly-button'),
+      publishAllDraftsButton: document.getElementById('publish-all-drafts-button'),
       dayNoteInput: document.getElementById('day-note-input'),
       saveDayNoteButton: document.getElementById('save-day-note-button'),
       scheduleToolsPanel: document.getElementById('schedule-tools-panel'),
@@ -2352,21 +2388,23 @@
       return validStarts[0] || '09:00';
     }
 
+    function compareScheduleEntries(a, b) {
+      const aStart = parseTimeToMinutes(a.start_time || '') ?? 99999;
+      const bStart = parseTimeToMinutes(b.start_time || '') ?? 99999;
+
+      if (aStart !== bStart) {
+        return aStart - bStart;
+      }
+
+      return String(a.title || '').trim().localeCompare(
+        String(b.title || '').trim(),
+        undefined,
+        { sensitivity: 'base' }
+      );
+    }
+
     function sortEditableEntries() {
-      appState.editableEntries.sort((a, b) => {
-        const aStart = parseTimeToMinutes(a.start_time || '') ?? 99999;
-        const bStart = parseTimeToMinutes(b.start_time || '') ?? 99999;
-
-        if (aStart !== bStart) {
-          return aStart - bStart;
-        }
-
-        return String(a.title || '').trim().localeCompare(
-          String(b.title || '').trim(),
-          undefined,
-          { sensitivity: 'base' }
-        );
-      });
+      appState.editableEntries.sort(compareScheduleEntries);
     }
 
     function formatStoredTimeForDisplay(time24) {
@@ -2844,17 +2882,23 @@
       return { data: result.data || null, error: result.error || null };
     }
 
-        function getSanitizedEditableEntries() {
-      return cloneEntries(appState.editableEntries).map((entry) => {
+    function getSanitizedEntries(entries) {
+      return cloneEntries(entries).map((entry) => {
         const cleanedEntry = { ...entry };
+
         Object.keys(cleanedEntry).forEach((key) => {
           if (key.endsWith('__ui')) {
             delete cleanedEntry[key];
           }
         });
+
         cleanedEntry.description = '';
         return cleanedEntry;
       });
+    }
+
+    function getSanitizedEditableEntries() {
+      return getSanitizedEntries(appState.editableEntries);
     }
 
     async function saveDraftSchedule() {
@@ -2898,13 +2942,13 @@
       return { data, error };
     }
 
-    function validateEntries() {
+    function validateEntries(entriesToValidate = appState.editableEntries) {
       const summaryErrors = [];
       const rowErrors = {};
       const validLocationKeys = new Set(appState.locationStyles.map((style) => style.location_key));
       const seenIds = new Set();
 
-      appState.editableEntries.forEach((entry, index) => {
+        entriesToValidate.forEach((entry, index) => {
         const errors = [];
         const rowNumber = index + 1;
 
@@ -3811,6 +3855,181 @@
       return { data, error };
     }
 
+    async function loadUnpublishedDraftSchedules() {
+      const [draftResult, liveResult] = await Promise.all([
+        supabaseClient
+          .from('program_schedule_sets')
+          .select('*')
+          .eq('mode', 'draft')
+          .order('schedule_date', { ascending: true }),
+
+        supabaseClient
+          .from('program_schedule_sets')
+          .select('schedule_date')
+          .eq('mode', 'live')
+      ]);
+
+      if (draftResult.error) {
+        return { data: null, error: draftResult.error };
+      }
+
+      if (liveResult.error) {
+        return { data: null, error: liveResult.error };
+      }
+
+      const liveDates = new Set(
+        (liveResult.data || []).map((row) => row.schedule_date)
+      );
+
+      const unpublishedDrafts = (draftResult.data || []).filter(
+        (draft) => !liveDates.has(draft.schedule_date)
+      );
+
+      return {
+        data: unpublishedDrafts,
+        error: null
+      };
+    }
+
+    async function handlePublishAllDrafts() {
+      if (!ui.publishAllDraftsButton) return;
+
+      ui.publishAllDraftsButton.disabled = true;
+      setSaveStatus('Checking unpublished drafts...', 'neutral');
+
+      try {
+        const result = await loadUnpublishedDraftSchedules();
+
+        if (result.error) {
+          const message = `Could not load unpublished drafts: ${result.error.message}`;
+          setSaveStatus(message, 'error');
+          window.alert(message);
+          return;
+        }
+
+        const unpublishedDrafts = result.data || [];
+
+        const emptyDrafts = unpublishedDrafts.filter((draft) => (
+          !Array.isArray(draft.entries_json) || draft.entries_json.length === 0
+        ));
+
+        const populatedDrafts = unpublishedDrafts.filter((draft) => (
+          Array.isArray(draft.entries_json) && draft.entries_json.length > 0
+        ));
+
+        if (!populatedDrafts.length) {
+          const message = emptyDrafts.length
+            ? `No populated unpublished drafts were found. ${emptyDrafts.length} empty draft(s) were skipped.`
+            : 'No unpublished drafts were found.';
+
+          setSaveStatus(message, 'neutral');
+          window.alert(message);
+          return;
+        }
+
+        const invalidDrafts = populatedDrafts
+          .map((draft) => ({
+            draft,
+            validation: validateEntries(draft.entries_json || [])
+          }))
+          .filter((item) => !item.validation.isValid);
+
+        if (invalidDrafts.length) {
+          const invalidDateList = invalidDrafts
+            .map((item) => item.draft.schedule_date)
+            .join(', ');
+
+          const message =
+            `Batch publishing blocked. Fix validation issues in these draft dates first: ${invalidDateList}`;
+
+          setSaveStatus(message, 'error');
+          window.alert(message);
+          return;
+        }
+
+        const dateList = populatedDrafts
+          .map((draft) => draft.schedule_date)
+          .join(', ');
+
+        const skippedText = emptyDrafts.length
+          ? `\n\n${emptyDrafts.length} empty draft(s) will be skipped.`
+          : '';
+
+        const confirmed = window.confirm(
+          `Publish ${populatedDrafts.length} unpublished draft schedule(s) live?\n\n` +
+          `${dateList}` +
+          `${skippedText}\n\n` +
+          `Existing live schedules will not be overwritten.`
+        );
+
+        if (!confirmed) {
+          setSaveStatus('Publish All Drafts cancelled.', 'neutral');
+          return;
+        }
+
+        setSaveStatus('Publishing unpublished drafts...', 'neutral');
+
+        let publishedCount = 0;
+        let errorCount = 0;
+        const failedDates = [];
+
+        for (const draft of populatedDrafts) {
+          const nowIso = new Date().toISOString();
+
+          const sortedEntries = cloneEntries(draft.entries_json || [])
+            .sort(compareScheduleEntries);
+
+          const payload = {
+            schedule_date: draft.schedule_date,
+            mode: 'live',
+            timezone_name: draft.timezone_name || 'America/Vancouver',
+            entries_json: getSanitizedEntries(sortedEntries),
+            day_note: draft.day_note || '',
+            saved_at: nowIso,
+            published_at: nowIso
+          };
+
+          const { error } = await supabaseClient
+            .from('program_schedule_sets')
+            .upsert(payload, { onConflict: 'schedule_date,mode' });
+
+          if (error) {
+            console.error(`Could not publish ${draft.schedule_date}:`, error);
+            errorCount += 1;
+            failedDates.push(draft.schedule_date);
+            continue;
+          }
+
+          publishedCount += 1;
+        }
+
+        await loadAllData();
+
+        const skippedSummary = emptyDrafts.length
+          ? ` · Empty drafts skipped ${emptyDrafts.length}`
+          : '';
+
+        const failedSummary = failedDates.length
+          ? ` · Failed dates: ${failedDates.join(', ')}`
+          : '';
+
+        const summary =
+          `Publish All Drafts complete. Published ${publishedCount}` +
+          ` · Errors ${errorCount}` +
+          skippedSummary +
+          failedSummary;
+
+        setSaveStatus(summary, errorCount ? 'error' : 'success');
+        window.alert(summary);
+      } catch (err) {
+        const message = `Publish All Drafts failed: ${err.message || err}`;
+        setSaveStatus(message, 'error');
+        window.alert(message);
+      } finally {
+        ui.publishAllDraftsButton.disabled = false;
+      }
+    }
+
     async function loadAllData() {
       clearPendingDeleteState();
       appState.timeUiState = {};
@@ -4025,6 +4244,7 @@
       if (ui.copyFromDateButton) ui.copyFromDateButton.addEventListener('click', handleCopyFromDate);
       if (ui.copyLastWeekButton) ui.copyLastWeekButton.addEventListener('click', handleCopySameWeekdayFromLastWeek);
       if (ui.repeatWeeklyButton) ui.repeatWeeklyButton.addEventListener('click', handleRepeatWeeklyUntilDate);
+      if (ui.publishAllDraftsButton) ui.publishAllDraftsButton.addEventListener('click', handlePublishAllDrafts);
       if (ui.dayNoteInput) ui.dayNoteInput.addEventListener('input', handleDayNoteInput);
       if (ui.saveDayNoteButton) ui.saveDayNoteButton.addEventListener('click', handleSaveDraft);
       if (ui.emailInput) ui.emailInput.addEventListener('keydown', handleLoginKeydown);
