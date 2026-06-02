@@ -61,7 +61,15 @@
       --wayfinding-label-width: 72px;
       --wayfinding-arrow-width: 50px;
       --legend-pin-width: 62px;
-      --active-pin-width: 72px;
+
+      /* Active map-pin animation settings */
+      --active-pin-width: 28px;
+      --active-pin-hop-distance: 5px;
+      --active-pin-shadow-width: 28px;
+      --active-pin-shadow-min-width: 15px;
+      --active-pin-shadow-min-scale: 0.536; /* approximately 15px / 28px */
+      --active-pin-shadow-height: 9px;
+      --active-pin-animation-duration: 2.2s;
 
       --debug-outline: rgba(214, 54, 54, 0.62);
       --debug-dot: #d63636;
@@ -184,9 +192,73 @@
       width: var(--legend-pin-width);
     }
 
+    /* ======================================================================
+       ACTIVE YOU-ARE-HERE MAP PIN ANIMATION
+
+       The wrapper holds the geographic centre coordinate. The SVG and its
+       CSS-generated ellipse shadow animate independently inside the wrapper,
+       so the marker can hop without overriding the positioning transform.
+       ====================================================================== */
+
     .active-pin {
       width: var(--active-pin-width);
-      filter: drop-shadow(0 6px 5px rgba(0, 0, 0, 0.28));
+    }
+
+    .active-pin-marker {
+      position: absolute;
+      width: var(--active-pin-width);
+      isolation: isolate;
+    }
+
+    .active-you-are-here-pin {
+      position: relative;
+      z-index: 2;
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.22));
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+      animation: active-pin-hop var(--active-pin-animation-duration) ease-in-out infinite;
+    }
+
+    .active-pin-shadow {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      z-index: 1;
+      display: block;
+      width: var(--active-pin-shadow-width);
+      height: var(--active-pin-shadow-height);
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.1);
+      transform: translate3d(-50%, 35%, 0) scaleX(1);
+      transform-origin: center center;
+      will-change: transform;
+      animation: active-pin-shadow-pulse var(--active-pin-animation-duration) ease-in-out infinite;
+    }
+
+    @keyframes active-pin-hop {
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      50% {
+        transform: translate3d(0, calc(-1 * var(--active-pin-hop-distance)), 0);
+      }
+    }
+
+    @keyframes active-pin-shadow-pulse {
+      0%,
+      100% {
+        transform: translate3d(-50%, 35%, 0) scaleX(1);
+      }
+
+      50% {
+        transform: translate3d(-50%, 35%, 0)
+          scaleX(var(--active-pin-shadow-min-scale));
+      }
     }
 
     .you-are-here-key {
@@ -454,8 +526,8 @@
     /* ======================================================================
        2. VMAP 01 PROFILE — EXPLORATION
 
-       activeYouAreHere is intentionally disabled until the physical display
-       location coordinate is supplied for this specific map module.
+       activeYouAreHere contains the physical display location for this
+       specific map module. Coordinates are intentionally easy to edit here.
        ====================================================================== */
 
     const MAP_PROFILE = {
@@ -478,9 +550,9 @@
       },
 
       activeYouAreHere: {
-        visible: false,
-        x: null,
-        y: null,
+        visible: true,
+        x: 36.0,
+        y: 20.1,
         anchor: "centre"
       },
 
@@ -971,9 +1043,20 @@
       if (!pin.visible || !Number.isFinite(pin.x) || !Number.isFinite(pin.y)) return;
 
       const layer = document.getElementById("dynamic-marker-layer");
-      const image = makeImage("../assets/you-are-here.svg", "pin-asset active-pin");
-      setPosition(image, pin);
-      layer.appendChild(image);
+      const marker = document.createElement("div");
+      marker.className = "active-pin-marker";
+
+      const shadow = document.createElement("span");
+      shadow.className = "active-pin-shadow";
+
+      const image = makeImage(
+        "../assets/you-are-here.svg",
+        "pin-asset active-you-are-here-pin"
+      );
+
+      marker.append(shadow, image);
+      setPosition(marker, pin);
+      layer.appendChild(marker);
       makeDebugDot(pin.x, pin.y);
     }
 
