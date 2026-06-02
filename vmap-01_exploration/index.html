@@ -196,6 +196,11 @@
       white-space: nowrap;
     }
 
+    .you-are-here-key .legend-pin {
+      position: relative;
+      left: 14px;
+    }
+
     .you-are-here-key span {
       color: #65707a;
       font-size: 22px;
@@ -204,34 +209,57 @@
     }
 
     .qr-block {
-      width: 125px;
+      width: 170px;
       text-align: center;
       color: var(--orange);
     }
 
+    .qr-frame {
+      position: relative;
+      display: flex;
+      width: 156px;
+      height: 156px;
+      margin: 0 auto;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--orange);
+      border-radius: 14px;
+    }
+
+    .qr-heading,
+    .qr-url {
+      position: absolute;
+      left: 50%;
+      margin: 0;
+      padding: 0 6px;
+      background: #ffffff;
+      white-space: nowrap;
+    }
+
     .qr-heading {
-      margin: 0 0 7px;
+      top: 0;
       font-size: 15px;
       font-weight: 700;
       line-height: 1;
+      transform: translate(-50%, -50%);
     }
 
     .qr-code {
       display: block;
       width: 112px;
       height: 112px;
-      margin: 0 auto;
     }
 
     .qr-url {
-      margin: 7px 0 0;
+      bottom: 0;
       font-size: 8px;
       line-height: 1;
+      transform: translate(-50%, 50%);
     }
 
     .legend-heading {
       margin: 0;
-      color: #444444;
+      color: #202124;
       font-size: 39px;
       font-weight: 700;
       letter-spacing: 0.8px;
@@ -254,6 +282,8 @@
     }
 
     .gallery-legend-icon {
+      position: relative;
+      left: 11px;
       display: block;
       width: 64px;
       height: 42px;
@@ -319,10 +349,15 @@
       white-space: nowrap;
     }
 
+    .footer-cta span {
+      transform: translateY(7px);
+    }
+
     .footer-cta strong {
       color: var(--orange);
       font-size: 24px;
       font-weight: 700;
+      transform: translateY(3px);
     }
 
     .debug-panel {
@@ -427,19 +462,19 @@
       key: "vmap-01_exploration",
 
       chrome: {
-        title:                  { x: 5.0,  y: 4.2,  anchor: "top-left" },
-        logo:                   { x: 82.3, y: 2.5,  anchor: "top-left" },
-        qrBlock:                { x: 81.0, y: 55.0, anchor: "top-left" },
+        title:                  { x: 5.0,  y: 3.6,  anchor: "top-left" },
+        logo:                   { x: 82.3, y: 2.6,  anchor: "top-left" },
+        qrBlock:                { x: 81.4, y: 55.0, anchor: "top-left" },
         legendHeading:          { x: 5.0,  y: 63.5, anchor: "top-left" },
         galleryLegendLeft:      { x: 12.5, y: 66.4, anchor: "top-left" },
         galleryLegendRight:     { x: 46.4, y: 66.4, anchor: "top-left" },
-        amenityLegend:          { x: 79.8, y: 67.9, anchor: "top-left" },
+        amenityLegend:          { x: 82.2, y: 67.9, anchor: "top-left" },
         footer:                 { x: 50.0, y: 97.3, anchor: "centre" },
-        exitArrow:              { x: 81.0, y: 32.2, anchor: "centre" },
-        exitLabel:              { x: 85.9, y: 32.2, anchor: "centre" },
-        enterArrow:             { x: 81.0, y: 35.0, anchor: "centre" },
-        enterLabel:             { x: 85.9, y: 35.0, anchor: "centre" },
-        youAreHereLegend:       { x: 75.6, y: 18.3, anchor: "centre" }
+        exitArrow:              { x: 80.1, y: 32.0, anchor: "centre" },
+        exitLabel:              { x: 85.9, y: 32.0, anchor: "centre" },
+        enterArrow:             { x: 80.1, y: 34.8, anchor: "centre" },
+        enterLabel:             { x: 85.9, y: 34.8, anchor: "centre" },
+        youAreHereLegend:       { x: 81.6, y: 18.3, anchor: "centre" }
       },
 
       activeYouAreHere: {
@@ -756,9 +791,11 @@
       const qrBlock = document.createElement("section");
       qrBlock.className = "qr-block";
       qrBlock.innerHTML = `
-        <p class="qr-heading">Scan for PDF</p>
-        <img class="qr-code" src="../assets/qr-code.svg" alt="">
-        <p class="qr-url">vanaqua.org/visit/map/</p>
+        <div class="qr-frame">
+          <p class="qr-heading">Scan for PDF</p>
+          <img class="qr-code" src="../assets/qr-code.svg" alt="">
+          <p class="qr-url">vanaqua.org/visit/map/</p>
+        </div>
       `;
       setPosition(qrBlock, p.qrBlock);
       layer.appendChild(qrBlock);
