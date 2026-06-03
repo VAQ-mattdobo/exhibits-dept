@@ -65,10 +65,10 @@
       /* Active map-pin animation settings */
       --active-pin-width: 28px;
       --active-pin-hop-distance: 5px;
-      --active-pin-shadow-width: 28px;
-      --active-pin-shadow-min-width: 15px;
-      --active-pin-shadow-min-scale: 0.536; /* approximately 15px / 28px */
-      --active-pin-shadow-height: 9px;
+      --active-pin-shadow-width: 21px;
+      --active-pin-shadow-min-width: 11.25px;
+      --active-pin-shadow-min-scale: 0.536; /* approximately 11.25px / 21px */
+      --active-pin-shadow-height: 6.75px;
       --active-pin-animation-duration: 2.2s;
 
       --debug-outline: rgba(214, 54, 54, 0.62);
@@ -173,6 +173,7 @@
       width: var(--amenity-marker-size);
       height: var(--amenity-marker-size);
       object-fit: contain;
+      filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.8));
     }
 
     .guest-services-marker {
@@ -540,11 +541,11 @@
       chrome: {
         title:                  { x: 5.0,  y: 3.6,  anchor: "top-left" },
         logo:                   { x: 82.3, y: 2.6,  anchor: "top-left" },
-        qrBlock:                { x: 81.4, y: 55.0, anchor: "top-left" },
+        qrBlock:                { x: 81.4, y: 53.0, anchor: "top-left" },
         legendHeading:          { x: 5.0,  y: 63.5, anchor: "top-left" },
         galleryLegendLeft:      { x: 12.5, y: 66.4, anchor: "top-left" },
         galleryLegendRight:     { x: 46.4, y: 66.4, anchor: "top-left" },
-        amenityLegend:          { x: 82.2, y: 67.9, anchor: "top-left" },
+        amenityLegend:          { x: 82.2, y: 66.8, anchor: "top-left" },
         footer:                 { x: 50.0, y: 97.3, anchor: "centre" },
         exitArrow:              { x: 80.1, y: 29.0, anchor: "centre" },
         exitLabel:              { x: 85.9, y: 29.0, anchor: "centre" },
