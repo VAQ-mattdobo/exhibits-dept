@@ -528,6 +528,10 @@
 
        activeYouAreHere contains the physical display location for this
        specific map module. Coordinates are intentionally easy to edit here.
+
+       Map-alignment note:
+       The illustrated base-map assets and all map-relative overlays were moved
+       upward by 3 percentage points during the Exploration alignment pass.
        ====================================================================== */
 
     const MAP_PROFILE = {
@@ -542,17 +546,17 @@
         galleryLegendRight:     { x: 46.4, y: 66.4, anchor: "top-left" },
         amenityLegend:          { x: 82.2, y: 67.9, anchor: "top-left" },
         footer:                 { x: 50.0, y: 97.3, anchor: "centre" },
-        exitArrow:              { x: 80.1, y: 32.0, anchor: "centre" },
-        exitLabel:              { x: 85.9, y: 32.0, anchor: "centre" },
-        enterArrow:             { x: 80.1, y: 34.8, anchor: "centre" },
-        enterLabel:             { x: 85.9, y: 34.8, anchor: "centre" },
-        youAreHereLegend:       { x: 81.6, y: 18.3, anchor: "centre" }
+        exitArrow:              { x: 80.1, y: 29.0, anchor: "centre" },
+        exitLabel:              { x: 85.9, y: 29.0, anchor: "centre" },
+        enterArrow:             { x: 80.1, y: 31.8, anchor: "centre" },
+        enterLabel:             { x: 85.9, y: 31.8, anchor: "centre" },
+        youAreHereLegend:       { x: 81.6, y: 15.3, anchor: "centre" }
       },
 
       activeYouAreHere: {
         visible: true,
         x: 36.0,
-        y: 20.1,
+        y: 17.1,
         anchor: "centre"
       },
 
@@ -649,71 +653,71 @@
        ====================================================================== */
 
     const AMENITY_MARKERS = [
-      { id: "accessible-viewing-01",  type: "accessible-viewing",  x: 56.9, y: 20.5 },
-      { id: "accessible-viewing-02",  type: "accessible-viewing",  x: 18.1, y: 30.1 },
-      { id: "accessible-viewing-03",  type: "accessible-viewing",  x: 39.0, y: 33.0 },
-      { id: "accessible-viewing-04",  type: "accessible-viewing",  x: 37.5, y: 38.2 },
+      { id: "accessible-viewing-01",  type: "accessible-viewing",  x: 56.9, y: 17.5 },
+      { id: "accessible-viewing-02",  type: "accessible-viewing",  x: 18.1, y: 27.1 },
+      { id: "accessible-viewing-03",  type: "accessible-viewing",  x: 39.0, y: 30.0 },
+      { id: "accessible-viewing-04",  type: "accessible-viewing",  x: 37.5, y: 35.2 },
 
-      { id: "accessible-washroom-01", type: "accessible-washroom", x: 64.9, y: 38.0 },
-      { id: "accessible-washroom-02", type: "accessible-washroom", x: 51.2, y: 49.5 },
-      { id: "accessible-washroom-03", type: "accessible-washroom", x: 69.3, y: 60.9 },
-      { id: "accessible-washroom-04", type: "accessible-washroom", x: 14.1, y: 39.9 },
+      { id: "accessible-washroom-01", type: "accessible-washroom", x: 64.9, y: 35.0 },
+      { id: "accessible-washroom-02", type: "accessible-washroom", x: 51.2, y: 46.5 },
+      { id: "accessible-washroom-03", type: "accessible-washroom", x: 69.3, y: 57.9 },
+      { id: "accessible-washroom-04", type: "accessible-washroom", x: 14.1, y: 36.9 },
 
-      { id: "elevator-01",            type: "elevator",            x: 45.2, y: 27.5 },
-      { id: "elevator-02",            type: "elevator",            x: 23.2, y: 29.6 },
-      { id: "elevator-03",            type: "elevator",            x: 58.4, y: 36.6 },
-      { id: "elevator-04",            type: "elevator",            x: 45.0, y: 47.8 },
-      { id: "elevator-05",            type: "elevator",            x: 23.1, y: 52.8 },
-      { id: "elevator-06",            type: "elevator",            x: 58.5, y: 58.9 },
+      { id: "elevator-01",            type: "elevator",            x: 45.2, y: 24.5 },
+      { id: "elevator-02",            type: "elevator",            x: 23.2, y: 26.6 },
+      { id: "elevator-03",            type: "elevator",            x: 58.4, y: 33.6 },
+      { id: "elevator-04",            type: "elevator",            x: 45.0, y: 44.8 },
+      { id: "elevator-05",            type: "elevator",            x: 23.1, y: 49.8 },
+      { id: "elevator-06",            type: "elevator",            x: 58.5, y: 55.9 },
 
-      { id: "food-and-beverage-01",   type: "food-and-beverage",   x: 30.0, y: 25.6 },
-      { id: "food-and-beverage-02",   type: "food-and-beverage",   x: 63.9, y: 40.5 },
-      { id: "food-and-beverage-03",   type: "food-and-beverage",   x: 66.1, y: 47.2 },
+      { id: "food-and-beverage-01",   type: "food-and-beverage",   x: 30.0, y: 22.6 },
+      { id: "food-and-beverage-02",   type: "food-and-beverage",   x: 63.9, y: 37.5 },
+      { id: "food-and-beverage-03",   type: "food-and-beverage",   x: 66.1, y: 44.2 },
 
-      { id: "genderless-washroom-01", type: "genderless-washroom", x: 23.1, y: 52.5 },
-      { id: "genderless-washroom-02", type: "genderless-washroom", x: 66.6, y: 38.5 },
-      { id: "genderless-washroom-03", type: "genderless-washroom", x: 52.8, y: 50.2 },
-      { id: "genderless-washroom-04", type: "genderless-washroom", x: 67.6, y: 60.5 },
+      { id: "genderless-washroom-01", type: "genderless-washroom", x: 23.1, y: 49.5 },
+      { id: "genderless-washroom-02", type: "genderless-washroom", x: 66.6, y: 35.5 },
+      { id: "genderless-washroom-03", type: "genderless-washroom", x: 52.8, y: 47.2 },
+      { id: "genderless-washroom-04", type: "genderless-washroom", x: 67.6, y: 57.5 },
 
-      { id: "gift-shop-01",           type: "gift-shop",           x: 75.7, y: 32.4 },
-      { id: "gift-shop-02",           type: "gift-shop",           x: 46.2, y: 52.6 },
+      { id: "gift-shop-01",           type: "gift-shop",           x: 75.7, y: 29.4 },
+      { id: "gift-shop-02",           type: "gift-shop",           x: 46.2, y: 49.6 },
 
-      { id: "lockers-01",             type: "lockers",             x: 49.6, y: 48.7 },
-      { id: "lockers-02",             type: "lockers",             x: 68.9, y: 58.1 },
+      { id: "lockers-01",             type: "lockers",             x: 49.6, y: 45.7 },
+      { id: "lockers-02",             type: "lockers",             x: 68.9, y: 55.1 },
 
-      { id: "stairs-01",              type: "stairs",              x: 22.5, y: 19.5 },
-      { id: "stairs-02",              type: "stairs",              x: 48.1, y: 28.4 },
-      { id: "stairs-03",              type: "stairs",              x: 42.5, y: 30.6 },
-      { id: "stairs-04",              type: "stairs",              x: 24.8, y: 33.4 },
-      { id: "stairs-05",              type: "stairs",              x: 57.6, y: 35.4 },
-      { id: "stairs-06",              type: "stairs",              x: 19.9, y: 39.4 },
-      { id: "stairs-07",              type: "stairs",              x: 49.9, y: 41.4 },
-      { id: "stairs-08",              type: "stairs",              x: 42.1, y: 51.0 },
-      { id: "stairs-09",              type: "stairs",              x: 48.0, y: 50.0 },
-      { id: "stairs-10",              type: "stairs",              x: 24.6, y: 54.5 },
-      { id: "stairs-11",              type: "stairs",              x: 57.5, y: 57.5 },
-      { id: "stairs-12",              type: "stairs",              x: 50.6, y: 62.9 },
+      { id: "stairs-01",              type: "stairs",              x: 22.5, y: 16.5 },
+      { id: "stairs-02",              type: "stairs",              x: 48.1, y: 25.4 },
+      { id: "stairs-03",              type: "stairs",              x: 42.5, y: 27.6 },
+      { id: "stairs-04",              type: "stairs",              x: 24.8, y: 30.4 },
+      { id: "stairs-05",              type: "stairs",              x: 57.6, y: 32.4 },
+      { id: "stairs-06",              type: "stairs",              x: 19.9, y: 36.4 },
+      { id: "stairs-07",              type: "stairs",              x: 49.9, y: 38.4 },
+      { id: "stairs-08",              type: "stairs",              x: 42.1, y: 48.0 },
+      { id: "stairs-09",              type: "stairs",              x: 48.0, y: 47.0 },
+      { id: "stairs-10",              type: "stairs",              x: 24.6, y: 51.5 },
+      { id: "stairs-11",              type: "stairs",              x: 57.5, y: 54.5 },
+      { id: "stairs-12",              type: "stairs",              x: 50.6, y: 59.9 },
 
-      { id: "stroller-wagon-parking-01", type: "stroller-wagon-parking", x: 49.0, y: 18.7 },
-      { id: "stroller-wagon-parking-02", type: "stroller-wagon-parking", x: 58.8, y: 27.8 },
-      { id: "stroller-wagon-parking-03", type: "stroller-wagon-parking", x: 50.3, y: 34.8 },
-      { id: "stroller-wagon-parking-04", type: "stroller-wagon-parking", x: 55.2, y: 48.6 },
+      { id: "stroller-wagon-parking-01", type: "stroller-wagon-parking", x: 49.0, y: 15.7 },
+      { id: "stroller-wagon-parking-02", type: "stroller-wagon-parking", x: 58.8, y: 24.8 },
+      { id: "stroller-wagon-parking-03", type: "stroller-wagon-parking", x: 50.3, y: 31.8 },
+      { id: "stroller-wagon-parking-04", type: "stroller-wagon-parking", x: 55.2, y: 45.6 },
 
-      { id: "washroom-01",            type: "washroom",            x: 42.5, y: 12.4 },
-      { id: "washroom-02",            type: "washroom",            x: 33.9, y: 19.5 },
-      { id: "washroom-03",            type: "washroom",            x: 40.3, y: 26.6 },
-      { id: "washroom-04",            type: "washroom",            x: 15.5, y: 38.9 },
-      { id: "washroom-05",            type: "washroom",            x: 65.2, y: 39.5 },
-      { id: "washroom-06",            type: "washroom",            x: 70.9, y: 43.5 },
-      { id: "washroom-07",            type: "washroom",            x: 67.2, y: 59.1 },
-      { id: "washroom-08",            type: "washroom",            x: 52.5, y: 61.7 },
+      { id: "washroom-01",            type: "washroom",            x: 42.5, y: 9.4 },
+      { id: "washroom-02",            type: "washroom",            x: 33.9, y: 16.5 },
+      { id: "washroom-03",            type: "washroom",            x: 40.3, y: 23.6 },
+      { id: "washroom-04",            type: "washroom",            x: 15.5, y: 35.9 },
+      { id: "washroom-05",            type: "washroom",            x: 65.2, y: 36.5 },
+      { id: "washroom-06",            type: "washroom",            x: 70.9, y: 40.5 },
+      { id: "washroom-07",            type: "washroom",            x: 67.2, y: 56.1 },
+      { id: "washroom-08",            type: "washroom",            x: 52.5, y: 58.7 },
 
-      { id: "water-station-01",       type: "water-station",       x: 34.4, y: 21.8 },
-      { id: "water-station-02",       type: "water-station",       x: 70.9, y: 39.2 },
-      { id: "water-station-03",       type: "water-station",       x: 54.2, y: 51.0 },
-      { id: "water-station-04",       type: "water-station",       x: 42.1, y: 28.8 },
+      { id: "water-station-01",       type: "water-station",       x: 34.4, y: 18.8 },
+      { id: "water-station-02",       type: "water-station",       x: 70.9, y: 36.2 },
+      { id: "water-station-03",       type: "water-station",       x: 54.2, y: 48.0 },
+      { id: "water-station-04",       type: "water-station",       x: 42.1, y: 25.8 },
 
-      { id: "guest-services-desk",    type: "guest-services",      x: 52.8, y: 32.7, className: "guest-services-marker" }
+      { id: "guest-services-desk",    type: "guest-services",      x: 52.8, y: 29.7, className: "guest-services-marker" }
     ];
 
     /* ======================================================================
