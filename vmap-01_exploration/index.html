@@ -173,7 +173,7 @@
       width: var(--amenity-marker-size);
       height: var(--amenity-marker-size);
       object-fit: contain;
-      filter: drop-shadow(0 5px 3px rgba(0, 0, 0, 0.35));
+      filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.8));
     }
 
     .guest-services-marker {
@@ -551,7 +551,8 @@
         exitLabel:              { x: 85.9, y: 29.0, anchor: "centre" },
         enterArrow:             { x: 80.1, y: 31.8, anchor: "centre" },
         enterLabel:             { x: 85.9, y: 31.8, anchor: "centre" },
-        youAreHereLegend:       { x: 81.6, y: 15.3, anchor: "centre" }
+        youAreHereLegend:       { x: 81.6, y: 15.3, anchor: "centre" },
+        nextProgramLegend:       { x: 81.6, y: 20.0, anchor: "centre" }
       },
 
       activeYouAreHere: {
@@ -1082,6 +1083,18 @@
       layer.appendChild(key);
     }
 
+    function renderNextProgramLegendKey() {
+      const layer = document.getElementById("legend-layer");
+      const key = document.createElement("div");
+      key.className = "you-are-here-key";
+      key.innerHTML = `
+        <img class="pin-asset legend-pin" src="../assets/next-program-here.svg" alt="">
+        <span>= Next program here</span>
+      `;
+      setPosition(key, MAP_PROFILE.chrome.nextProgramLegend);
+      layer.appendChild(key);
+    }
+
     function renderAmenityLegend() {
       const layer = document.getElementById("legend-layer");
       const legend = document.createElement("section");
@@ -1234,6 +1247,7 @@
       renderAmenityMarkers();
       renderActiveYouAreHerePin();
       renderYouAreHereLegendKey();
+      renderNextProgramLegendKey();
       renderAmenityLegend();
 
       const locationStyles = await loadLocationStyles();
