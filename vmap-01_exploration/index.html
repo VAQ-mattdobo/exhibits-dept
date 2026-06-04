@@ -62,8 +62,9 @@
       --wayfinding-arrow-width: 50px;
       --legend-pin-width: 62px;
 
-      /* Active map-pin animation settings */
+      /* Animated map-pin settings */
       --active-pin-width: 28px;
+      --next-program-pin-width: 28px;
       --active-pin-hop-distance: 5px;
       --active-pin-shadow-width: 21px;
       --active-pin-shadow-min-width: 11.25px;
@@ -211,7 +212,11 @@
       isolation: isolate;
     }
 
-    .active-you-are-here-pin {
+    .next-program-pin-marker {
+      width: var(--next-program-pin-width);
+    }
+
+    .animated-map-pin-image {
       position: relative;
       z-index: 2;
       display: block;
@@ -267,6 +272,10 @@
       align-items: center;
       gap: 15px;
       white-space: nowrap;
+    }
+
+    .you-are-here-key[hidden] {
+      display: none;
     }
 
     .you-are-here-key .legend-pin {
@@ -519,6 +528,15 @@
     const AMENITY_CLUSTER_GAP_PX = 2;
     const AMENITY_LAYOUT_MAX_ITERATIONS = 120;
 
+    // The map uses its own broader Next Program Here visibility window.
+    // Show the earliest non-cancelled program location or locations well in
+    // advance, then keep those pins visible until five minutes after the
+    // qualifying start time. Simultaneous programs share the designation.
+    const TIMEZONE_NAME = "America/Vancouver";
+    const NEXT_PROGRAM_POST_START_GRACE_MINUTES = 5;
+    const NEXT_PROGRAM_DATA_REFRESH_MS = 25000;
+    const NEXT_PROGRAM_BOUNDARY_FUDGE_MS = 250;
+
     const supabaseClient = window.supabase.createClient(
       SUPABASE_URL,
       SUPABASE_PUBLISHABLE_KEY
@@ -565,13 +583,39 @@
       },
 
       /*
-        Future phase:
-        Add a coordinate per program-capable location key and render
-        ../assets/next-program-here.svg for the next upcoming program.
+        Database-driven Next Program Here anchors.
+        Each key matches program_schedule_sets.entries_json[].location_key.
+        Coordinates are centre points measured from the full 1080 × 1440 map.
       */
       nextProgramAnchors: {
-        // "exploration": { x: 00.0, y: 00.0, anchor: "centre" }
+        "bill-reid-plaza":           { x: 81.5, y: 37.4, anchor: "centre" },
+        "teck-connections":          { x: 54.7, y: 32.7, anchor: "centre" },
+        "teck-engagement":           { x: 58.3, y: 55.2, anchor: "centre" },
+        "pacific-canada":            { x: 51.0, y: 28.7, anchor: "centre" },
+        "frogs-forever":             { x: 53.1, y: 48.4, anchor: "centre" },
+        "treasures-of-the-bc-coast": { x: 44.2, y: 25.0, anchor: "centre" },
+        "stellers-bay":              { x: 22.5, y: 24.8, anchor: "centre" },
+        "canadas-arctic":            { x: 22.5, y: 51.1, anchor: "centre" },
+        "bc-wild-coast":             { x: 40.0, y: 40.5, anchor: "centre" },
+        "seal-cove":                 { x: 22.5, y: 34.0, anchor: "centre" },
+        "sea-otters":                { x: 30.0, y: 30.5, anchor: "centre" },
+        "exploration":               { x: 42.0, y: 18.0, anchor: "centre" },
+        "wet-lab":                   { x: 40.0, y: 14.5, anchor: "centre" },
+        "4d-theatre":                { x: 50.0, y: 16.1, anchor: "centre" },
+        "immotion-vr":               { x: 36.8, y: 17.2, anchor: "centre" },
+        "clownfish-cove":            { x: 53.0, y: 21.5, anchor: "centre" },
+        "the-tropics":               { x: 59.0, y: 24.5, anchor: "centre" },
+        "amazon-gallery":            { x: 68.7, y: 30.9, anchor: "centre" },
+        "dragons-2026":              { x: 67.0, y: 55.5, anchor: "centre" },
+        "amazing-axolotls":          { x: 45.0, y: 8.5, anchor: "centre" }
       }
+    };
+
+    const nextProgramState = {
+      refreshTimerId: null,
+      boundaryTimerId: null,
+      lastScheduleSignature: "",
+      lastRenderedLocationKeys: []
     };
 
     /* ======================================================================
@@ -1060,7 +1104,7 @@
 
       const image = makeImage(
         "../assets/you-are-here.svg",
-        "pin-asset active-you-are-here-pin"
+        "pin-asset animated-map-pin-image"
       );
 
       marker.append(shadow, image);
@@ -1088,13 +1132,20 @@
     function renderNextProgramLegendKey() {
       const layer = document.getElementById("legend-layer");
       const key = document.createElement("div");
+      key.id = "next-program-legend-key";
       key.className = "you-are-here-key";
+      key.hidden = true;
       key.innerHTML = `
         <img class="pin-asset legend-pin" src="../assets/next-program-here.svg" alt="">
         <span>= Next program here</span>
       `;
       setPosition(key, MAP_PROFILE.chrome.nextProgramLegend);
       layer.appendChild(key);
+    }
+
+    function setNextProgramLegendVisibility(isVisible) {
+      const key = document.getElementById("next-program-legend-key");
+      if (key) key.hidden = !isVisible;
     }
 
     function renderAmenityLegend() {
@@ -1208,28 +1259,223 @@
     }
 
     /* ======================================================================
-       11. FUTURE NEXT-PROGRAM PIN HOOK
+       11. DATABASE-DRIVEN NEXT-PROGRAM MAP PINS
 
-       This function is intentionally unused until gallery-specific pin
-       coordinates are supplied. It is ready for the later integration pass.
+       This mirrors the guest-facing Daily Program Schedule definition of
+       "next": the earliest eligible start time remains highlighted until
+       five minutes after that start time. Tied programs are intentionally
+       retained, so several gallery pins may bounce at once.
        ====================================================================== */
 
-    function setNextProgramPin(locationKey) {
-      const layer = document.getElementById("dynamic-marker-layer");
-      const existing = document.getElementById("next-program-pin");
-      if (existing) existing.remove();
-      if (!locationKey) return;
+    function getTodayInVancouver() {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: TIMEZONE_NAME
+      }).format(new Date());
+    }
 
-      const position = MAP_PROFILE.nextProgramAnchors[locationKey];
-      if (!position) {
-        console.info(`No next-program map anchor configured for: ${locationKey}`);
-        return;
+    function getCurrentVancouverParts() {
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: TIMEZONE_NAME,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(new Date());
+      const get = (type) => parts.find((part) => part.type === type)?.value ?? "00";
+
+      return {
+        hour: Number(get("hour")),
+        minute: Number(get("minute")),
+        second: Number(get("second"))
+      };
+    }
+
+    function getCurrentMinutesInVancouver() {
+      const now = getCurrentVancouverParts();
+      return (now.hour * 60) + now.minute;
+    }
+
+    function parseTimeToMinutes(time) {
+      if (!/^\d{2}:\d{2}$/.test(time || "")) return null;
+      const [hours, minutes] = time.split(":").map(Number);
+      return (hours * 60) + minutes;
+    }
+
+    /*
+      Map-specific Next Program Here rule:
+      - Consider only non-cancelled schedule entries with valid start times.
+      - Keep future entries eligible no matter how far in advance they occur.
+      - Keep a started entry eligible until five minutes after its start time.
+      - Select the earliest eligible start time only.
+      - Render every distinct gallery sharing that qualifying start time.
+    */
+    function resolveNextProgramLocationKeys(entries, nowMinutes) {
+      const eligibleEntries = (Array.isArray(entries) ? entries : [])
+        .filter((entry) => !entry.is_cancelled)
+        .map((entry) => ({
+          ...entry,
+          start_minutes: parseTimeToMinutes(entry.start_time)
+        }))
+        .filter((entry) => (
+          Number.isInteger(entry.start_minutes)
+          && nowMinutes < (
+            entry.start_minutes + NEXT_PROGRAM_POST_START_GRACE_MINUTES
+          )
+        ))
+        .sort((a, b) => a.start_minutes - b.start_minutes);
+
+      if (!eligibleEntries.length) return [];
+
+      const nextStartMinutes = eligibleEntries[0].start_minutes;
+      return [...new Set(
+        eligibleEntries
+          .filter((entry) => entry.start_minutes === nextStartMinutes)
+          .map((entry) => entry.location_key)
+          .filter(Boolean)
+      )];
+    }
+
+    function createAnimatedNextProgramPin(locationKey, position) {
+      const marker = document.createElement("div");
+      marker.className = "active-pin-marker next-program-pin-marker";
+      marker.dataset.nextProgramLocationKey = locationKey;
+
+      const shadow = document.createElement("span");
+      shadow.className = "active-pin-shadow";
+
+      const image = makeImage(
+        "../assets/next-program-here.svg",
+        "pin-asset animated-map-pin-image"
+      );
+
+      marker.append(shadow, image);
+      setPosition(marker, position);
+      return marker;
+    }
+
+    function renderNextProgramPins(locationKeys) {
+      const layer = document.getElementById("dynamic-marker-layer");
+      layer.querySelectorAll(".next-program-pin-marker").forEach((marker) => marker.remove());
+
+      const uniqueKeys = [...new Set(locationKeys || [])];
+      const renderedKeys = [];
+
+      uniqueKeys.forEach((locationKey) => {
+        const position = MAP_PROFILE.nextProgramAnchors[locationKey];
+        if (!position) {
+          console.info(`No next-program map anchor configured for: ${locationKey}`);
+          return;
+        }
+
+        layer.appendChild(createAnimatedNextProgramPin(locationKey, position));
+        makeDebugDot(position.x, position.y);
+        renderedKeys.push(locationKey);
+      });
+
+      nextProgramState.lastRenderedLocationKeys = renderedKeys;
+      setNextProgramLegendVisibility(renderedKeys.length > 0);
+      updateDebugPanel(`Next Program Here pins: ${renderedKeys.length}${renderedKeys.length ? `\n${renderedKeys.join(", ")}` : ""}`);
+    }
+
+    function getNextProgramBoundaryMinutes(entries, nowMinutes) {
+      return (Array.isArray(entries) ? entries : [])
+        .filter((entry) => !entry.is_cancelled)
+        .flatMap((entry) => {
+          const startMinutes = parseTimeToMinutes(entry.start_time);
+          if (!Number.isInteger(startMinutes)) return [];
+          return [
+            startMinutes,
+            startMinutes + NEXT_PROGRAM_POST_START_GRACE_MINUTES
+          ];
+        })
+        .filter((minutes) => minutes > nowMinutes)
+        .sort((a, b) => a - b)[0] ?? null;
+    }
+
+    function getMillisecondsUntilVancouverMinute(targetMinutes) {
+      const now = getCurrentVancouverParts();
+      const currentMinutes = (now.hour * 60) + now.minute;
+      let delta = targetMinutes - currentMinutes;
+      if (delta < 0) delta += 1440;
+
+      const msRemaining = (60 - now.second) * 1000;
+      return delta === 0
+        ? msRemaining
+        : msRemaining + ((delta - 1) * 60000);
+    }
+
+    function clearNextProgramBoundaryTimer() {
+      if (nextProgramState.boundaryTimerId) {
+        clearTimeout(nextProgramState.boundaryTimerId);
+        nextProgramState.boundaryTimerId = null;
+      }
+    }
+
+    function refreshNextProgramPinsFromEntries(entries) {
+      clearNextProgramBoundaryTimer();
+
+      const nowMinutes = getCurrentMinutesInVancouver();
+      const locationKeys = resolveNextProgramLocationKeys(entries, nowMinutes);
+      renderNextProgramPins(locationKeys);
+
+      const nextBoundaryMinutes = getNextProgramBoundaryMinutes(entries, nowMinutes);
+      if (!Number.isInteger(nextBoundaryMinutes)) return;
+
+      nextProgramState.boundaryTimerId = setTimeout(
+        () => refreshNextProgramPinsFromEntries(entries),
+        getMillisecondsUntilVancouverMinute(nextBoundaryMinutes) + NEXT_PROGRAM_BOUNDARY_FUDGE_MS
+      );
+    }
+
+    async function fetchLiveProgramSchedule() {
+      const { data, error } = await supabaseClient
+        .from("program_schedule_sets")
+        .select("id, updated_at, entries_json")
+        .eq("schedule_date", getTodayInVancouver())
+        .eq("mode", "live")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data || null;
+    }
+
+    function getScheduleSignature(schedule) {
+      return schedule
+        ? JSON.stringify({
+            id: schedule.id,
+            updated_at: schedule.updated_at,
+            entries_json: schedule.entries_json
+          })
+        : "";
+    }
+
+    async function refreshLiveNextProgramSchedule() {
+      try {
+        const schedule = await fetchLiveProgramSchedule();
+        const signature = getScheduleSignature(schedule);
+
+        if (signature !== nextProgramState.lastScheduleSignature) {
+          nextProgramState.lastScheduleSignature = signature;
+          refreshNextProgramPinsFromEntries(schedule?.entries_json || []);
+        }
+      } catch (error) {
+        console.error("Could not refresh live next-program map pins.", error);
       }
 
-      const pin = makeImage("../assets/next-program-here.svg", "pin-asset active-pin");
-      pin.id = "next-program-pin";
-      setPosition(pin, position);
-      layer.appendChild(pin);
+      nextProgramState.refreshTimerId = setTimeout(
+        refreshLiveNextProgramSchedule,
+        NEXT_PROGRAM_DATA_REFRESH_MS
+      );
+    }
+
+    async function initializeNextProgramPins() {
+      renderNextProgramPins([]);
+      await refreshLiveNextProgramSchedule();
     }
 
     /* ======================================================================
@@ -1251,6 +1497,7 @@
       renderYouAreHereLegendKey();
       renderNextProgramLegendKey();
       renderAmenityLegend();
+      initializeNextProgramPins();
 
       const locationStyles = await loadLocationStyles();
       renderGalleryLegend(locationStyles);
