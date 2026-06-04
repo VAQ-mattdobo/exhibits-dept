@@ -551,8 +551,10 @@
         exitLabel:              { x: 85.9, y: 29.0, anchor: "centre" },
         enterArrow:             { x: 80.1, y: 31.8, anchor: "centre" },
         enterLabel:             { x: 85.9, y: 31.8, anchor: "centre" },
-        youAreHereLegend:       { x: 81.6, y: 15.3, anchor: "centre" },
-        nextProgramLegend:       { x: 81.6, y: 20.0, anchor: "centre" }
+        // Fixed map-pin legend rows use top-left anchors so their SVGs align
+        // vertically. Coordinates are easy to tune together as a paired block.
+        youAreHereLegend:       { x: 68.0, y: 10.65, anchor: "top-left" },
+        nextProgramLegend:      { x: 68.0, y: 15.35, anchor: "top-left" }
       },
 
       activeYouAreHere: {
