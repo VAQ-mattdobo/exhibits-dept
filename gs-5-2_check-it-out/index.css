@@ -210,6 +210,7 @@ body {
 }
 
 .poster-image {
+  backface-visibility: hidden;
   background: rgba(255, 255, 255, 0.08);
   border: 4px solid var(--poster-primary);
   border-radius: 7px;
@@ -222,8 +223,13 @@ body {
   position: absolute;
   top: 19px;
   transition: border-color var(--transition-page) ease;
+  visibility: hidden;
   width: var(--poster-width);
   z-index: 2;
+}
+
+.poster-image.is-active {
+  visibility: visible;
 }
 
 .poster-fallback {

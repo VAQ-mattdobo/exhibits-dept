@@ -7,7 +7,7 @@
     content="width=1920, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no"
   />
   <title>VAQ Poster Slideshow</title>
-  <link rel="stylesheet" href="./index.css?v=1" />
+  <link rel="stylesheet" href="./index.css?v=2" />
 </head>
 
 <!--
@@ -30,6 +30,7 @@
           <article class="poster-slot" data-slot-index="0">
             <div class="poster-frame" aria-hidden="true"></div>
             <div class="poster-glow" aria-hidden="true"></div>
+            <img class="poster-image is-active" alt="" />
             <img class="poster-image" alt="" />
             <div class="poster-fallback">Poster<br>Unavailable</div>
           </article>
@@ -37,6 +38,7 @@
           <article class="poster-slot" data-slot-index="1">
             <div class="poster-frame" aria-hidden="true"></div>
             <div class="poster-glow" aria-hidden="true"></div>
+            <img class="poster-image is-active" alt="" />
             <img class="poster-image" alt="" />
             <div class="poster-fallback">Poster<br>Unavailable</div>
           </article>
@@ -44,6 +46,7 @@
           <article class="poster-slot" data-slot-index="2">
             <div class="poster-frame" aria-hidden="true"></div>
             <div class="poster-glow" aria-hidden="true"></div>
+            <img class="poster-image is-active" alt="" />
             <img class="poster-image" alt="" />
             <div class="poster-fallback">Poster<br>Unavailable</div>
           </article>
@@ -67,7 +70,8 @@
       'piranha-pockets.jpg',
       'pupsicle-chiller.jpg',
       'soccer-otter.jpg',
-      'sweet-seal.jpg'
+      'sweet-seal.jpg',
+      'taco-challenge.jpg'
     ];
 
     const SLOT_COUNT = 3;
@@ -83,7 +87,9 @@
       visibleBySlot: new Array(SLOT_COUNT).fill(null),
       rotationTimerId: null,
       slotCursor: 0,
-      posterCursor: 0
+      posterCursor: 0,
+      activeImageIndexBySlot: new Array(SLOT_COUNT).fill(0),
+      transitionInProgressBySlot: new Array(SLOT_COUNT).fill(false)
     };
 
     const ui = {
@@ -363,26 +369,79 @@
       return state.posters.find((poster) => !blockedKeys.has(poster.key)) || state.posters[0];
     }
 
-    function setSlotPoster(slotIndex, poster, options = {}) {
-      const slot = ui.slots[slotIndex];
-      const image = slot.querySelector('.poster-image');
-      const fallback = slot.querySelector('.poster-fallback');
+    function getSlotImages(slot) {
+      return Array.from(slot.querySelectorAll('.poster-image'));
+    }
 
-      const applyPoster = () => {
-        slot.style.setProperty('--poster-primary', poster.primary);
-        slot.style.setProperty('--poster-secondary', poster.secondary);
+    function decodeImageIfSupported(image) {
+      if (typeof image.decode !== 'function') {
+        return Promise.resolve();
+      }
+
+      return image.decode().catch(() => undefined);
+    }
+
+    function prepareImageLayer(image, poster) {
+      return new Promise((resolve) => {
+        let isSettled = false;
+
+        const finish = async (isReady) => {
+          if (isSettled) return;
+
+          isSettled = true;
+          image.onload = null;
+          image.onerror = null;
+
+          if (isReady) {
+            await decodeImageIfSupported(image);
+          }
+
+          resolve(isReady);
+        };
 
         image.alt = poster.alt;
-        image.src = poster.src;
         image.style.display = 'block';
+        image.onload = () => finish(true);
+        image.onerror = () => finish(false);
+        image.src = poster.src;
 
-        fallback.style.display = 'none';
+        if (image.complete) {
+          finish(image.naturalWidth > 0);
+        }
+      });
+    }
 
-        state.visibleBySlot[slotIndex] = poster;
-      };
+    function applyPosterAtHandoff(slotIndex, poster, nextImageIndex, isReady) {
+      const slot = ui.slots[slotIndex];
+      const images = getSlotImages(slot);
+      const fallback = slot.querySelector('.poster-fallback');
+
+      slot.style.setProperty('--poster-primary', poster.primary);
+      slot.style.setProperty('--poster-secondary', poster.secondary);
+
+      images.forEach((image, imageIndex) => {
+        image.classList.toggle('is-active', isReady && imageIndex === nextImageIndex);
+      });
+
+      fallback.style.display = isReady ? 'none' : 'flex';
+      state.activeImageIndexBySlot[slotIndex] = nextImageIndex;
+      state.visibleBySlot[slotIndex] = poster;
+    }
+
+    async function setSlotPoster(slotIndex, poster, options = {}) {
+      const slot = ui.slots[slotIndex];
+      const images = getSlotImages(slot);
+      const activeImageIndex = state.activeImageIndexBySlot[slotIndex];
+      const nextImageIndex = options.immediate
+        ? activeImageIndex
+        : activeImageIndex === 0 ? 1 : 0;
+      const nextImage = images[nextImageIndex];
 
       if (options.immediate) {
-        applyPoster();
+        nextImage.alt = poster.alt;
+        nextImage.src = poster.src;
+        nextImage.style.display = 'block';
+        applyPosterAtHandoff(slotIndex, poster, nextImageIndex, true);
 
         window.setTimeout(() => {
           slot.classList.add('is-visible');
@@ -391,17 +450,35 @@
         return;
       }
 
+      if (state.transitionInProgressBySlot[slotIndex]) {
+        return;
+      }
+
+      state.transitionInProgressBySlot[slotIndex] = true;
+
+      /*
+        Load and decode the incoming JPEG in the hidden image layer before
+        beginning any visible movement. This avoids changing image.src at the
+        edge-on handoff frame while the slot is animating.
+      */
+      const isReady = await prepareImageLayer(nextImage, poster);
+
+      if (!isReady) {
+        console.warn(`Unable to prepare poster for transition: ${poster.src}`);
+      }
+
       slot.classList.remove('is-entering');
       slot.classList.add('is-exiting');
 
       window.setTimeout(() => {
-        applyPoster();
+        applyPosterAtHandoff(slotIndex, poster, nextImageIndex, isReady);
 
         slot.classList.remove('is-exiting');
         slot.classList.add('is-entering', 'is-visible');
 
         window.setTimeout(() => {
           slot.classList.remove('is-entering');
+          state.transitionInProgressBySlot[slotIndex] = false;
         }, TRANSITION_MS);
       }, TRANSITION_MS);
     }
@@ -454,12 +531,16 @@
     }
 
     ui.slots.forEach((slot) => {
-      const image = slot.querySelector('.poster-image');
+      const images = getSlotImages(slot);
       const fallback = slot.querySelector('.poster-fallback');
 
-      image.addEventListener('error', () => {
-        image.style.display = 'none';
-        fallback.style.display = 'flex';
+      images.forEach((image) => {
+        image.addEventListener('error', () => {
+          if (!image.classList.contains('is-active')) return;
+
+          image.style.display = 'none';
+          fallback.style.display = 'flex';
+        });
       });
     });
 
