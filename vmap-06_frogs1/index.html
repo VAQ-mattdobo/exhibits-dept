@@ -95,23 +95,20 @@
     }
 
     .viewport {
+      position: relative;
       width: 100vw;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
 
     .page {
       position: relative;
-      flex: 0 0 auto;
       width: var(--page-width);
       height: var(--page-height);
       overflow: hidden;
       background: #ffffff;
       transform: scale(var(--stage-scale));
-      transform-origin: center center;
+      transform-origin: top left;
     }
 
     .base-map,
