@@ -142,7 +142,7 @@
       width: var(--amenity-marker-size);
       height: var(--amenity-marker-size);
       object-fit: contain;
-      filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.8));
+      filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.27));
     }
 
     .guest-services-marker {
