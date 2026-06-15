@@ -390,23 +390,31 @@
     }
 
     .footer-cta {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
       color: #687078;
-      font-size: 15px;
-      line-height: 1;
+      font-size: 17px;
+      line-height: 1.05;
+      white-space: nowrap;
       text-align: left;
-      white-space: normal;
     }
 
     .footer-cta span {
-      display: block;
+      transform: none;
     }
 
     .footer-cta strong {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 14px;
       color: var(--orange);
       font-size: 24px;
       font-weight: 700;
+      line-height: 1;
+      transform: none;
     }
 
     .debug-panel {
