@@ -390,24 +390,23 @@
     }
 
     .footer-cta {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+      display: block;
       color: #687078;
       font-size: 15px;
       line-height: 1;
-      white-space: nowrap;
+      text-align: left;
+      white-space: normal;
     }
 
     .footer-cta span {
-      transform: translateY(7px);
+      display: block;
     }
 
     .footer-cta strong {
+      display: block;
       color: var(--orange);
       font-size: 24px;
       font-weight: 700;
-      transform: translateY(4px);
     }
 
     .debug-panel {
