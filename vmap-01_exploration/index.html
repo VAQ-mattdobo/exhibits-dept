@@ -111,11 +111,11 @@
         title:                  { x: 5.0,  y: 4.6,  anchor: "top-left" },
         logo:                   { x: 82.3, y: 2.6,  anchor: "top-left" },
         qrBlock:                { x: 81.4, y: 53.0, anchor: "top-left" },
-        legendHeading:          { x: 28.0, y: 63.5, anchor: "top-left" },
-        galleryLegendLeft:      { x: 22.0, y: 66.4, anchor: "top-left" },
-        galleryLegendRight:     { x: 52.5, y: 66.4, anchor: "top-left" },
-        amenityLegend:          { x: 82.2, y: 67.0, anchor: "top-left" },
-        footer:                 { x: 50.0, y: 97.3, anchor: "centre" },
+        legendHeading:          { x: 4.0,  y: 63.5, anchor: "top-left" },
+        galleryLegendLeft:      { x: 21.0, y: 66.4, anchor: "top-left" },
+        galleryLegendRight:     { x: 50.4, y: 66.4, anchor: "top-left" },
+        amenityLegend:          { x: 3.5,  y: 67.1, anchor: "top-left" },
+        footer:                 { x: 82.2, y: 75.0, anchor: "top-left" },
         exitArrow:              { x: 80.1, y: 27.7, anchor: "centre" },
         exitLabel:              { x: 85.9, y: 27.7, anchor: "centre" },
         enterArrow:             { x: 80.1, y: 30.5, anchor: "centre" },
@@ -519,9 +519,11 @@
 
       const footer = document.createElement("div");
       footer.className = "footer-cta";
+      footer.style.textAlign = "left";
       footer.innerHTML = `
-        <span>Share what you loved about your visit:</span>
-        <strong>@VanAqua&nbsp;&nbsp;#VanAqua</strong>
+        <span>Share what you loved<br>about your visit:</span><br>
+        <strong>@VanAqua</strong><br>
+        <strong>#VanAqua</strong>
       `;
       setPosition(footer, p.footer);
       layer.appendChild(footer);
