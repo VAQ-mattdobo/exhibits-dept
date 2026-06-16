@@ -6,10 +6,10 @@
     name="viewport"
     content="width=1080, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
   />
-  <title>VAQ Visitor Map — Frogs Forever 2</title>
+  <title>VAQ Visitor Map — Frogs Forever? 2</title>
 
   <!--
-    VAQ VISITOR MAP — VMAP-07_FROGS2
+    VAQ VISITOR MAP — VMAP-07 FROGS2: FROGS FOREVER? 2
     Target signage canvas: 1080 × 1440 px
 
     Folder assumptions:
@@ -92,7 +92,7 @@
     );
 
     /* ======================================================================
-       2. VMAP-07_FROGS2 PROFILE — FROGS FOREVER 2
+       2. VMAP-07 FROGS2 PROFILE — FROGS FOREVER? 2
 
        activeYouAreHere contains the physical display location for this
        specific map module. Coordinates are intentionally easy to edit here.
@@ -109,8 +109,9 @@
 
       chrome: {
         title:                  { x: 5.0,  y: 4.6,  anchor: "top-left" },
-        logo:                   { x: 82.3, y: 92.7,  anchor: "top-left" },
-        qrBlock:                { x: 81.4, y: 53.0, anchor: "top-left" },
+        logo:                   { x: 82.3, y: 92.7, anchor: "top-left" },
+        qrBlock:                { x: 83.3, y: 53.0, anchor: "top-left" },
+        appQrBlock:             { x: 3.9,  y: 53.0, anchor: "top-left" },
         legendHeading:          { x: 3.5,  y: 65.0, anchor: "top-left" },
         galleryLegendLeft:      { x: 21.0, y: 67.9, anchor: "top-left" },
         galleryLegendRight:     { x: 50.4, y: 67.9, anchor: "top-left" },
@@ -516,6 +517,18 @@
       `;
       setPosition(qrBlock, p.qrBlock);
       layer.appendChild(qrBlock);
+
+      const appQrBlock = document.createElement("section");
+      appQrBlock.className = "app_qr-block";
+      appQrBlock.innerHTML = `
+        <div class="qr-frame">
+          <p class="qr-heading">Scan for App</p>
+          <img class="qr-code" src="../assets/app_qr-code.svg" alt="">
+          <p class="qr-url">vanaqua.org/mobile-app/</p>
+        </div>
+      `;
+      setPosition(appQrBlock, p.appQrBlock);
+      layer.appendChild(appQrBlock);
 
       const footer = document.createElement("div");
       footer.className = "footer-cta";
