@@ -106,7 +106,7 @@
   }
 
   .intro-card {
-    width: 1190px;
+    width: 1180px;
     max-width: 80%;
     text-align: center;
     color: var(--vaq-white);
@@ -116,67 +116,53 @@
   .intro-card::after {
     content: "";
     display: block;
-    width: 260px;
+    width: 270px;
     height: 8px;
-    margin: 0 auto 44px;
+    margin: 0 auto 42px;
     border-radius: 999px;
     background: var(--vaq-orange);
     box-shadow: 0 2px 18px rgba(0, 0, 0, 0.22);
   }
 
   .intro-card::after {
-    margin: 44px auto 0;
+    margin: 42px auto 0;
     background: var(--vaq-sky);
   }
 
   .intro-text {
     margin: 0;
     font-family: 'BlissPro', Arial, sans-serif;
-    font-size: 51px;
+    font-size: 62px;
     font-weight: 700;
-    line-height: 1.16;
+    line-height: 1.12;
     letter-spacing: 0.004em;
-    text-shadow: 0 3px 20px rgba(0, 0, 0, 0.38);
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 0.42);
   }
 
-  .intro-text + .intro-text {
-    margin-top: 46px;
-    font-size: 48px;
-    line-height: 1.14;
+  .intro-thanks {
+    margin-top: 44px;
+    color: #e5f3cc;
+    font-size: 56px;
+    line-height: 1.08;
   }
 
   .items-slide {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    inset: 0;
   }
 
-  .items-grid {
-    width: 1416px;
-    height: 690px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    column-gap: 46px;
-    row-gap: 18px;
-    align-items: center;
+  .items-field {
+    position: absolute;
+    inset: 0;
   }
 
   .item {
+    position: absolute;
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 36px;
     min-width: 0;
-    height: 168px;
-  }
-
-  .items-grid.count-7 .item:nth-child(7),
-  .items-grid.count-6 .item:nth-child(5) {
-    grid-column: 1;
-  }
-
-  .items-grid.count-6 .item:nth-child(6) {
-    grid-column: 2;
+    height: 160px;
   }
 
   .icon-wrap {
@@ -232,17 +218,17 @@
     <main class="content-layer" aria-label="Guest entry requirements and prohibited items">
       <section class="slide intro-slide is-active" data-slide="intro" aria-label="Why some items are not permitted">
         <div class="intro-card">
-          <p class="intro-text">For the safety and comfort of our guests, staff, and animals, some items are not permitted inside the Aquarium. These guidelines help protect animal welfare, keep sensitive habitats safe, and ensure our pathways remain clear and comfortable for everyone.</p>
-          <p class="intro-text">Thank you for helping us care for this special place and keep the magic flowing for all our guests.</p>
+          <p class="intro-text">For the safety of our animals, and comfort of our guests, some items are not permitted inside the Aquarium.</p>
+          <p class="intro-text intro-thanks">Thank you for your cooperation.</p>
         </div>
       </section>
 
       <section class="slide items-slide" data-slide="group-1" aria-label="Required items and prohibited items, group one">
-        <div class="items-grid count-7" data-items-grid="group-1"></div>
+        <div class="items-field" data-items-grid="group-1"></div>
       </section>
 
       <section class="slide items-slide" data-slide="group-2" aria-label="Prohibited wheeled items, group two">
-        <div class="items-grid count-6" data-items-grid="group-2"></div>
+        <div class="items-field" data-items-grid="group-2"></div>
       </section>
     </main>
   </div>
@@ -257,37 +243,37 @@
 
   const itemGroups = {
     'group-1': [
-      { label: 'Shirt & shoes\nrequired', file: 'shirt-shoes.svg', required: true },
-      { label: 'No smoking', file: 'smoking.svg' },
-      { label: 'No vaping', file: 'vaping.svg' },
-      { label: 'No balloons', file: 'balloons.svg' },
-      { label: 'No drinking\nstraws', file: 'straws.svg' },
-      { label: 'No clear lids', file: 'clear-lids.svg' },
-      { label: 'No pets', file: 'pets.svg' }
+      { label: 'Shirt & shoes\nrequired', file: 'shirt-shoes.svg', required: true, x: 60, y: 80 },
+      { label: 'No smoking', file: 'smoking.svg', x: 76, y: 316 },
+      { label: 'No vaping', file: 'vaping.svg', x: 568, y: 322 },
+      { label: 'No balloons', file: 'balloons.svg', x: 1064, y: 328 },
+      { label: 'No drinking\nstraws', file: 'straws.svg', x: 84, y: 556 },
+      { label: 'No clear lids', file: 'clear-lids.svg', x: 548, y: 560 },
+      { label: 'No pets', file: 'pets.svg', x: 1064, y: 574 }
     ],
     'group-2': [
-      { label: 'No scooters', file: 'scooters.svg' },
-      { label: 'No ride-on\nscooters', file: 'ride-on-scooters.svg' },
-      { label: 'No in-line\nskates', file: 'inline-skates.svg' },
-      { label: 'No push cars', file: 'push-cars.svg' },
-      { label: 'No wagons', file: 'wagons.svg' },
-      { label: 'No jogging\nstrollers', file: 'jogging-strollers.svg' }
+      { label: 'No scooters', file: 'scooters.svg', x: 60, y: 92 },
+      { label: 'No ride-on\nscooters', file: 'ride-on-scooters.svg', x: 548, y: 104 },
+      { label: 'No in-line\nskates', file: 'inline-skates.svg', x: 1048, y: 112 },
+      { label: 'No push cars', file: 'push-cars.svg', x: 60, y: 380 },
+      { label: 'No wagons', file: 'wagons.svg', x: 548, y: 372 },
+      { label: 'No jogging\nstrollers', file: 'jogging-strollers.svg', x: 1048, y: 376 }
     ]
   };
 
   function renderItems() {
     Object.entries(itemGroups).forEach(([groupName, items]) => {
-      const grid = document.querySelector(`[data-items-grid="${groupName}"]`);
-      if (!grid) return;
+      const field = document.querySelector(`[data-items-grid="${groupName}"]`);
+      if (!field) return;
 
-      grid.innerHTML = items.map((item) => {
+      field.innerHTML = items.map((item) => {
         const labelHtml = item.label.split('\n').join('<br />');
         const needsWrap = item.label.includes('\n');
         const requiredClass = item.required ? ' required' : '';
         const wrapClass = needsWrap ? ' wrap' : '';
 
         return `
-          <div class="item${requiredClass}">
+          <div class="item${requiredClass}" style="left: ${item.x}px; top: ${item.y}px;">
             <div class="icon-wrap" aria-hidden="true">
               <img src="${ICON_BASE_PATH}${item.file}" alt="" />
             </div>
