@@ -24,6 +24,15 @@
     font-display: swap;
   }
 
+  :root {
+    --vaq-white: #ffffff;
+    --vaq-sky: #64a5c3;
+    --vaq-orange: #f58220;
+    --vaq-soft-green: #b8d987;
+    --slide-duration-ms: 13500ms;
+    --slide-transition-ms: 1400ms;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
@@ -68,34 +77,107 @@
     to   { transform: rotate(-360deg); }
   }
 
-  /* Foreground layout */
   .content-layer {
     position: absolute;
     inset: 0;
     z-index: 2;
   }
 
-  .items-layout {
+  .slide {
     position: absolute;
     inset: 0;
+    opacity: 0;
+    transform: translateY(26px) scale(0.99);
+    transition:
+      opacity var(--slide-transition-ms) ease,
+      transform var(--slide-transition-ms) ease;
+    pointer-events: none;
+  }
+
+  .slide.is-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .intro-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .intro-card {
+    width: 1190px;
+    max-width: 80%;
+    text-align: center;
+    color: var(--vaq-white);
+  }
+
+  .intro-card::before,
+  .intro-card::after {
+    content: "";
+    display: block;
+    width: 260px;
+    height: 8px;
+    margin: 0 auto 44px;
+    border-radius: 999px;
+    background: var(--vaq-orange);
+    box-shadow: 0 2px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  .intro-card::after {
+    margin: 44px auto 0;
+    background: var(--vaq-sky);
+  }
+
+  .intro-text {
+    margin: 0;
+    font-family: 'BlissPro', Arial, sans-serif;
+    font-size: 51px;
+    font-weight: 700;
+    line-height: 1.16;
+    letter-spacing: 0.004em;
+    text-shadow: 0 3px 20px rgba(0, 0, 0, 0.38);
+  }
+
+  .intro-text + .intro-text {
+    margin-top: 46px;
+    font-size: 48px;
+    line-height: 1.14;
+  }
+
+  .items-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .items-grid {
+    width: 1416px;
+    height: 690px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    column-gap: 46px;
+    row-gap: 18px;
+    align-items: center;
   }
 
   .item {
-    position: absolute;
     display: flex;
     align-items: center;
-    gap: 34px;
-    min-width: 405px;
-    height: 158px;
+    gap: 32px;
+    min-width: 0;
+    height: 168px;
   }
 
-  .item.col-1 { left: 60px; }
-  .item.col-2 { left: 550px; }
-  .item.col-3 { left: 1040px; }
+  .items-grid.count-7 .item:nth-child(7),
+  .items-grid.count-6 .item:nth-child(5) {
+    grid-column: 1;
+  }
 
-  .item.row-1 { top: 80px; }
-  .item.row-2 { top: 326px; }
-  .item.row-3 { top: 572px; }
+  .items-grid.count-6 .item:nth-child(6) {
+    grid-column: 2;
+  }
 
   .icon-wrap {
     flex: 0 0 auto;
@@ -116,19 +198,29 @@
 
   .item-label {
     margin: 0;
-    color: #ffffff;
+    color: var(--vaq-white);
     font-family: 'BlissPro', Arial, sans-serif;
-    font-size: 42px;
+    font-size: 40px;
     font-style: normal;
     font-weight: 700;
     letter-spacing: 0.01em;
-    line-height: 1.08;
+    line-height: 1.06;
     text-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
     white-space: nowrap;
   }
 
   .item-label.wrap {
     white-space: normal;
+  }
+
+  .item.required .item-label {
+    color: #e5f3cc;
+  }
+
+  .item.required .icon-wrap img {
+    filter:
+      drop-shadow(0 0 9px rgba(0, 0, 0, 0.22))
+      drop-shadow(0 0 10px rgba(184, 217, 135, 0.28));
   }
 </style>
 </head>
@@ -137,74 +229,88 @@
   <div class="frame">
     <div class="bg-rotator"></div>
 
-    <div class="content-layer">
-      <div class="items-layout" aria-label="Guest entry requirements and prohibited items">
-
-        <div class="item col-1 row-1">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/balloons.svg" alt="" />
-          </div>
-          <p class="item-label">No balloons</p>
+    <main class="content-layer" aria-label="Guest entry requirements and prohibited items">
+      <section class="slide intro-slide is-active" data-slide="intro" aria-label="Why some items are not permitted">
+        <div class="intro-card">
+          <p class="intro-text">For the safety and comfort of our guests, staff, and animals, some items are not permitted inside the Aquarium. These guidelines help protect animal welfare, keep sensitive habitats safe, and ensure our pathways remain clear and comfortable for everyone.</p>
+          <p class="intro-text">Thank you for helping us care for this special place and keep the magic flowing for all our guests.</p>
         </div>
+      </section>
 
-        <div class="item col-2 row-1">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/clear-lids.svg" alt="" />
-          </div>
-          <p class="item-label">No clear lids</p>
-        </div>
+      <section class="slide items-slide" data-slide="group-1" aria-label="Required items and prohibited items, group one">
+        <div class="items-grid count-7" data-items-grid="group-1"></div>
+      </section>
 
-        <div class="item col-3 row-1">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/pets.svg" alt="" />
-          </div>
-          <p class="item-label">No pets</p>
-        </div>
-
-        <div class="item col-1 row-2">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/scooters.svg" alt="" />
-          </div>
-          <p class="item-label">No scooters</p>
-        </div>
-
-        <div class="item col-2 row-2">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/inline-skates.svg" alt="" />
-          </div>
-          <p class="item-label wrap">No in-line<br />skates</p>
-        </div>
-
-        <div class="item col-3 row-2">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/straws.svg" alt="" />
-          </div>
-          <p class="item-label">No straws</p>
-        </div>
-
-        <div class="item col-1 row-3">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/smoking.svg" alt="" />
-          </div>
-          <p class="item-label">No smoking</p>
-        </div>
-
-        <div class="item col-2 row-3">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/vaping.svg" alt="" />
-          </div>
-          <p class="item-label">No vaping</p>
-        </div>
-
-        <div class="item col-3 row-3">
-          <div class="icon-wrap" aria-hidden="true">
-            <img src="../assets/prohibited/shirt-shoes.svg" alt="" />
-          </div>
-          <p class="item-label wrap">Shirt &amp; shoes<br />required</p>
-        </div>
-
-      </div>
-    </div>
+      <section class="slide items-slide" data-slide="group-2" aria-label="Prohibited wheeled items, group two">
+        <div class="items-grid count-6" data-items-grid="group-2"></div>
+      </section>
+    </main>
   </div>
+
+<script>
+  const SLIDE_DURATION_MS = 13500;
+  const SLIDE_TRANSITION_MS = 1400;
+  const ICON_BASE_PATH = '../assets/prohibited/';
+
+  document.documentElement.style.setProperty('--slide-duration-ms', `${SLIDE_DURATION_MS}ms`);
+  document.documentElement.style.setProperty('--slide-transition-ms', `${SLIDE_TRANSITION_MS}ms`);
+
+  const itemGroups = {
+    'group-1': [
+      { label: 'Shirt & shoes\nrequired', file: 'shirt-shoes.svg', required: true },
+      { label: 'No smoking', file: 'smoking.svg' },
+      { label: 'No vaping', file: 'vaping.svg' },
+      { label: 'No balloons', file: 'balloons.svg' },
+      { label: 'No drinking\nstraws', file: 'straws.svg' },
+      { label: 'No clear lids', file: 'clear-lids.svg' },
+      { label: 'No pets', file: 'pets.svg' }
+    ],
+    'group-2': [
+      { label: 'No scooters', file: 'scooters.svg' },
+      { label: 'No ride-on\nscooters', file: 'ride-on-scooters.svg' },
+      { label: 'No in-line\nskates', file: 'inline-skates.svg' },
+      { label: 'No push cars', file: 'push-cars.svg' },
+      { label: 'No wagons', file: 'wagons.svg' },
+      { label: 'No jogging\nstrollers', file: 'jogging-strollers.svg' }
+    ]
+  };
+
+  function renderItems() {
+    Object.entries(itemGroups).forEach(([groupName, items]) => {
+      const grid = document.querySelector(`[data-items-grid="${groupName}"]`);
+      if (!grid) return;
+
+      grid.innerHTML = items.map((item) => {
+        const labelHtml = item.label.split('\n').join('<br />');
+        const needsWrap = item.label.includes('\n');
+        const requiredClass = item.required ? ' required' : '';
+        const wrapClass = needsWrap ? ' wrap' : '';
+
+        return `
+          <div class="item${requiredClass}">
+            <div class="icon-wrap" aria-hidden="true">
+              <img src="${ICON_BASE_PATH}${item.file}" alt="" />
+            </div>
+            <p class="item-label${wrapClass}">${labelHtml}</p>
+          </div>
+        `;
+      }).join('');
+    });
+  }
+
+  function startSlideRotation() {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let activeIndex = 0;
+
+    window.setInterval(() => {
+      slides[activeIndex].classList.remove('is-active');
+      activeIndex = (activeIndex + 1) % slides.length;
+      slides[activeIndex].classList.add('is-active');
+    }, SLIDE_DURATION_MS);
+  }
+
+  renderItems();
+  startSlideRotation();
+</script>
 </body>
 </html>
