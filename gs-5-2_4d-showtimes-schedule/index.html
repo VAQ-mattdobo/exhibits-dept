@@ -81,9 +81,12 @@
     const DATA_REFRESH_MS = 10000;
     const SHOWTIME_BOUNDARY_FUDGE_MS = 750;
     const SHOWTIME_TRANSITION_MS = 520;
+    const AFTER_HOURS_GATE_HOUR = 17;
+    const AFTER_HOURS_GATE_MINUTES = AFTER_HOURS_GATE_HOUR * 60;
 
     /* const END_OF_DAY_NEXT_LABEL = 'Shows have ended for today'; */
     const END_OF_DAY_BODY_LABEL = 'Please check back tomorrow for more 4D showtimes.';
+    const HIDDEN_AFTER_HOURS_BODY_LABEL = 'Please check back after 5:00 p.m. for additional 4D showtimes.';
     const LOADING_LABEL = 'Loading 4D showtimes...';
     const UNAVAILABLE_LABEL = '4D showtimes are not available right now.';
     const FALLBACK_ERROR_LABEL = 'Unable to load 4D showtimes.';
@@ -401,6 +404,69 @@
       return Number.isFinite(time) ? time : null;
     }
 
+    function getVancouverTimeParts(dateInput = new Date()) {
+      const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+
+      if (Number.isNaN(date.getTime())) {
+        return null;
+      }
+
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TIMEZONE_NAME,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+      }).formatToParts(date);
+
+      const getPart = (type) => Number(parts.find((part) => part.type === type)?.value);
+
+      const hour = getPart('hour');
+      const minute = getPart('minute');
+      const second = getPart('second');
+
+      if (![hour, minute, second].every(Number.isFinite)) {
+        return null;
+      }
+
+      return { hour, minute, second };
+    }
+
+    function getVancouverMinutesOfDay(dateInput = new Date()) {
+      const parts = getVancouverTimeParts(dateInput);
+
+      if (!parts) return null;
+
+      return parts.hour * 60 + parts.minute + parts.second / 60;
+    }
+
+    function isAfterHoursGateOpen() {
+      const currentMinutes = getVancouverMinutesOfDay();
+
+      return currentMinutes !== null && currentMinutes >= AFTER_HOURS_GATE_MINUTES;
+    }
+
+    function getAfterHoursGateDelayMs() {
+      const parts = getVancouverTimeParts();
+
+      if (!parts) return null;
+
+      const currentSeconds = parts.hour * 3600 + parts.minute * 60 + parts.second;
+      const gateSeconds = AFTER_HOURS_GATE_MINUTES * 60;
+
+      if (currentSeconds >= gateSeconds) return null;
+
+      return Math.max(1000, (gateSeconds - currentSeconds) * 1000 + SHOWTIME_BOUNDARY_FUDGE_MS);
+    }
+
+    function isAfterHoursShowtime(showtime) {
+      if (showtime?.is_after_hours === true) return true;
+
+      const showtimeMinutes = getVancouverMinutesOfDay(showtime?.show_at);
+
+      return showtimeMinutes !== null && showtimeMinutes >= AFTER_HOURS_GATE_MINUTES;
+    }
+
     function getFutureShowtimes(showtimes) {
       const now = Date.now();
 
@@ -413,18 +479,38 @@
         .sort((a, b) => getShowtimeMs(a) - getShowtimeMs(b));
     }
 
+    function getDisplayableFutureShowtimes(showtimes) {
+      const afterHoursGateOpen = isAfterHoursGateOpen();
+
+      return getFutureShowtimes(showtimes)
+        .filter((showtime) => afterHoursGateOpen || !isAfterHoursShowtime(showtime));
+    }
+
     function getNextShowtimeBoundaryDelayMs(showtimes) {
       const now = Date.now();
+      const candidateDelays = [];
 
-      const nextTime = normalizeItemArray(showtimes)
-        .filter((showtime) => !showtime.is_cancelled)
+      const nextDisplayableTime = getDisplayableFutureShowtimes(showtimes)
         .map(getShowtimeMs)
         .filter((time) => time !== null && time > now)
         .sort((a, b) => a - b)[0];
 
-      if (!nextTime) return null;
+      if (nextDisplayableTime) {
+        candidateDelays.push(nextDisplayableTime - now + SHOWTIME_BOUNDARY_FUDGE_MS);
+      }
 
-      return Math.max(1000, nextTime - now + SHOWTIME_BOUNDARY_FUDGE_MS);
+      const hasHiddenAfterHoursShowtimes =
+        !isAfterHoursGateOpen() &&
+        getFutureShowtimes(showtimes).some(isAfterHoursShowtime);
+
+      if (hasHiddenAfterHoursShowtimes) {
+        const gateDelay = getAfterHoursGateDelayMs();
+        if (gateDelay) candidateDelays.push(gateDelay);
+      }
+
+      if (!candidateDelays.length) return null;
+
+      return Math.max(1000, Math.min(...candidateDelays));
     }
 
     function renderPoster(data) {
@@ -799,7 +885,11 @@
 
     function renderShowtimes(data) {
       const previousPositions = captureShowtimePositions();
-      const futureShowtimes = getFutureShowtimes(data.showtimes);
+      const allFutureShowtimes = getFutureShowtimes(data.showtimes);
+      const futureShowtimes = getDisplayableFutureShowtimes(data.showtimes);
+      const hasHiddenAfterHoursShowtimes =
+        !isAfterHoursGateOpen() &&
+        allFutureShowtimes.some(isAfterHoursShowtime);
 
       if (!futureShowtimes.length) {
         ui.signLayout.classList.add('is-ended');
@@ -834,8 +924,8 @@
         ui.showtimesGrid.className = 'showtimes-grid';
         ui.showtimesGrid.innerHTML = `
           <div class="showtimes-end-message">
-            Shows have ended for today
-            <span>${END_OF_DAY_BODY_LABEL}</span>
+            ${hasHiddenAfterHoursShowtimes ? 'More showtimes later today' : 'Shows have ended for today'}
+            <span>${hasHiddenAfterHoursShowtimes ? HIDDEN_AFTER_HOURS_BODY_LABEL : END_OF_DAY_BODY_LABEL}</span>
           </div>
         `;
 
