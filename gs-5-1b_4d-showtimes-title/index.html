@@ -6,7 +6,7 @@
     name="viewport"
     content="width=1920, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no"
   >
-  <title>VAQ Titlebar – 4-D Showtimes</title>
+  <title>VAQ Titlebar – 4-D Showtimes with Clock</title>
 
 <!--
   Target container: 1920 x 270 px
@@ -14,6 +14,9 @@
   Shared asset path note:
   This page uses the repo-level ../assets/ folder for common fonts and imagery.
   Update these paths if the hosted folder structure changes later.
+
+  Clock implementation note:
+  No Program Schedule DB logic. Just a clock!
 -->
 
   <style>
@@ -50,7 +53,7 @@
 
       display: flex;
       align-items: center;
-      justify-content: flex-start; 
+      justify-content: flex-start;
 
       background-color: #ffffff;
       background-image: url('../assets/Titlebar-Nightmode_RptX_10x270.jpg');
@@ -61,7 +64,8 @@
       overflow: hidden;
     }
 
-    .title {
+    .title,
+    #clock {
       font-family: 'BlissPro', Arial, sans-serif;
       font-size: 82px;
       line-height: 1;
@@ -70,8 +74,20 @@
       letter-spacing: 0.5px;
       white-space: nowrap;
 
-      margin-left: 85px;
       transform: translateY(-11px);
+    }
+
+    .title {
+      margin-left: 85px;
+    }
+
+    .clock-slot {
+      margin-left: auto;
+      margin-right: 130px;
+      min-width: 410px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
     }
   </style>
 </head>
@@ -80,7 +96,53 @@
 
   <div class="wrapper">
     <div class="title">4-D Showtimes</div>
+    <div class="clock-slot" aria-label="Current time">
+      <div id="clock">--:-- a.m.</div>
+    </div>
   </div>
+
+  <script>
+    const TIMEZONE_NAME = 'America/Vancouver';
+    const clockEl = document.getElementById('clock');
+
+    function getTimePartsInTimezone(date = new Date(), timeZone = TIMEZONE_NAME) {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(date);
+      const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+
+      return {
+        hour: Number(map.hour),
+        minute: Number(map.minute)
+      };
+    }
+
+    function formatClockText() {
+      const now = getTimePartsInTimezone();
+      let hours = now.hour;
+      const minutes = now.minute;
+
+      const isPM = hours >= 12;
+      const meridiem = isPM ? 'p.m.' : 'a.m.';
+
+      hours = hours % 12 || 12;
+      const minuteText = minutes < 10 ? '0' + minutes : String(minutes);
+
+      return `${hours}:${minuteText} ${meridiem}`;
+    }
+
+    function updateClockFace() {
+      clockEl.textContent = formatClockText();
+    }
+
+    updateClockFace();
+    setInterval(updateClockFace, 1000);
+  </script>
 
 </body>
 </html>
