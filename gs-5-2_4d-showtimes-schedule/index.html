@@ -459,12 +459,20 @@
       return Math.max(1000, (gateSeconds - currentSeconds) * 1000 + SHOWTIME_BOUNDARY_FUDGE_MS);
     }
 
+    function isExactlyAfterHoursGateShowtime(showtime) {
+      const showtimeMinutes = getVancouverMinutesOfDay(showtime?.show_at);
+
+      return showtimeMinutes === AFTER_HOURS_GATE_MINUTES;
+    }
+
     function isAfterHoursShowtime(showtime) {
+      if (isExactlyAfterHoursGateShowtime(showtime)) return false;
+
       if (showtime?.is_after_hours === true) return true;
 
       const showtimeMinutes = getVancouverMinutesOfDay(showtime?.show_at);
 
-      return showtimeMinutes !== null && showtimeMinutes >= AFTER_HOURS_GATE_MINUTES;
+      return showtimeMinutes !== null && showtimeMinutes > AFTER_HOURS_GATE_MINUTES;
     }
 
     function getFutureShowtimes(showtimes) {
