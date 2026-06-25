@@ -6,7 +6,7 @@
     name="viewport"
     content="width=1920, initial-scale=0.6667, minimum-scale=0.6667, maximum-scale=0.6667, user-scalable=no"
   >
-  <title>VAQ Titlebar – Program Schedule</title>
+  <title>VAQ Titlebar – Program Schedule + Current Time</title>
 
 <!--
   Target container: 1536 x 270 px
@@ -14,6 +14,9 @@
   Shared asset path note:
   This page uses the repo-level ../assets/ folder for common fonts and imagery.
   Update these paths if the hosted folder structure changes later.
+
+  This titlebar combines the Program Schedule title with the standalone
+  current-time clock behaviour, including schedule-aware colour glow.
 -->
 
   <style>
@@ -25,6 +28,15 @@
       font-weight: 700;
       font-style: normal;
       font-display: swap;
+    }
+
+    :root {
+      --clock-color: #34495e;
+      --glow-color: rgba(243, 188, 67, 0.92);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     html, body {
@@ -50,7 +62,7 @@
 
       display: flex;
       align-items: center;
-      justify-content: flex-start; 
+      justify-content: flex-start;
 
       background-color: #ffffff;
       background-image: url('../assets/Titlebar_RptX_10x270.jpg');
@@ -73,14 +85,297 @@
       margin-left: 85px;
       transform: translateY(-11px);
     }
+
+    .clock-slot {
+      margin-left: auto;
+      margin-right: 110px;
+      width: 520px;
+      height: 270px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      overflow: visible;
+      flex: 0 0 520px;
+    }
+
+    #clock {
+      position: relative;
+      z-index: 1;
+      font-family: 'BlissPro', Arial, sans-serif;
+      font-size: 82px;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--clock-color);
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      transform: translateY(-11px);
+      transition:
+        text-shadow 1.4s ease,
+        filter 1.4s ease;
+      will-change: text-shadow, filter;
+    }
+
+    #clock.glow-active {
+      animation: clockGlowPulse 3.2s ease-in-out infinite;
+      text-shadow:
+        0 0 7px color-mix(in srgb, var(--glow-color) 40%, transparent),
+        0 0 16px color-mix(in srgb, var(--glow-color) 55%, transparent),
+        0 0 28px color-mix(in srgb, var(--glow-color) 45%, transparent),
+        0 0 42px color-mix(in srgb, var(--glow-color) 28%, transparent);
+      filter: saturate(1.04);
+    }
+
+    @keyframes clockGlowPulse {
+      0%,
+      100% {
+        font-size: 82px;
+        text-shadow:
+          0 0 6px color-mix(in srgb, var(--glow-color) 35%, transparent),
+          0 0 14px color-mix(in srgb, var(--glow-color) 48%, transparent),
+          0 0 24px color-mix(in srgb, var(--glow-color) 36%, transparent),
+          0 0 34px color-mix(in srgb, var(--glow-color) 22%, transparent);
+      }
+
+      50% {
+        font-size: 92px; /* +10px peak */
+        text-shadow:
+          0 0 10px color-mix(in srgb, var(--glow-color) 48%, transparent),
+          0 0 22px color-mix(in srgb, var(--glow-color) 62%, transparent),
+          0 0 36px color-mix(in srgb, var(--glow-color) 50%, transparent),
+          0 0 52px color-mix(in srgb, var(--glow-color) 32%, transparent);
+      }
+    }
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-
   <div class="wrapper">
     <div class="title">Program Schedule</div>
+    <div class="clock-slot" aria-label="Current time">
+      <div id="clock">--:-- a.m.</div>
+    </div>
   </div>
 
+  <script>
+    const SUPABASE_URL = 'https://csxuuwbtxgdpvskggcux.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_jPeweysUr7DZvFxG7F1-LQ_UR8MT1F9';
+    const TIMEZONE_NAME = 'America/Vancouver';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const clockEl = document.getElementById('clock');
+
+    const state = {
+      activeDate: '',
+      entries: [],
+      locationMap: {},
+      lastScheduleFetchMs: 0
+    };
+
+    function getTimePartsInTimezone(date = new Date(), timeZone = TIMEZONE_NAME) {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(date);
+      const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+
+      return {
+        year: Number(map.year),
+        month: Number(map.month),
+        day: Number(map.day),
+        hour: Number(map.hour),
+        minute: Number(map.minute),
+        second: Number(map.second),
+        dateString: `${map.year}-${map.month}-${map.day}`
+      };
+    }
+
+    function getCurrentMinutesInVancouver() {
+      const now = getTimePartsInTimezone();
+      return (now.hour * 60) + now.minute;
+    }
+
+    function parseTimeToMinutes(value) {
+      if (!value || typeof value !== 'string') return null;
+
+      const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) return null;
+
+      const hours = Number(match[1]);
+      const minutes = Number(match[2]);
+
+      if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+      if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+      return (hours * 60) + minutes;
+    }
+
+    function formatClockText() {
+      const now = getTimePartsInTimezone();
+      let hours = now.hour;
+      const minutes = now.minute;
+
+      const isPM = hours >= 12;
+      const meridiem = isPM ? 'p.m.' : 'a.m.';
+
+      hours = hours % 12 || 12;
+      const minuteText = minutes < 10 ? '0' + minutes : String(minutes);
+
+      return `${hours}:${minuteText} ${meridiem}`;
+    }
+
+    function updateClockFace() {
+      clockEl.textContent = formatClockText();
+    }
+
+    function getActiveStartingEntries(nowMinutes) {
+      return state.entries.filter(entry => {
+        if (entry.is_cancelled) return false;
+        if (!Number.isFinite(entry.start_minutes)) return false;
+
+        const minutesSinceStart = nowMinutes - entry.start_minutes;
+        return minutesSinceStart >= 0 && minutesSinceStart < 5;
+      });
+    }
+
+    function getDistinctActiveColors(activeEntries) {
+      const seen = new Set();
+      const colors = [];
+
+      for (const entry of activeEntries) {
+        const rawColor =
+          state.locationMap[entry.location_key]?.hex_color ||
+          entry.hex_color ||
+          '#f3bc43';
+
+        const color = String(rawColor).trim();
+
+        if (!seen.has(color)) {
+          seen.add(color);
+          colors.push(color);
+        }
+      }
+
+      return colors;
+    }
+
+    function applyGlowState() {
+      const nowMinutes = getCurrentMinutesInVancouver();
+      const activeEntries = getActiveStartingEntries(nowMinutes);
+      const activeColors = getDistinctActiveColors(activeEntries);
+
+      if (!activeColors.length) {
+        clockEl.classList.remove('glow-active');
+        return;
+      }
+
+      let selectedColor = activeColors[0];
+
+      if (activeColors.length > 1) {
+        const rotationIntervalMs = 2400;
+        const rotationIndex = Math.floor(Date.now() / rotationIntervalMs) % activeColors.length;
+        selectedColor = activeColors[rotationIndex];
+      }
+
+      clockEl.style.setProperty('--glow-color', selectedColor);
+      clockEl.classList.add('glow-active');
+    }
+
+    async function fetchScheduleAndStyles() {
+      const nowParts = getTimePartsInTimezone();
+      const today = nowParts.dateString;
+
+      try {
+        const [locRes, schedRes] = await Promise.all([
+          supabaseClient
+            .from('program_location_styles')
+            .select('location_key, hex_color, display_name, is_active')
+            .eq('is_active', true),
+
+          supabaseClient
+            .from('program_schedule_sets')
+            .select('schedule_date, mode, entries_json')
+            .eq('schedule_date', today)
+            .eq('mode', 'live')
+            .maybeSingle()
+        ]);
+
+        if (locRes.error) {
+          console.warn('Location styles fetch error:', locRes.error);
+        }
+
+        if (schedRes.error) {
+          console.warn('Program schedule fetch error:', schedRes.error);
+        }
+
+        const locationRows = Array.isArray(locRes.data) ? locRes.data : [];
+        state.locationMap = Object.fromEntries(
+          locationRows.map(row => [row.location_key, row])
+        );
+
+        const rawEntries = Array.isArray(schedRes.data?.entries_json)
+          ? schedRes.data.entries_json
+          : [];
+
+        state.entries = rawEntries
+          .filter(entry => !entry.is_cancelled)
+          .map(entry => ({
+            ...entry,
+            start_minutes: parseTimeToMinutes(entry.start_time),
+            end_minutes: parseTimeToMinutes(entry.end_time),
+            hex_color: state.locationMap[entry.location_key]?.hex_color || '#f3bc43'
+          }))
+          .filter(entry => Number.isFinite(entry.start_minutes))
+          .sort((a, b) => a.start_minutes - b.start_minutes);
+
+        state.activeDate = today;
+        state.lastScheduleFetchMs = Date.now();
+      } catch (error) {
+        console.warn('Unexpected schedule/styles fetch failure:', error);
+      }
+    }
+
+    async function ensureFreshSchedule() {
+      const nowParts = getTimePartsInTimezone();
+      const today = nowParts.dateString;
+      const nowMs = Date.now();
+
+      const needsDateRolloverRefresh = state.activeDate !== today;
+      const needsTimedRefresh = (nowMs - state.lastScheduleFetchMs) >= 30000;
+
+      if (needsDateRolloverRefresh || needsTimedRefresh) {
+        await fetchScheduleAndStyles();
+      }
+    }
+
+    async function initialize() {
+      updateClockFace();
+      await fetchScheduleAndStyles();
+      applyGlowState();
+
+      setInterval(() => {
+        updateClockFace();
+        applyGlowState();
+      }, 1000);
+
+      setInterval(() => {
+        ensureFreshSchedule();
+      }, 15000);
+    }
+
+    initialize();
+  </script>
 </body>
 </html>
