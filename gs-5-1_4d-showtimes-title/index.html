@@ -27,6 +27,16 @@
       font-display: swap;
     }
 
+    @font-face {
+      font-family: 'BlissPro';
+      src:
+        url('../assets/BlissPro-Regular.woff2') format('woff2'),
+        url('../assets/BlissPro-Regular.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
     html, body {
       width: 1920px;
       height: 270px;
@@ -73,6 +83,22 @@
       margin-left: 85px;
       transform: translateY(-11px);
     }
+
+    .admission-note {
+      position: absolute;
+      right: 110px;
+      top: 50%;
+
+      font-family: 'BlissPro', Arial, sans-serif;
+      font-size: 57px;
+      line-height: 1;
+      font-weight: 400;
+      color: #34495e;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+
+      transform: translateY(-50%) translateY(-11px);
+    }
   </style>
 </head>
 
@@ -80,6 +106,7 @@
 
   <div class="wrapper">
     <div class="title">4-D Showtimes</div>
+    <div class="admission-note">(Free with Aquarium Admission!)</div>
   </div>
 
 </body>
