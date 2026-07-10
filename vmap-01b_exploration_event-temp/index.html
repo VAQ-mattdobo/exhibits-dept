@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=1080, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+  />
+  <title>VAQ Visitor Map — Exploration Gallery Event Map</title>
+
+  <!--
+    VAQ VISITOR MAP — EXPLORATION GALLERY TEMPORARY EVENT MAP
+    Target signage canvas: 1080 × 1440 px
+
+    Folder assumptions:
+      /assets/...
+      /vmap-##_event-map/index.html
+      /gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/...
+
+    Temporary event-map behaviour:
+      - No database connection is used.
+      - All existing amenity markers remain defined below but are hidden by default.
+      - Set an individual marker's visible property to true to display it.
+      - Additional event-specific amenity markers may be appended to AMENITY_MARKERS.
+
+    Coordinate convention:
+      - Percentages are measured from the top-left corner of the full 1080 × 1440 canvas.
+      - Map-marker coordinates represent the centre of the SVG asset.
+      - Large grouped layout blocks use top-left coordinates.
+
+    Debug mode:
+      Add ?debug=1 to reveal marker centres, bounding outlines, and X/Y percentage labels.
+  -->
+
+  <link rel="stylesheet" href="../assets/css/visitor-map.css?v=1" />
+</head>
+
+<body>
+  <main class="viewport">
+    <section id="page" class="page" aria-label="Vancouver Aquarium Visitor Map">
+      <picture class="base-map" aria-hidden="true">
+        <source
+          type="image/webp"
+          srcset="../assets/visitor-map-base@1x.webp 1x, ../assets/visitor-map-base@2x.webp 2x"
+        />
+        <img
+          src="../assets/visitor-map-base@1x.png"
+          srcset="../assets/visitor-map-base@1x.png 1x, ../assets/visitor-map-base@2x.png 2x"
+          alt=""
+        />
+      </picture>
+
+      <div id="chrome-layer" class="layer" aria-hidden="true"></div>
+      <div id="amenity-marker-layer" class="layer" aria-hidden="true"></div>
+      <div id="dynamic-marker-layer" class="layer" aria-hidden="true"></div>
+      <div id="legend-layer" class="layer" aria-hidden="true"></div>
+      <div id="debug-layer" class="layer" aria-hidden="true"></div>
+
+      <div id="debug-panel" class="debug-panel"></div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    /* ======================================================================
+       1. PUBLIC SIGNAGE SETTINGS
+       ====================================================================== */
+
+    const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
+
+    const GALLERY_ICON_BASE_PATH =
+      "../gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/";
+
+    const AMENITY_CLUSTER_GAP_PX = 2;
+    const AMENITY_LAYOUT_MAX_ITERATIONS = 120;
+
+    const GALLERY_LEGEND_PILL_WIDTH_PX = 216;
+    const GALLERY_LEGEND_COLUMN_WIDTH_PX = 292;
+
+    /* ======================================================================
+       2. TEMPORARY EVENT-MAP PROFILE
+
+       activeYouAreHere contains the physical display location for this
+       map module. Four event-map versions may share this file structure while
+       using different You Are Here coordinates.
+
+       Map-alignment note:
+       The illustrated base-map assets and all map-relative overlays were moved
+       upward by 3 percentage points during the original Exploration alignment
+       pass. After the June 2026 base-map replacement, map overlays in this
+       Exploration test page were shifted upward by an additional 1.3%.
+       ====================================================================== */
+
+    const MAP_PROFILE = {
+      key: "vmap-01_exploration_event",
+
+      chrome: {
+        title:                  { x: 5.0,  y: 4.6,  anchor: "top-left" },
+        logo:                   { x: 82.3, y: 92.7, anchor: "top-left" },
+        qrBlock:                { x: 83.3, y: 53.0, anchor: "top-left" },
+        appQrBlock:             { x: 3.9,  y: 53.0, anchor: "top-left" },
+        legendHeading:          { x: 3.5,  y: 65.0, anchor: "top-left" },
+        galleryLegendLeft:      { x: 21.0, y: 67.9, anchor: "top-left" },
+        galleryLegendRight:     { x: 50.4, y: 67.9, anchor: "top-left" },
+        amenityLegend:          { x: 3.5,  y: 68.6, anchor: "top-left" },
+        footer:                 { x: 82.2, y: 76.5, anchor: "top-left" },
+        exitArrow:              { x: 80.1, y: 27.7, anchor: "centre" },
+        exitLabel:              { x: 85.9, y: 27.7, anchor: "centre" },
+        enterArrow:             { x: 80.1, y: 30.5, anchor: "centre" },
+        enterLabel:             { x: 85.9, y: 30.5, anchor: "centre" },
+        // Fixed map-pin legend rows use top-left anchors so their SVGs align
+        // vertically. Coordinates are easy to tune together as a paired block.
+        youAreHereLegend:       { x: 68.0, y: 9.35, anchor: "top-left" }
+      },
+
+      activeYouAreHere: {
+        visible: true,
+        x: 36.0,
+        y: 15.8,
+        anchor: "centre"
+      }
+    };
+
+    /* ======================================================================
+       3. AMENITY ICON DEFINITIONS
+       ====================================================================== */
+
+    const AMENITY_TYPES = {
+      "guest-services": {
+        label: "Guest Services",
+        icon: "../assets/icons/guest-services.svg"
+      },
+      "elevator": {
+        label: "Elevator",
+        icon: "../assets/icons/elevator.svg"
+      },
+      "stairs": {
+        label: "Stairs",
+        icon: "../assets/icons/stairs.svg"
+      },
+      "gift-shop": {
+        label: "Gift Shop",
+        icon: "../assets/icons/gift-shop.svg"
+      },
+      "food-and-beverage": {
+        label: "Food & Beverage",
+        icon: "../assets/icons/food-and-beverage.svg"
+      },
+      "food-station": {
+        label: "Food Station",
+        icon: "../assets/icons/food-and-beverage.svg"
+      },
+      "bar": {
+        label: "Bar",
+        icon: "../assets/icons/bar.svg"
+      },
+      "outdoor-bar": {
+        label: "Outdoor Bar",
+        icon: "../assets/icons/outdoor-bar.svg"
+      },
+      "dessert-station": {
+        label: "Dessert Station",
+        icon: "../assets/icons/dessert.svg"
+      },
+      "water-station": {
+        label: "Water Station",
+        icon: "../assets/icons/water-station.svg"
+      },
+      "washroom": {
+        label: "Washroom",
+        icon: "../assets/icons/washroom.svg"
+      },
+      "accessible-washroom": {
+        label: "Accessible Washroom",
+        icon: "../assets/icons/accessible-washroom.svg"
+      },
+      "genderless-washroom": {
+        label: "Genderless Washroom",
+        icon: "../assets/icons/genderless-washroom.svg"
+      },
+      "nursing-quiet-room": {
+        label: "Nursing / Quiet Room",
+        icon: "../assets/icons/nursing-quiet-room.svg"
+      },
+      "stroller-wagon-parking": {
+        label: "Stroller Parking",
+        icon: "../assets/icons/stroller-wagon-parking.svg"
+      },
+      "lockers": {
+        label: "Lockers",
+        icon: "../assets/icons/lockers.svg"
+      },
+      "accessible-viewing": {
+        label: "Accessible Viewing",
+        icon: "../assets/icons/accessible-viewing.svg"
+      }
+    };
+
+    const AMENITY_LEGEND_ORDER = [
+      "accessible-washroom",
+      "elevator",
+      "genderless-washroom",
+      "stairs",
+      "washroom",
+      "water-station",
+      "food-station",
+      "bar",
+      "outdoor-bar",
+      "dessert-station"
+    ];
+
+    /* ======================================================================
+       4. STATIC MAP-OVERLAY MARKERS
+
+       Every coordinate is a centre point measured from the top-left corner
+       of the 1080 × 1440 canvas.
+
+       Legacy markers remain defined below. Only the standard amenity categories
+       required for this event and the temporary event-specific markers are
+       visible. Any marker can still be enabled or disabled with its visible
+       property.
+       ====================================================================== */
+
+    const AMENITY_MARKERS = [
+      { id: "accessible-viewing-01", visible: false, type: "accessible-viewing",  x: 56.9, y: 16.2 },
+      { id: "accessible-viewing-02", visible: false, type: "accessible-viewing",  x: 18.1, y: 25.8 },
+      { id: "accessible-viewing-03", visible: false, type: "accessible-viewing",  x: 39.0, y: 28.7 },
+      { id: "accessible-viewing-04", visible: false, type: "accessible-viewing",  x: 37.5, y: 33.9 },
+
+      { id: "accessible-washroom-01", visible: true, type: "accessible-washroom", x: 64.9, y: 33.7 },
+      { id: "accessible-washroom-02", visible: true, type: "accessible-washroom", x: 51.2, y: 45.2 },
+      { id: "accessible-washroom-03", visible: true, type: "accessible-washroom", x: 69.3, y: 56.6 },
+      { id: "accessible-washroom-04", visible: true, type: "accessible-washroom", x: 14.1, y: 35.6 },
+
+      { id: "elevator-01", visible: true, type: "elevator",            x: 45.2, y: 23.2 },
+      { id: "elevator-02", visible: true, type: "elevator",            x: 23.2, y: 25.3 },
+      { id: "elevator-03", visible: true, type: "elevator",            x: 58.4, y: 32.3 },
+      { id: "elevator-04", visible: true, type: "elevator",            x: 45.0, y: 43.5 },
+      { id: "elevator-05", visible: true, type: "elevator",            x: 23.1, y: 48.5 },
+      { id: "elevator-06", visible: true, type: "elevator",            x: 58.5, y: 54.6 },
+
+      { id: "food-and-beverage-01", visible: false, type: "food-and-beverage",   x: 30.0, y: 21.3 },
+      { id: "food-and-beverage-02", visible: false, type: "food-and-beverage",   x: 63.9, y: 36.2 },
+      { id: "food-and-beverage-03", visible: false, type: "food-and-beverage",   x: 66.1, y: 42.9 },
+
+      { id: "genderless-washroom-01", visible: true, type: "genderless-washroom", x: 66.6, y: 34.2 },
+      { id: "genderless-washroom-02", visible: true, type: "genderless-washroom", x: 52.8, y: 45.9 },
+      { id: "genderless-washroom-03", visible: true, type: "genderless-washroom", x: 67.6, y: 56.2 },
+
+      { id: "gift-shop-01", visible: false, type: "gift-shop",           x: 75.7, y: 28.1 },
+      { id: "gift-shop-02", visible: false, type: "gift-shop",           x: 46.2, y: 48.3 },
+
+      { id: "lockers-01", visible: false, type: "lockers",             x: 49.6, y: 44.4 },
+      { id: "lockers-02", visible: false, type: "lockers",             x: 68.9, y: 53.8 },
+
+      { id: "stairs-01", visible: true, type: "stairs",              x: 22.5, y: 15.2 },
+      { id: "stairs-02", visible: true, type: "stairs",              x: 48.1, y: 24.1 },
+      { id: "stairs-03", visible: true, type: "stairs",              x: 42.5, y: 26.3 },
+      { id: "stairs-04", visible: true, type: "stairs",              x: 24.8, y: 29.1 },
+      { id: "stairs-05", visible: true, type: "stairs",              x: 57.6, y: 31.1 },
+      { id: "stairs-06", visible: true, type: "stairs",              x: 19.9, y: 35.1 },
+      { id: "stairs-07", visible: true, type: "stairs",              x: 49.9, y: 37.1 },
+      { id: "stairs-08", visible: true, type: "stairs",              x: 42.1, y: 46.7 },
+      { id: "stairs-09", visible: true, type: "stairs",              x: 48.0, y: 45.7 },
+      { id: "stairs-10", visible: true, type: "stairs",              x: 24.6, y: 50.2 },
+      { id: "stairs-11", visible: true, type: "stairs",              x: 57.5, y: 53.2 },
+      { id: "stairs-12", visible: true, type: "stairs",              x: 50.6, y: 58.6 },
+
+      { id: "stroller-wagon-parking-01", visible: false, type: "stroller-wagon-parking", x: 49.0, y: 14.4 },
+      { id: "stroller-wagon-parking-02", visible: false, type: "stroller-wagon-parking", x: 58.8, y: 23.5 },
+      { id: "stroller-wagon-parking-03", visible: false, type: "stroller-wagon-parking", x: 50.3, y: 30.5 },
+      { id: "stroller-wagon-parking-04", visible: false, type: "stroller-wagon-parking", x: 55.2, y: 44.3 },
+      { id: "stroller-wagon-parking-05", visible: false, type: "stroller-wagon-parking", x: 58.0, y: 31.5 },
+      { id: "stroller-wagon-parking-06", visible: false, type: "stroller-wagon-parking", x: 60.1, y: 52.2 },
+
+      { id: "washroom-01", visible: true, type: "washroom",            x: 42.5, y: 8.1 },
+      { id: "washroom-02", visible: true, type: "washroom",            x: 33.9, y: 15.2 },
+      { id: "washroom-03", visible: true, type: "washroom",            x: 40.3, y: 22.3 },
+      { id: "washroom-04", visible: true, type: "washroom",            x: 15.5, y: 34.6 },
+      { id: "washroom-05", visible: true, type: "washroom",            x: 65.2, y: 35.2 },
+      { id: "washroom-06", visible: true, type: "washroom",            x: 70.9, y: 39.2 },
+      { id: "washroom-07", visible: true, type: "washroom",            x: 67.2, y: 54.8 },
+      { id: "washroom-08", visible: true, type: "washroom",            x: 52.5, y: 57.4 },
+
+      { id: "water-station-01", visible: true, type: "water-station",       x: 34.4, y: 17.5 },
+      { id: "water-station-02", visible: true, type: "water-station",       x: 70.9, y: 34.9 },
+      { id: "water-station-03", visible: true, type: "water-station",       x: 54.2, y: 46.7 },
+      { id: "water-station-04", visible: true, type: "water-station",       x: 42.1, y: 24.5 },
+
+      /* Temporary event amenities — Exploration Gallery event map */
+      { id: "event-bar-01",            visible: true, type: "bar",             x: 54.2, y: 28.5 },
+      { id: "event-bar-02",            visible: true, type: "bar",             x: 53.8, y: 23.0 },
+      { id: "event-outdoor-bar-01",    visible: true, type: "outdoor-bar",     x: 27.6, y: 21.1 },
+
+      { id: "event-food-station-01",   visible: true, type: "food-station",    x: 59.5, y: 29.0 },
+      { id: "event-food-station-02",   visible: true, type: "food-station",    x: 52.5, y: 25.2 },
+      { id: "event-food-station-03",   visible: true, type: "food-station",    x: 45.1, y: 24.9 },
+      { id: "event-food-station-04",   visible: true, type: "food-station",    x: 46.8, y: 21.9 },
+      { id: "event-food-station-05",   visible: true, type: "food-station",    x: 44.8, y: 14.8 },
+      { id: "event-food-station-06",   visible: true, type: "food-station",    x: 35.0, y: 15.0 },
+      { id: "event-food-station-07",   visible: true, type: "food-station",    x: 44.8, y: 14.9 },
+
+      { id: "event-dessert-station-01", visible: true, type: "dessert-station", x: 61.5, y: 53.0 },
+      { id: "event-dessert-station-02", visible: true, type: "dessert-station", x: 59.5, y: 32.0 },
+
+      { id: "guest-services-desk", visible: false, type: "guest-services",      x: 52.8, y: 28.4, className: "guest-services-marker" }
+    ];
+
+    /* ======================================================================
+       5. GALLERY LEGEND PRESENTATION
+
+       The map legend follows the legacy visitor-map order. For this temporary
+       event map, colours and icon filenames come exclusively from the static
+       LOCATION_STYLES list below. No database request is made.
+
+       Changing Tides remains available in the schedule CMS but is omitted
+       here while the current public map presents Dragons in that gallery.
+       ====================================================================== */
+
+    const LOCATION_STYLES = [
+      { location_key: "4d-theatre",                display_name: "4-D Theatre",                    hex_color: "#cca1cc", icon_path: "./assets/icons/4d-theatre.svg",                    sort_order: 10 },
+      { location_key: "amazing-axolotls",          display_name: "Amazing Axolotls",                hex_color: "#008f9f", icon_path: "./assets/icons/amazing-axolotls.svg",              sort_order: 20 },
+      { location_key: "bc-wild-coast",             display_name: "B.C. Wild Coast",                 hex_color: "#1b4788", icon_path: "./assets/icons/bc-wild-coast.svg",                 sort_order: 30 },
+      { location_key: "bill-reid-plaza",           display_name: "Bill Reid Plaza",                 hex_color: "#818286", icon_path: "./assets/icons/bill-reid-plaza.svg",               sort_order: 40 },
+      { location_key: "canadas-arctic",            display_name: "Canada's Arctic",                 hex_color: "#6dcff6", icon_path: "./assets/icons/canadas-arctic.svg",                sort_order: 50 },
+      { location_key: "changing-tides",            display_name: "Changing Tides",                  hex_color: "#9e1f64", icon_path: "./assets/icons/changing-tides.svg",                sort_order: 60 },
+      { location_key: "clownfish-cove",            display_name: "Clownfish Cove",                  hex_color: "#fbb466", icon_path: "./assets/icons/clownfish-cove.svg",                sort_order: 70 },
+      { location_key: "dragons",                   display_name: "Dragons",                         hex_color: "#d89b2d", icon_path: "./assets/icons/dragons.svg",                       sort_order: 80 },
+      { location_key: "exploration-gallery",       display_name: "Exploration Gallery",             hex_color: "#dfc822", icon_path: "./assets/icons/exploration-gallery.svg",           sort_order: 90 },
+      { location_key: "frogs-forever",             display_name: "Frogs Forever?",                  hex_color: "#c0d731", icon_path: "./assets/icons/frogs-forever.svg",                 sort_order: 100 },
+      { location_key: "amazon-gallery",            display_name: "Amazon Gallery",                  hex_color: "#1ca95b", icon_path: "./assets/icons/amazon-gallery.svg",                 sort_order: 110 },
+      { location_key: "virtual-reality",            display_name: "Virtual Reality",                  hex_color: "#29367a", icon_path: "./assets/icons/virtual-reality.svg",                sort_order: 120 },
+      { location_key: "pacific-canada",            display_name: "Pacific Canada",                  hex_color: "#56c5d0", icon_path: "./assets/icons/pacific-canada.svg",                sort_order: 130 },
+      { location_key: "sea-otters",                display_name: "Sea Otters",                      hex_color: "#8fbeda", icon_path: "./assets/icons/sea-otters.svg",                    sort_order: 140 },
+      { location_key: "seal-cove",                 display_name: "Seal Cove & Plaza",               hex_color: "#8d4e87", icon_path: "./assets/icons/seal-cove.svg",                     sort_order: 150 },
+      { location_key: "stellers-bay",              display_name: "Steller's Bay",                   hex_color: "#0072bb", icon_path: "./assets/icons/stellers-bay.svg",                  sort_order: 160 },
+      { location_key: "connections-gallery",        display_name: "Connections Gallery",              hex_color: "#f89c21", icon_path: "./assets/icons/connections-gallery.svg",            sort_order: 170 },
+      { location_key: "engagement-gallery",         display_name: "Engagement Gallery",               hex_color: "#f89c21", icon_path: "./assets/icons/engagement-gallery.svg",             sort_order: 180 },
+      { location_key: "the-tropics",               display_name: "The Tropics",                     hex_color: "#f3775f", icon_path: "./assets/icons/the-tropics.svg",                   sort_order: 190 },
+      { location_key: "treasures-of-the-bc-coast", display_name: "Treasures of the B.C. Coast",     hex_color: "#38ba96", icon_path: "./assets/icons/treasures-of-the-bc-coast.svg",     sort_order: 200 },
+      { location_key: "wet-lab",                   display_name: "Wet Lab",                         hex_color: "#846f2e", icon_path: "./assets/icons/wet-lab.svg",                       sort_order: 210 }
+    ];
+
+    const GALLERY_LEGEND_LAYOUT = {
+      leftColumn: [
+        { key: "bill-reid-plaza",           label: "Bill Reid Plaza" },
+        { key: "connections-gallery",       label: "Connections Gallery" },
+        { key: "amazon-gallery",            label: "Amazon Gallery" },
+        { key: "the-tropics",               label: "The Tropics" },
+        { key: "pacific-canada",            label: "Pacific Canada" },
+        { key: "treasures-of-the-bc-coast", label: "Treasures of the B.C. Coast" },
+        { key: "exploration-gallery",       label: "Exploration Gallery" },
+        { key: "virtual-reality",           label: "Virtual Reality" },
+        { key: "wet-lab",                   label: "Wet Lab" },
+        { key: "clownfish-cove",            label: "Clownfish Cove" }
+      ],
+
+      rightColumn: [
+        { key: "4d-theatre",       label: "4-D Theatre" },
+        { key: "amazing-axolotls", label: "Amazing Axolotls!" },
+        { key: "sea-otters",       label: "Sea Otters" },
+        { key: "canadas-arctic",   label: "Canada's Arctic" },
+        { key: "engagement-gallery", label: "Engagement Gallery" },
+        { key: "dragons",          label: "Dragons" },
+        { key: "frogs-forever",    label: "Frogs Forever?" },
+        { key: "bc-wild-coast",    label: "B.C. Wild Coast" },
+        { key: "seal-cove",        label: "Seal Cove & Plaza" },
+        { key: "stellers-bay",     label: "Steller's Bay" }
+      ]
+    };
+
+    /* ======================================================================
+       6. GENERIC HELPERS
+       ====================================================================== */
+
+    function getAnchorClass(anchor = "centre") {
+      return anchor === "top-left" ? "anchor-top-left" : "anchor-centre";
+    }
+
+    function setPosition(element, { x, y, anchor = "centre" }, debugLabel = "") {
+      element.classList.add("positioned", getAnchorClass(anchor));
+      element.style.setProperty("--x", x);
+      element.style.setProperty("--y", y);
+
+      const resolvedDebugLabel =
+        debugLabel
+        || element.dataset.debugLabel
+        || element.dataset.markerId
+        || element.id
+        || [...element.classList].filter((className) => className !== "positioned").join(".")
+        || element.tagName.toLowerCase();
+
+      makeDebugCoordinateLabel(x, y, resolvedDebugLabel);
+      return element;
+    }
+
+    function makeImage(src, className = "", alt = "") {
+      const image = document.createElement("img");
+      image.src = src;
+      image.alt = alt;
+      image.className = className;
+      return image;
+    }
+
+    function getGalleryIconUrl(iconPath) {
+      const filename = String(iconPath || "").split("/").pop();
+      if (!filename) return "";
+
+      /*
+        Resolve from the page URL, not from the external shared CSS file.
+
+        The visitor-map HTML lives in /vmap-##_.../index.html, so this keeps
+        gallery masks pointed at:
+        ../gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/
+      */
+      return new URL(`${GALLERY_ICON_BASE_PATH}${filename}`, window.location.href).href;
+    }
+
+    function formatDebugCoordinate(value) {
+      return Number.isInteger(value)
+        ? value.toFixed(1)
+        : String(value);
+    }
+
+    function makeDebugCoordinateLabel(x, y, label = "") {
+      if (!DEBUG_MODE) return;
+
+      const coordinateLabel = document.createElement("span");
+      coordinateLabel.className = "debug-coordinate-label";
+      coordinateLabel.style.left = `${x}%`;
+      coordinateLabel.style.top = `${y}%`;
+      coordinateLabel.textContent =
+        `${label ? `${label} · ` : ""}x:${formatDebugCoordinate(x)}% y:${formatDebugCoordinate(y)}%`;
+
+      document.getElementById("debug-layer").appendChild(coordinateLabel);
+    }
+
+    function makeDebugDot(x, y) {
+      if (!DEBUG_MODE) return;
+      const dot = document.createElement("span");
+      dot.className = "debug-dot";
+      dot.style.left = `${x}%`;
+      dot.style.top = `${y}%`;
+      document.getElementById("debug-layer").appendChild(dot);
+    }
+
+    function updateDebugPanel(message) {
+      if (!DEBUG_MODE) return;
+      document.getElementById("debug-panel").textContent = [
+        `Profile: ${MAP_PROFILE.key}`,
+        "Canvas: 1080 × 1440",
+        `Visible amenity overlays: ${AMENITY_MARKERS.filter((marker) => marker.visible).length}`,
+        `Active You Are Here pin: ${MAP_PROFILE.activeYouAreHere.visible ? "enabled" : "disabled"}`,
+        message
+      ].join("\n");
+    }
+
+    /* ======================================================================
+       7. STATIC PAGE CHROME
+       ====================================================================== */
+
+    function renderChrome() {
+      const layer = document.getElementById("chrome-layer");
+      const p = MAP_PROFILE.chrome;
+
+      const title = document.createElement("h1");
+      title.className = "page-title";
+      title.textContent = "Visitor Map";
+      setPosition(title, p.title);
+      layer.appendChild(title);
+
+      const logo = makeImage("../assets/vaq-full-logo.svg", "vaq-logo");
+      setPosition(logo, p.logo);
+      layer.appendChild(logo);
+
+      const exitArrow = makeImage("../assets/icons/exit-arrow.svg", "wayfinding-asset direction-arrow");
+      setPosition(exitArrow, p.exitArrow);
+      layer.appendChild(exitArrow);
+
+      const exitLabel = makeImage("../assets/icons/exit-label.svg", "wayfinding-asset direction-label");
+      setPosition(exitLabel, p.exitLabel);
+      layer.appendChild(exitLabel);
+
+      const enterArrow = makeImage("../assets/icons/enter-arrow.svg", "wayfinding-asset direction-arrow");
+      setPosition(enterArrow, p.enterArrow);
+      layer.appendChild(enterArrow);
+
+      const enterLabel = makeImage("../assets/icons/enter-label.svg", "wayfinding-asset direction-label");
+      setPosition(enterLabel, p.enterLabel);
+      layer.appendChild(enterLabel);
+
+      const qrBlock = document.createElement("section");
+      qrBlock.className = "qr-block";
+      qrBlock.innerHTML = `
+        <div class="qr-frame">
+          <p class="qr-heading">Scan for PDF</p>
+          <img class="qr-code" src="../assets/qr-code.svg" alt="">
+          <p class="qr-url">vanaqua.org/visit/map/</p>
+        </div>
+      `;
+      setPosition(qrBlock, p.qrBlock);
+      layer.appendChild(qrBlock);
+
+      const appQrBlock = document.createElement("section");
+      appQrBlock.className = "app_qr-block";
+      appQrBlock.innerHTML = `
+        <div class="qr-frame">
+          <p class="qr-heading">Scan for App</p>
+          <img class="qr-code" src="../assets/app_qr-code.svg" alt="">
+          <p class="qr-url">vanaqua.org/mobile-app/</p>
+        </div>
+      `;
+      setPosition(appQrBlock, p.appQrBlock);
+      layer.appendChild(appQrBlock);
+
+      const footer = document.createElement("div");
+      footer.className = "footer-cta";
+      footer.innerHTML = `
+        <span>Share what you loved<br>about your visit:</span>
+        <strong>@VanAqua</strong>
+        <strong>#VanAqua</strong>
+      `;
+      setPosition(footer, p.footer);
+      layer.appendChild(footer);
+
+      Object.values(p).forEach(({ x, y }) => makeDebugDot(x, y));
+    }
+
+    /* ======================================================================
+       8. MAP OVERLAYS
+       ====================================================================== */
+
+    function getAmenityMarkerSizePx(marker) {
+      return marker.className === "guest-services-marker"
+        ? 28
+        : 26;
+    }
+
+    /*
+      Tight amenity groups are resolved dynamically at render time.
+
+      The declared x/y values remain the geographic source anchors. Icons are
+      shifted only when their visible rectangles would touch or overlap. Each
+      collision is resolved along the smallest axis of movement, producing
+      compact, pixel-aligned clusters while preserving as much illustrated-map
+      artwork as possible beneath the overlays.
+    */
+    function resolveAmenityMarkerLayout(markers) {
+      const canvasWidth = 1080;
+      const canvasHeight = 1440;
+
+      const layout = markers.map((marker) => ({
+        ...marker,
+        sourceX: marker.x,
+        sourceY: marker.y,
+        px: (marker.x / 100) * canvasWidth,
+        py: (marker.y / 100) * canvasHeight,
+        sizePx: getAmenityMarkerSizePx(marker)
+      }));
+
+      function separateTouchingPairs() {
+        let moved = false;
+
+        for (let i = 0; i < layout.length; i += 1) {
+          for (let j = i + 1; j < layout.length; j += 1) {
+            const a = layout[i];
+            const b = layout[j];
+            const requiredDistance =
+              ((a.sizePx + b.sizePx) / 2) + AMENITY_CLUSTER_GAP_PX;
+
+            const dx = b.px - a.px;
+            const dy = b.py - a.py;
+            const overlapX = requiredDistance - Math.abs(dx);
+            const overlapY = requiredDistance - Math.abs(dy);
+
+            if (overlapX <= 0 || overlapY <= 0) continue;
+
+            moved = true;
+
+            if (overlapX <= overlapY) {
+              const direction = dx === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dx);
+              const shift = (overlapX / 2) + 0.05;
+              a.px -= direction * shift;
+              b.px += direction * shift;
+            } else {
+              const direction = dy === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dy);
+              const shift = (overlapY / 2) + 0.05;
+              a.py -= direction * shift;
+              b.py += direction * shift;
+            }
+          }
+        }
+
+        return moved;
+      }
+
+      for (let pass = 0; pass < AMENITY_LAYOUT_MAX_ITERATIONS; pass += 1) {
+        if (!separateTouchingPairs()) break;
+      }
+
+      /*
+        Snap resolved centres to whole pixels, then make a final integer-pixel
+        pass so icons retain a true visible gap rather than merely a
+        sub-pixel separation.
+      */
+      layout.forEach((marker) => {
+        marker.px = Math.round(marker.px);
+        marker.py = Math.round(marker.py);
+      });
+
+      for (let pass = 0; pass < AMENITY_LAYOUT_MAX_ITERATIONS; pass += 1) {
+        let moved = false;
+
+        for (let i = 0; i < layout.length; i += 1) {
+          for (let j = i + 1; j < layout.length; j += 1) {
+            const a = layout[i];
+            const b = layout[j];
+            const requiredDistance =
+              ((a.sizePx + b.sizePx) / 2) + AMENITY_CLUSTER_GAP_PX;
+
+            const dx = b.px - a.px;
+            const dy = b.py - a.py;
+            const overlapX = requiredDistance - Math.abs(dx);
+            const overlapY = requiredDistance - Math.abs(dy);
+
+            if (overlapX <= 0 || overlapY <= 0) continue;
+
+            moved = true;
+
+            if (overlapX <= overlapY) {
+              const direction = dx === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dx);
+              const shift = Math.ceil(overlapX / 2);
+              a.px -= direction * shift;
+              b.px += direction * shift;
+            } else {
+              const direction = dy === 0
+                ? (a.id.localeCompare(b.id) < 0 ? 1 : -1)
+                : Math.sign(dy);
+              const shift = Math.ceil(overlapY / 2);
+              a.py -= direction * shift;
+              b.py += direction * shift;
+            }
+          }
+        }
+
+        if (!moved) break;
+      }
+
+      return layout.map((marker) => ({
+        ...marker,
+        x: (marker.px / canvasWidth) * 100,
+        y: (marker.py / canvasHeight) * 100
+      }));
+    }
+
+    function renderAmenityMarkers() {
+      const layer = document.getElementById("amenity-marker-layer");
+      const visibleMarkers = AMENITY_MARKERS.filter((marker) => marker.visible === true);
+      const resolvedMarkers = resolveAmenityMarkerLayout(visibleMarkers);
+
+      resolvedMarkers.forEach((marker) => {
+        const type = AMENITY_TYPES[marker.type];
+        if (!type) {
+          console.warn(`Unknown amenity type: ${marker.type}`);
+          return;
+        }
+
+        const extraClass = marker.className ? ` ${marker.className}` : "";
+        const image = makeImage(type.icon, `amenity-marker${extraClass}`);
+        image.dataset.markerId = marker.id;
+        image.title = `${type.label}: ${marker.id}`;
+        setPosition(image, marker);
+        layer.appendChild(image);
+        makeDebugDot(marker.x, marker.y);
+      });
+    }
+
+    function renderActiveYouAreHerePin() {
+      const pin = MAP_PROFILE.activeYouAreHere;
+      if (!pin.visible || !Number.isFinite(pin.x) || !Number.isFinite(pin.y)) return;
+
+      const layer = document.getElementById("dynamic-marker-layer");
+      const marker = document.createElement("div");
+      marker.className = "active-pin-marker";
+
+      const shadow = document.createElement("span");
+      shadow.className = "active-pin-shadow";
+
+      const image = makeImage(
+        "../assets/you-are-here.svg",
+        "pin-asset animated-map-pin-image"
+      );
+
+      marker.append(shadow, image);
+      setPosition(marker, pin);
+      layer.appendChild(marker);
+      makeDebugDot(pin.x, pin.y);
+    }
+
+    /* ======================================================================
+       9. LEGENDS
+       ====================================================================== */
+
+    function renderYouAreHereLegendKey() {
+      const layer = document.getElementById("legend-layer");
+      const key = document.createElement("div");
+      key.className = "you-are-here-key";
+      key.innerHTML = `
+        <img class="pin-asset legend-pin" src="../assets/you-are-here.svg" alt="">
+        <span>= You are here</span>
+      `;
+      setPosition(key, MAP_PROFILE.chrome.youAreHereLegend);
+      layer.appendChild(key);
+    }
+
+    function renderAmenityLegend() {
+      const layer = document.getElementById("legend-layer");
+      const legend = document.createElement("section");
+      legend.className = "amenity-legend";
+
+      AMENITY_LEGEND_ORDER.forEach((typeKey) => {
+        const type = AMENITY_TYPES[typeKey];
+        const item = document.createElement("div");
+        item.className = "amenity-legend-item";
+        item.innerHTML = `
+          <img src="${type.icon}" alt="">
+          <span>${type.label}</span>
+        `;
+        legend.appendChild(item);
+      });
+
+      setPosition(legend, MAP_PROFILE.chrome.amenityLegend);
+      layer.appendChild(legend);
+    }
+
+    function renderGalleryLegendColumn(items, position, styleMap) {
+      const layer = document.getElementById("legend-layer");
+      const column = document.createElement("section");
+      column.className = "gallery-legend-column";
+      column.style.width = `${GALLERY_LEGEND_COLUMN_WIDTH_PX}px`;
+
+      items.forEach((legendItem) => {
+        const style = styleMap.get(legendItem.key);
+        if (!style) {
+          console.warn(`Missing location style for gallery legend item: ${legendItem.key}`, legendItem);
+          return;
+        }
+
+        const item = document.createElement("div");
+        item.className = "gallery-legend-item";
+
+        const icon = document.createElement("span");
+        icon.className = "gallery-legend-icon";
+        icon.style.setProperty("--gallery-icon-color", style.hex_color);
+
+        const iconUrl = getGalleryIconUrl(style.icon_path);
+        if (iconUrl) {
+          icon.style.webkitMaskImage = `url("${iconUrl}")`;
+          icon.style.maskImage = `url("${iconUrl}")`;
+        }
+
+        const pill = document.createElement("div");
+        pill.className = "gallery-legend-pill";
+        pill.style.width = `${GALLERY_LEGEND_PILL_WIDTH_PX}px`;
+        pill.style.maxWidth = `${GALLERY_LEGEND_PILL_WIDTH_PX}px`;
+        pill.style.backgroundColor = style.hex_color;
+        pill.textContent = legendItem.label;
+
+        item.append(icon, pill);
+        column.appendChild(item);
+      });
+
+      setPosition(column, position);
+      layer.appendChild(column);
+    }
+
+    function renderGalleryLegend(locationStyles) {
+      const styleMap = new Map(locationStyles.map((style) => [style.location_key, style]));
+      const layer = document.getElementById("legend-layer");
+
+      const heading = document.createElement("h2");
+      heading.className = "legend-heading";
+      heading.textContent = "Legend";
+      setPosition(heading, MAP_PROFILE.chrome.legendHeading);
+      layer.appendChild(heading);
+
+      renderGalleryLegendColumn(
+        GALLERY_LEGEND_LAYOUT.leftColumn,
+        MAP_PROFILE.chrome.galleryLegendLeft,
+        styleMap
+      );
+
+      renderGalleryLegendColumn(
+        GALLERY_LEGEND_LAYOUT.rightColumn,
+        MAP_PROFILE.chrome.galleryLegendRight,
+        styleMap
+      );
+    }
+
+    /* ======================================================================
+       10. VIEWPORT SCALING AND INITIALIZATION
+       ====================================================================== */
+
+    function fitCanvasToViewport() {
+      const scale = Math.min(window.innerWidth / 1080, window.innerHeight / 1440);
+      document.documentElement.style.setProperty("--stage-scale", scale);
+    }
+
+    function initialize() {
+      document.getElementById("page").classList.toggle("debug-enabled", DEBUG_MODE);
+      fitCanvasToViewport();
+
+      renderChrome();
+      renderAmenityMarkers();
+      renderActiveYouAreHerePin();
+      renderYouAreHereLegendKey();
+      renderAmenityLegend();
+      renderGalleryLegend(LOCATION_STYLES);
+      updateDebugPanel("Exploration Gallery event map loaded. Database connection disabled.");
+    }
+
+    window.addEventListener("resize", fitCanvasToViewport);
+    window.addEventListener("DOMContentLoaded", initialize);
+  </script>
+</body>
+</html>
