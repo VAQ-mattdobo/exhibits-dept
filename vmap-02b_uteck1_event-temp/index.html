@@ -37,12 +37,13 @@
   <style>
     /*
       Temporary event-map refinements:
-      - The first five amenity legend icons are 39% larger.
+      - Bar, Outdoor Bar, Food Station, Dessert Station, and Water Station
+        markers on the map are 39% larger than the other amenity markers.
       - Exit guidance begins a slow, subtle pulse/wiggle after 11:30 p.m.
         Vancouver time. Individual scale/rotate properties preserve the
         positioning transform supplied by the shared visitor-map stylesheet.
     */
-    .amenity-legend-item.event-featured-legend-icon img {
+    .amenity-marker.event-featured-map-icon {
       scale: 1.39;
       transform-origin: center;
     }
@@ -122,7 +123,7 @@
     const BAR_AND_DESSERT_HIDE_MINUTES = (23 * 60) + 30;
     const EVENT_CLOCK_REFRESH_MS = 30000;
 
-    const FEATURED_AMENITY_LEGEND_TYPES = new Set([
+    const FEATURED_AMENITY_MAP_TYPES = new Set([
       "bar",
       "outdoor-bar",
       "food-station",
@@ -586,9 +587,13 @@
        ====================================================================== */
 
     function getAmenityMarkerSizePx(marker) {
-      return marker.className === "guest-services-marker"
+      const baseSizePx = marker.className === "guest-services-marker"
         ? 28
         : 26;
+
+      return FEATURED_AMENITY_MAP_TYPES.has(marker.type)
+        ? baseSizePx * 1.39
+        : baseSizePx;
     }
 
     /*
@@ -728,6 +733,11 @@
 
         const extraClass = marker.className ? ` ${marker.className}` : "";
         const image = makeImage(type.icon, `amenity-marker${extraClass}`);
+
+        if (FEATURED_AMENITY_MAP_TYPES.has(marker.type)) {
+          image.classList.add("event-featured-map-icon");
+        }
+
         image.dataset.markerId = marker.id;
         image.dataset.amenityType = marker.type;
         image.title = `${type.label}: ${marker.id}`;
@@ -785,10 +795,6 @@
         const item = document.createElement("div");
         item.className = "amenity-legend-item";
         item.dataset.amenityType = typeKey;
-
-        if (FEATURED_AMENITY_LEGEND_TYPES.has(typeKey)) {
-          item.classList.add("event-featured-legend-icon");
-        }
 
         item.innerHTML = `
           <img src="${type.icon}" alt="">
