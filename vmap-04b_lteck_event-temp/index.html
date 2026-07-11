@@ -6,16 +6,22 @@
     name="viewport"
     content="width=1080, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
   />
-  <title>VAQ Visitor Map — Lower Teck</title>
+  <title>VAQ Visitor Map — Engagement Gallery Event Map</title>
 
   <!--
-    VAQ VISITOR MAP — VMAP-04 LTECK: LOWER TECK
+    VAQ VISITOR MAP — ENGAGEMENT GALLERY TEMPORARY EVENT MAP
     Target signage canvas: 1080 × 1440 px
 
     Folder assumptions:
       /assets/...
-      /vmap-01_exploration/index.html
+      /vmap-##_event-map/index.html
       /gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/...
+
+    Temporary event-map behaviour:
+      - No database connection is used.
+      - All existing amenity markers remain defined below but are hidden by default.
+      - Set an individual marker's visible property to true to display it.
+      - Additional event-specific amenity markers may be appended to AMENITY_MARKERS.
 
     Coordinate convention:
       - Percentages are measured from the top-left corner of the full 1080 × 1440 canvas.
@@ -27,6 +33,45 @@
   -->
 
   <link rel="stylesheet" href="../assets/css/visitor-map.css?v=1" />
+
+  <style>
+    /*
+      Temporary event-map refinements:
+      - The first five amenity legend icons are 39% larger.
+      - Exit guidance begins a slow, subtle pulse/wiggle after 11:30 p.m.
+        Vancouver time. Individual scale/rotate properties preserve the
+        positioning transform supplied by the shared visitor-map stylesheet.
+    */
+    .amenity-legend-item.event-featured-legend-icon img {
+      scale: 1.39;
+      transform-origin: center;
+    }
+
+    .exit-guidance-active {
+      animation: exitGuidancePulse 4.8s ease-in-out infinite;
+      transform-origin: center;
+      will-change: scale, rotate;
+    }
+
+    @keyframes exitGuidancePulse {
+      0%,
+      100% {
+        scale: 0.95;
+        rotate: -1deg;
+      }
+
+      50% {
+        scale: 1.05;
+        rotate: 1deg;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .exit-guidance-active {
+        animation: none;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -54,7 +99,6 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     "use strict";
 
@@ -63,8 +107,6 @@
        ====================================================================== */
 
     const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
-    const SUPABASE_URL = "https://csxuuwbtxgdpvskggcux.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_jPeweysUr7DZvFxG7F1-LQ_UR8MT1F9";
 
     const GALLERY_ICON_BASE_PATH =
       "../gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/";
@@ -72,30 +114,28 @@
     const AMENITY_CLUSTER_GAP_PX = 2;
     const AMENITY_LAYOUT_MAX_ITERATIONS = 120;
 
-    // Exploration map legend tuning after the updated base-map artwork.
-    // 216px is exactly 20% of the 1080px signage canvas.
     const GALLERY_LEGEND_PILL_WIDTH_PX = 216;
     const GALLERY_LEGEND_COLUMN_WIDTH_PX = 292;
 
-    // The map uses its own broader Next Program Here visibility window.
-    // Show the earliest non-cancelled program location or locations well in
-    // advance, then keep those pins visible until five minutes after the
-    // qualifying start time. Simultaneous programs share the designation.
-    const TIMEZONE_NAME = "America/Vancouver";
-    const NEXT_PROGRAM_POST_START_GRACE_MINUTES = 5;
-    const NEXT_PROGRAM_DATA_REFRESH_MS = 25000;
-    const NEXT_PROGRAM_BOUNDARY_FUDGE_MS = 250;
+    const EVENT_TIMEZONE_NAME = "America/Vancouver";
+    const FOOD_AND_OUTDOOR_BAR_HIDE_MINUTES = (22 * 60);
+    const BAR_AND_DESSERT_HIDE_MINUTES = (23 * 60) + 30;
+    const EVENT_CLOCK_REFRESH_MS = 30000;
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
+    const FEATURED_AMENITY_LEGEND_TYPES = new Set([
+      "bar",
+      "outdoor-bar",
+      "food-station",
+      "dessert-station",
+      "water-station"
+    ]);
 
     /* ======================================================================
-       2. VMAP-04 LTECK PROFILE — LOWER TECK
+       2. TEMPORARY EVENT-MAP PROFILE
 
        activeYouAreHere contains the physical display location for this
-       specific map module. Coordinates are intentionally easy to edit here.
+       map module. Four event-map versions may share this file structure while
+       using different You Are Here coordinates.
 
        Map-alignment note:
        The illustrated base-map assets and all map-relative overlays were moved
@@ -105,7 +145,7 @@
        ====================================================================== */
 
     const MAP_PROFILE = {
-      key: "vmap-04_lteck",
+      key: "vmap-01_exploration_event",
 
       chrome: {
         title:                  { x: 5.0,  y: 4.6,  anchor: "top-left" },
@@ -123,8 +163,7 @@
         enterLabel:             { x: 85.9, y: 30.5, anchor: "centre" },
         // Fixed map-pin legend rows use top-left anchors so their SVGs align
         // vertically. Coordinates are easy to tune together as a paired block.
-        youAreHereLegend:       { x: 68.0, y: 9.35, anchor: "top-left" },
-        nextProgramLegend:      { x: 68.0, y: 14.05, anchor: "top-left" }
+        youAreHereLegend:       { x: 68.0, y: 9.35, anchor: "top-left" }
       },
 
       activeYouAreHere: {
@@ -132,42 +171,7 @@
         x: 60.3,
         y: 54.8,
         anchor: "centre"
-      },
-
-      /*
-        Database-driven Next Program Here anchors.
-        Each key matches program_schedule_sets.entries_json[].location_key.
-        Coordinates are centre points measured from the full 1080 × 1440 map.
-      */
-      nextProgramAnchors: {
-        "bill-reid-plaza":           { x: 81.5, y: 33.1, anchor: "centre" },
-        "connections-gallery":       { x: 54.7, y: 28.4, anchor: "centre" },
-        "engagement-gallery":        { x: 58.3, y: 50.9, anchor: "centre" },
-        "pacific-canada":            { x: 51.0, y: 24.4, anchor: "centre" },
-        "frogs-forever":             { x: 53.1, y: 44.1, anchor: "centre" },
-        "treasures-of-the-bc-coast": { x: 44.2, y: 20.7, anchor: "centre" },
-        "stellers-bay":              { x: 22.5, y: 20.5, anchor: "centre" },
-        "canadas-arctic":            { x: 22.5, y: 46.8, anchor: "centre" },
-        "bc-wild-coast":             { x: 40.0, y: 36.2, anchor: "centre" },
-        "seal-cove":                 { x: 22.5, y: 29.7, anchor: "centre" },
-        "sea-otters":                { x: 30.0, y: 26.2, anchor: "centre" },
-        "exploration-gallery":        { x: 42.0, y: 13.7, anchor: "centre" },
-        "wet-lab":                   { x: 40.0, y: 10.2, anchor: "centre" },
-        "4d-theatre":                { x: 50.0, y: 11.8, anchor: "centre" },
-        "virtual-reality":            { x: 36.8, y: 12.9, anchor: "centre" },
-        "clownfish-cove":            { x: 53.0, y: 17.2, anchor: "centre" },
-        "the-tropics":               { x: 59.0, y: 20.2, anchor: "centre" },
-        "amazon-gallery":            { x: 68.7, y: 26.6, anchor: "centre" },
-        "dragons":                   { x: 67.0, y: 51.2, anchor: "centre" },
-        "amazing-axolotls":          { x: 45.0, y: 4.2, anchor: "centre" }
       }
-    };
-
-    const nextProgramState = {
-      refreshTimerId: null,
-      boundaryTimerId: null,
-      lastScheduleSignature: "",
-      lastRenderedLocationKeys: []
     };
 
     /* ======================================================================
@@ -194,6 +198,22 @@
       "food-and-beverage": {
         label: "Food & Beverage",
         icon: "../assets/icons/food-and-beverage.svg"
+      },
+      "food-station": {
+        label: "Food Station",
+        icon: "../assets/icons/food-and-beverage.svg"
+      },
+      "bar": {
+        label: "Bar",
+        icon: "../assets/icons/bar.svg"
+      },
+      "outdoor-bar": {
+        label: "Outdoor Bar",
+        icon: "../assets/icons/outdoor-bar.svg"
+      },
+      "dessert-station": {
+        label: "Dessert Station",
+        icon: "../assets/icons/dessert.svg"
       },
       "water-station": {
         label: "Water Station",
@@ -230,19 +250,16 @@
     };
 
     const AMENITY_LEGEND_ORDER = [
-      "guest-services",
-      "elevator",
-      "stairs",
-      "gift-shop",
-      "food-and-beverage",
+      "bar",
+      "outdoor-bar",
+      "food-station",
+      "dessert-station",
       "water-station",
       "washroom",
       "accessible-washroom",
       "genderless-washroom",
-      "nursing-quiet-room",
-      "stroller-wagon-parking",
-      "lockers",
-      "accessible-viewing"
+      "stairs",
+      "elevator"
     ];
 
     /* ======================================================================
@@ -250,89 +267,110 @@
 
        Every coordinate is a centre point measured from the top-left corner
        of the 1080 × 1440 canvas.
+
+       Legacy markers remain defined below. Only the standard amenity categories
+       required for this event and the temporary event-specific markers are
+       visible. Any marker can still be enabled or disabled with its visible
+       property.
        ====================================================================== */
 
     const AMENITY_MARKERS = [
-      { id: "accessible-viewing-01",  type: "accessible-viewing",  x: 56.9, y: 16.2 },
-      { id: "accessible-viewing-02",  type: "accessible-viewing",  x: 18.1, y: 25.8 },
-      { id: "accessible-viewing-03",  type: "accessible-viewing",  x: 39.0, y: 28.7 },
-      { id: "accessible-viewing-04",  type: "accessible-viewing",  x: 37.5, y: 33.9 },
+      { id: "accessible-viewing-01", visible: false, type: "accessible-viewing",  x: 56.9, y: 16.2 },
+      { id: "accessible-viewing-02", visible: false, type: "accessible-viewing",  x: 18.1, y: 25.8 },
+      { id: "accessible-viewing-03", visible: false, type: "accessible-viewing",  x: 39.0, y: 28.7 },
+      { id: "accessible-viewing-04", visible: false, type: "accessible-viewing",  x: 37.5, y: 33.9 },
 
-      { id: "accessible-washroom-01", type: "accessible-washroom", x: 64.9, y: 33.7 },
-      { id: "accessible-washroom-02", type: "accessible-washroom", x: 51.2, y: 45.2 },
-      { id: "accessible-washroom-03", type: "accessible-washroom", x: 69.3, y: 56.6 },
-      { id: "accessible-washroom-04", type: "accessible-washroom", x: 14.1, y: 35.6 },
+      { id: "accessible-washroom-01", visible: true, type: "accessible-washroom", x: 64.9, y: 33.7 },
+      { id: "accessible-washroom-02", visible: true, type: "accessible-washroom", x: 51.2, y: 45.2 },
+      { id: "accessible-washroom-03", visible: true, type: "accessible-washroom", x: 69.3, y: 56.6 },
+      { id: "accessible-washroom-04", visible: false, type: "accessible-washroom", x: 14.1, y: 35.6 },
 
-      { id: "elevator-01",            type: "elevator",            x: 45.2, y: 23.2 },
-      { id: "elevator-02",            type: "elevator",            x: 23.2, y: 25.3 },
-      { id: "elevator-03",            type: "elevator",            x: 58.4, y: 32.3 },
-      { id: "elevator-04",            type: "elevator",            x: 45.0, y: 43.5 },
-      { id: "elevator-05",            type: "elevator",            x: 23.1, y: 48.5 },
-      { id: "elevator-06",            type: "elevator",            x: 58.5, y: 54.6 },
+      { id: "elevator-01", visible: true, type: "elevator",            x: 45.2, y: 23.2 },
+      { id: "elevator-02", visible: true, type: "elevator",            x: 23.2, y: 25.3 },
+      { id: "elevator-03", visible: true, type: "elevator",            x: 58.4, y: 32.3 },
+      { id: "elevator-04", visible: true, type: "elevator",            x: 45.0, y: 43.5 },
+      { id: "elevator-05", visible: true, type: "elevator",            x: 23.1, y: 48.5 },
+      { id: "elevator-06", visible: true, type: "elevator",            x: 58.5, y: 54.6 },
 
-      { id: "food-and-beverage-01",   type: "food-and-beverage",   x: 30.0, y: 21.3 },
-      { id: "food-and-beverage-02",   type: "food-and-beverage",   x: 63.9, y: 36.2 },
-      { id: "food-and-beverage-03",   type: "food-and-beverage",   x: 66.1, y: 42.9 },
+      { id: "food-and-beverage-01", visible: false, type: "food-and-beverage",   x: 30.0, y: 21.3 },
+      { id: "food-and-beverage-02", visible: false, type: "food-and-beverage",   x: 63.9, y: 36.2 },
+      { id: "food-and-beverage-03", visible: false, type: "food-and-beverage",   x: 66.1, y: 42.9 },
 
-      { id: "genderless-washroom-01", type: "genderless-washroom", x: 66.6, y: 34.2 },
-      { id: "genderless-washroom-02", type: "genderless-washroom", x: 52.8, y: 45.9 },
-      { id: "genderless-washroom-03", type: "genderless-washroom", x: 67.6, y: 56.2 },
+      { id: "genderless-washroom-01", visible: true, type: "genderless-washroom", x: 66.6, y: 34.2 },
+      { id: "genderless-washroom-02", visible: true, type: "genderless-washroom", x: 52.8, y: 45.9 },
+      { id: "genderless-washroom-03", visible: true, type: "genderless-washroom", x: 67.6, y: 56.2 },
 
-      { id: "gift-shop-01",           type: "gift-shop",           x: 75.7, y: 28.1 },
-      { id: "gift-shop-02",           type: "gift-shop",           x: 46.2, y: 48.3 },
+      { id: "gift-shop-01", visible: false, type: "gift-shop",           x: 75.7, y: 28.1 },
+      { id: "gift-shop-02", visible: false, type: "gift-shop",           x: 46.2, y: 48.3 },
 
-      { id: "lockers-01",             type: "lockers",             x: 49.6, y: 44.4 },
-      { id: "lockers-02",             type: "lockers",             x: 68.9, y: 53.8 },
+      { id: "lockers-01", visible: false, type: "lockers",             x: 49.6, y: 44.4 },
+      { id: "lockers-02", visible: false, type: "lockers",             x: 68.9, y: 53.8 },
 
-      { id: "stairs-01",              type: "stairs",              x: 22.5, y: 15.2 },
-      { id: "stairs-02",              type: "stairs",              x: 48.1, y: 24.1 },
-      { id: "stairs-03",              type: "stairs",              x: 42.5, y: 26.3 },
-      { id: "stairs-04",              type: "stairs",              x: 24.8, y: 29.1 },
-      { id: "stairs-05",              type: "stairs",              x: 57.6, y: 31.1 },
-      { id: "stairs-06",              type: "stairs",              x: 19.9, y: 35.1 },
-      { id: "stairs-07",              type: "stairs",              x: 49.9, y: 37.1 },
-      { id: "stairs-08",              type: "stairs",              x: 42.1, y: 46.7 },
-      { id: "stairs-09",              type: "stairs",              x: 48.0, y: 45.7 },
-      { id: "stairs-10",              type: "stairs",              x: 24.6, y: 50.2 },
-      { id: "stairs-11",              type: "stairs",              x: 57.5, y: 53.2 },
-      { id: "stairs-12",              type: "stairs",              x: 50.6, y: 58.6 },
+      { id: "stairs-01", visible: true, type: "stairs",              x: 22.5, y: 15.2 },
+      { id: "stairs-02", visible: true, type: "stairs",              x: 48.1, y: 24.1 },
+      { id: "stairs-03", visible: true, type: "stairs",              x: 42.5, y: 26.3 },
+      { id: "stairs-04", visible: true, type: "stairs",              x: 24.8, y: 29.1 },
+      { id: "stairs-05", visible: true, type: "stairs",              x: 57.6, y: 31.1 },
+      { id: "stairs-06", visible: true, type: "stairs",              x: 19.9, y: 35.1 },
+      { id: "stairs-07", visible: true, type: "stairs",              x: 49.9, y: 37.1 },
+      { id: "stairs-08", visible: true, type: "stairs",              x: 42.1, y: 46.7 },
+      { id: "stairs-09", visible: true, type: "stairs",              x: 48.0, y: 45.7 },
+      { id: "stairs-10", visible: true, type: "stairs",              x: 24.6, y: 50.2 },
+      { id: "stairs-11", visible: true, type: "stairs",              x: 57.5, y: 53.2 },
+      { id: "stairs-12", visible: true, type: "stairs",              x: 50.6, y: 58.6 },
 
-      { id: "stroller-wagon-parking-01", type: "stroller-wagon-parking", x: 49.0, y: 14.4 },
-      { id: "stroller-wagon-parking-02", type: "stroller-wagon-parking", x: 58.8, y: 23.5 },
-      { id: "stroller-wagon-parking-03", type: "stroller-wagon-parking", x: 50.3, y: 30.5 },
-      { id: "stroller-wagon-parking-04", type: "stroller-wagon-parking", x: 55.2, y: 44.3 },
-      { id: "stroller-wagon-parking-05", type: "stroller-wagon-parking", x: 58.0, y: 31.5 },
-      { id: "stroller-wagon-parking-06", type: "stroller-wagon-parking", x: 60.1, y: 52.2 },
+      { id: "stroller-wagon-parking-01", visible: false, type: "stroller-wagon-parking", x: 49.0, y: 14.4 },
+      { id: "stroller-wagon-parking-02", visible: false, type: "stroller-wagon-parking", x: 58.8, y: 23.5 },
+      { id: "stroller-wagon-parking-03", visible: false, type: "stroller-wagon-parking", x: 50.3, y: 30.5 },
+      { id: "stroller-wagon-parking-04", visible: false, type: "stroller-wagon-parking", x: 55.2, y: 44.3 },
+      { id: "stroller-wagon-parking-05", visible: false, type: "stroller-wagon-parking", x: 58.0, y: 31.5 },
+      { id: "stroller-wagon-parking-06", visible: false, type: "stroller-wagon-parking", x: 60.1, y: 52.2 },
 
-      { id: "washroom-01",            type: "washroom",            x: 42.5, y: 8.1 },
-      { id: "washroom-02",            type: "washroom",            x: 33.9, y: 15.2 },
-      { id: "washroom-03",            type: "washroom",            x: 40.3, y: 22.3 },
-      { id: "washroom-04",            type: "washroom",            x: 15.5, y: 34.6 },
-      { id: "washroom-05",            type: "washroom",            x: 65.2, y: 35.2 },
-      { id: "washroom-06",            type: "washroom",            x: 70.9, y: 39.2 },
-      { id: "washroom-07",            type: "washroom",            x: 67.2, y: 54.8 },
-      { id: "washroom-08",            type: "washroom",            x: 52.5, y: 57.4 },
+      { id: "washroom-01", visible: false, type: "washroom",            x: 42.5, y: 8.1 },
+      { id: "washroom-02", visible: true, type: "washroom",            x: 33.9, y: 15.2 },
+      { id: "washroom-03", visible: true, type: "washroom",            x: 40.3, y: 22.3 },
+      { id: "washroom-04", visible: false, type: "washroom",            x: 15.5, y: 34.6 },
+      { id: "washroom-05", visible: true, type: "washroom",            x: 65.2, y: 35.2 },
+      { id: "washroom-06", visible: false, type: "washroom",            x: 70.9, y: 39.2 },
+      { id: "washroom-07", visible: true, type: "washroom",            x: 67.2, y: 54.8 },
+      { id: "washroom-08", visible: false, type: "washroom",            x: 52.5, y: 57.4 },
 
-      { id: "water-station-01",       type: "water-station",       x: 34.4, y: 17.5 },
-      { id: "water-station-02",       type: "water-station",       x: 70.9, y: 34.9 },
-      { id: "water-station-03",       type: "water-station",       x: 54.2, y: 46.7 },
-      { id: "water-station-04",       type: "water-station",       x: 42.1, y: 24.5 },
+      { id: "water-station-01", visible: true, type: "water-station",       x: 34.4, y: 17.5 },
+      { id: "water-station-02", visible: true, type: "water-station",       x: 70.9, y: 34.9 },
+      { id: "water-station-03", visible: true, type: "water-station",       x: 54.2, y: 46.7 },
+      { id: "water-station-04", visible: true, type: "water-station",       x: 42.1, y: 24.5 },
 
-      { id: "guest-services-desk",    type: "guest-services",      x: 52.8, y: 28.4, className: "guest-services-marker" }
+      /* Temporary event amenities — Exploration Gallery event map */
+      { id: "event-bar-01",            visible: true, type: "bar",             x: 54.2, y: 28.5 },
+      { id: "event-bar-02",            visible: true, type: "bar",             x: 53.8, y: 23.0 },
+      { id: "event-outdoor-bar-01",    visible: true, type: "outdoor-bar",     x: 27.6, y: 21.1 },
+
+      { id: "event-food-station-01",   visible: true, type: "food-station",    x: 59.5, y: 29.0 },
+      { id: "event-food-station-02",   visible: true, type: "food-station",    x: 52.5, y: 25.2 },
+      { id: "event-food-station-03",   visible: true, type: "food-station",    x: 45.1, y: 24.9 },
+      { id: "event-food-station-04",   visible: true, type: "food-station",    x: 46.8, y: 21.9 },
+      { id: "event-food-station-05",   visible: true, type: "food-station",    x: 44.8, y: 14.8 },
+      { id: "event-food-station-06",   visible: true, type: "food-station",    x: 35.0, y: 15.0 },
+      { id: "event-food-station-07",   visible: true, type: "food-station",    x: 44.8, y: 14.9 },
+
+      { id: "event-dessert-station-01", visible: true, type: "dessert-station", x: 61.5, y: 53.0 },
+      { id: "event-dessert-station-02", visible: true, type: "dessert-station", x: 59.5, y: 32.0 },
+
+      { id: "guest-services-desk", visible: false, type: "guest-services",      x: 52.8, y: 28.4, className: "guest-services-marker" }
     ];
 
     /* ======================================================================
        5. GALLERY LEGEND PRESENTATION
 
-       The map legend follows the legacy visitor-map order. Supabase remains
-       the source of truth for colour values and icon filenames. Map-specific
-       labels may intentionally differ from admin-facing schedule labels.
+       The map legend follows the legacy visitor-map order. For this temporary
+       event map, colours and icon filenames come exclusively from the static
+       LOCATION_STYLES list below. No database request is made.
 
        Changing Tides remains available in the schedule CMS but is omitted
        here while the current public map presents Dragons in that gallery.
        ====================================================================== */
 
-    const FALLBACK_LOCATION_STYLES = [
+    const LOCATION_STYLES = [
       { location_key: "4d-theatre",                display_name: "4-D Theatre",                    hex_color: "#cca1cc", icon_path: "./assets/icons/4d-theatre.svg",                    sort_order: 10 },
       { location_key: "amazing-axolotls",          display_name: "Amazing Axolotls",                hex_color: "#008f9f", icon_path: "./assets/icons/amazing-axolotls.svg",              sort_order: 20 },
       { location_key: "bc-wild-coast",             display_name: "B.C. Wild Coast",                 hex_color: "#1b4788", icon_path: "./assets/icons/bc-wild-coast.svg",                 sort_order: 30 },
@@ -401,7 +439,6 @@
         debugLabel
         || element.dataset.debugLabel
         || element.dataset.markerId
-        || element.dataset.nextProgramLocationKey
         || element.id
         || [...element.classList].filter((className) => className !== "positioned").join(".")
         || element.tagName.toLowerCase();
@@ -465,7 +502,7 @@
       document.getElementById("debug-panel").textContent = [
         `Profile: ${MAP_PROFILE.key}`,
         "Canvas: 1080 × 1440",
-        `Amenity overlays: ${AMENITY_MARKERS.length}`,
+        `Visible amenity overlays: ${AMENITY_MARKERS.filter((marker) => marker.visible).length}`,
         `Active You Are Here pin: ${MAP_PROFILE.activeYouAreHere.visible ? "enabled" : "disabled"}`,
         message
       ].join("\n");
@@ -490,10 +527,12 @@
       layer.appendChild(logo);
 
       const exitArrow = makeImage("../assets/icons/exit-arrow.svg", "wayfinding-asset direction-arrow");
+      exitArrow.id = "event-exit-arrow";
       setPosition(exitArrow, p.exitArrow);
       layer.appendChild(exitArrow);
 
       const exitLabel = makeImage("../assets/icons/exit-label.svg", "wayfinding-asset direction-label");
+      exitLabel.id = "event-exit-label";
       setPosition(exitLabel, p.exitLabel);
       layer.appendChild(exitLabel);
 
@@ -677,7 +716,8 @@
 
     function renderAmenityMarkers() {
       const layer = document.getElementById("amenity-marker-layer");
-      const resolvedMarkers = resolveAmenityMarkerLayout(AMENITY_MARKERS);
+      const visibleMarkers = AMENITY_MARKERS.filter((marker) => marker.visible === true);
+      const resolvedMarkers = resolveAmenityMarkerLayout(visibleMarkers);
 
       resolvedMarkers.forEach((marker) => {
         const type = AMENITY_TYPES[marker.type];
@@ -689,6 +729,7 @@
         const extraClass = marker.className ? ` ${marker.className}` : "";
         const image = makeImage(type.icon, `amenity-marker${extraClass}`);
         image.dataset.markerId = marker.id;
+        image.dataset.amenityType = marker.type;
         image.title = `${type.label}: ${marker.id}`;
         setPosition(image, marker);
         layer.appendChild(image);
@@ -734,25 +775,6 @@
       layer.appendChild(key);
     }
 
-    function renderNextProgramLegendKey() {
-      const layer = document.getElementById("legend-layer");
-      const key = document.createElement("div");
-      key.id = "next-program-legend-key";
-      key.className = "you-are-here-key";
-      key.hidden = true;
-      key.innerHTML = `
-        <img class="pin-asset legend-pin" src="../assets/next-program-here.svg" alt="">
-        <span>= Next program here</span>
-      `;
-      setPosition(key, MAP_PROFILE.chrome.nextProgramLegend);
-      layer.appendChild(key);
-    }
-
-    function setNextProgramLegendVisibility(isVisible) {
-      const key = document.getElementById("next-program-legend-key");
-      if (key) key.hidden = !isVisible;
-    }
-
     function renderAmenityLegend() {
       const layer = document.getElementById("legend-layer");
       const legend = document.createElement("section");
@@ -762,6 +784,12 @@
         const type = AMENITY_TYPES[typeKey];
         const item = document.createElement("div");
         item.className = "amenity-legend-item";
+        item.dataset.amenityType = typeKey;
+
+        if (FEATURED_AMENITY_LEGEND_TYPES.has(typeKey)) {
+          item.classList.add("event-featured-legend-icon");
+        }
+
         item.innerHTML = `
           <img src="${type.icon}" alt="">
           <span>${type.label}</span>
@@ -837,259 +865,83 @@
       );
     }
 
-    /* ======================================================================
-       10. SUPABASE LOCATION-STYLE LOADING
-
-       Gallery colours and icon filenames are loaded from the same
-       program_location_styles table used by the Daily Program Schedule.
-       If the network or database is unavailable, the page falls back to the
-       supplied export so the visitor map still renders.
-       ====================================================================== */
-
-    async function fetchActiveLocationStyles() {
-      const { data, error } = await supabaseClient
-        .from("program_location_styles")
-        .select("location_key, display_name, hex_color, icon_path, sort_order")
-        .eq("is_active", true);
-
-      if (error) throw error;
-      return Array.isArray(data) && data.length ? data : FALLBACK_LOCATION_STYLES;
-    }
-
-    async function loadLocationStyles() {
-      try {
-        const locationStyles = await fetchActiveLocationStyles();
-        updateDebugPanel(`Supabase styles loaded: ${locationStyles.length}`);
-        return locationStyles;
-      } catch (error) {
-        console.error("Could not load program_location_styles. Using fallback export.", error);
-        updateDebugPanel(`Supabase style query failed. Using fallback export.\n${error.message}`);
-        return FALLBACK_LOCATION_STYLES;
-      }
-    }
 
     /* ======================================================================
-       11. DATABASE-DRIVEN NEXT-PROGRAM MAP PINS
+       10. VANCOUVER-TIME EVENT AUTOMATION
 
-       This mirrors the guest-facing Daily Program Schedule definition of
-       "next": the earliest eligible start time remains highlighted until
-       five minutes after that start time. Tied programs are intentionally
-       retained, so several gallery pins may bounce at once.
+       Event amenity shutdown schedule:
+       - 10:00 p.m.: Food Station and Outdoor Bar markers disappear.
+       - 11:30 p.m.: Bar and Dessert Station markers disappear.
+       - 11:30 p.m.: Exit arrow and label begin a subtle pulse/wiggle.
+
+       Times between midnight and 5:59 a.m. are treated as a continuation of
+       the prior event evening, preventing hidden amenities from reappearing
+       at midnight. The schedule resets at 6:00 a.m.
        ====================================================================== */
 
-    function getTodayInVancouver() {
-      return new Intl.DateTimeFormat("en-CA", {
-        timeZone: TIMEZONE_NAME
-      }).format(new Date());
-    }
-
-    function getCurrentVancouverParts() {
+    function getCurrentVancouverMinutes() {
       const formatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: TIMEZONE_NAME,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+        timeZone: EVENT_TIMEZONE_NAME,
         hour: "2-digit",
         minute: "2-digit",
-        second: "2-digit",
         hour12: false
       });
 
       const parts = formatter.formatToParts(new Date());
-      const get = (type) => parts.find((part) => part.type === type)?.value ?? "00";
+      const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
+      const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
 
-      return {
-        hour: Number(get("hour")),
-        minute: Number(get("minute")),
-        second: Number(get("second"))
-      };
+      return (hour * 60) + minute;
     }
 
-    function getCurrentMinutesInVancouver() {
-      const now = getCurrentVancouverParts();
-      return (now.hour * 60) + now.minute;
+    function getEventClockMinutes() {
+      const currentMinutes = getCurrentVancouverMinutes();
+
+      // Carry the late-evening state through midnight until 6:00 a.m.
+      return currentMinutes < (6 * 60)
+        ? currentMinutes + (24 * 60)
+        : currentMinutes;
     }
 
-    function parseTimeToMinutes(time) {
-      if (!/^\d{2}:\d{2}$/.test(time || "")) return null;
-      const [hours, minutes] = time.split(":").map(Number);
-      return (hours * 60) + minutes;
+    function setAmenityTypeVisibility(typeKey, isVisible) {
+      document
+        .querySelectorAll(`[data-amenity-type="${typeKey}"].amenity-marker`)
+        .forEach((marker) => {
+          marker.hidden = !isVisible;
+        });
     }
 
-    /*
-      Map-specific Next Program Here rule:
-      - Consider only non-cancelled schedule entries with valid start times.
-      - Keep future entries eligible no matter how far in advance they occur.
-      - Keep a started entry eligible until five minutes after its start time.
-      - Select the earliest eligible start time only.
-      - Render every distinct gallery sharing that qualifying start time.
-    */
-    function resolveNextProgramLocationKeys(entries, nowMinutes) {
-      const eligibleEntries = (Array.isArray(entries) ? entries : [])
-        .filter((entry) => !entry.is_cancelled)
-        .map((entry) => ({
-          ...entry,
-          start_minutes: parseTimeToMinutes(entry.start_time)
-        }))
-        .filter((entry) => (
-          Number.isInteger(entry.start_minutes)
-          && nowMinutes < (
-            entry.start_minutes + NEXT_PROGRAM_POST_START_GRACE_MINUTES
-          )
-        ))
-        .sort((a, b) => a.start_minutes - b.start_minutes);
+    function applyEventClockState() {
+      const eventMinutes = getEventClockMinutes();
+      const hideFoodAndOutdoorBar =
+        eventMinutes >= FOOD_AND_OUTDOOR_BAR_HIDE_MINUTES;
+      const hideBarAndDessert =
+        eventMinutes >= BAR_AND_DESSERT_HIDE_MINUTES;
 
-      if (!eligibleEntries.length) return [];
+      setAmenityTypeVisibility("food-station", !hideFoodAndOutdoorBar);
+      setAmenityTypeVisibility("outdoor-bar", !hideFoodAndOutdoorBar);
+      setAmenityTypeVisibility("bar", !hideBarAndDessert);
+      setAmenityTypeVisibility("dessert-station", !hideBarAndDessert);
 
-      const nextStartMinutes = eligibleEntries[0].start_minutes;
-      return [...new Set(
-        eligibleEntries
-          .filter((entry) => entry.start_minutes === nextStartMinutes)
-          .map((entry) => entry.location_key)
-          .filter(Boolean)
-      )];
-    }
+      const exitGuidanceIsActive = hideBarAndDessert;
 
-    function createAnimatedNextProgramPin(locationKey, position) {
-      const marker = document.createElement("div");
-      marker.className = "active-pin-marker next-program-pin-marker";
-      marker.dataset.nextProgramLocationKey = locationKey;
-
-      const shadow = document.createElement("span");
-      shadow.className = "active-pin-shadow";
-
-      const image = makeImage(
-        "../assets/next-program-here.svg",
-        "pin-asset animated-map-pin-image"
-      );
-
-      marker.append(shadow, image);
-      setPosition(marker, position);
-      return marker;
-    }
-
-    function renderNextProgramPins(locationKeys) {
-      const layer = document.getElementById("dynamic-marker-layer");
-      layer.querySelectorAll(".next-program-pin-marker").forEach((marker) => marker.remove());
-
-      const uniqueKeys = [...new Set(locationKeys || [])];
-      const renderedKeys = [];
-
-      uniqueKeys.forEach((locationKey) => {
-        const position = MAP_PROFILE.nextProgramAnchors[locationKey];
-        if (!position) {
-          console.info(`No next-program map anchor configured for: ${locationKey}`);
-          return;
-        }
-
-        layer.appendChild(createAnimatedNextProgramPin(locationKey, position));
-        makeDebugDot(position.x, position.y);
-        renderedKeys.push(locationKey);
+      ["event-exit-arrow", "event-exit-label"].forEach((elementId) => {
+        document
+          .getElementById(elementId)
+          ?.classList.toggle("exit-guidance-active", exitGuidanceIsActive);
       });
 
-      nextProgramState.lastRenderedLocationKeys = renderedKeys;
-      setNextProgramLegendVisibility(renderedKeys.length > 0);
-      updateDebugPanel(`Next Program Here pins: ${renderedKeys.length}${renderedKeys.length ? `\n${renderedKeys.join(", ")}` : ""}`);
-    }
-
-    function getNextProgramBoundaryMinutes(entries, nowMinutes) {
-      return (Array.isArray(entries) ? entries : [])
-        .filter((entry) => !entry.is_cancelled)
-        .flatMap((entry) => {
-          const startMinutes = parseTimeToMinutes(entry.start_time);
-          if (!Number.isInteger(startMinutes)) return [];
-          return [
-            startMinutes,
-            startMinutes + NEXT_PROGRAM_POST_START_GRACE_MINUTES
-          ];
-        })
-        .filter((minutes) => minutes > nowMinutes)
-        .sort((a, b) => a - b)[0] ?? null;
-    }
-
-    function getMillisecondsUntilVancouverMinute(targetMinutes) {
-      const now = getCurrentVancouverParts();
-      const currentMinutes = (now.hour * 60) + now.minute;
-      let delta = targetMinutes - currentMinutes;
-      if (delta < 0) delta += 1440;
-
-      const msRemaining = (60 - now.second) * 1000;
-      return delta === 0
-        ? msRemaining
-        : msRemaining + ((delta - 1) * 60000);
-    }
-
-    function clearNextProgramBoundaryTimer() {
-      if (nextProgramState.boundaryTimerId) {
-        clearTimeout(nextProgramState.boundaryTimerId);
-        nextProgramState.boundaryTimerId = null;
-      }
-    }
-
-    function refreshNextProgramPinsFromEntries(entries) {
-      clearNextProgramBoundaryTimer();
-
-      const nowMinutes = getCurrentMinutesInVancouver();
-      const locationKeys = resolveNextProgramLocationKeys(entries, nowMinutes);
-      renderNextProgramPins(locationKeys);
-
-      const nextBoundaryMinutes = getNextProgramBoundaryMinutes(entries, nowMinutes);
-      if (!Number.isInteger(nextBoundaryMinutes)) return;
-
-      nextProgramState.boundaryTimerId = setTimeout(
-        () => refreshNextProgramPinsFromEntries(entries),
-        getMillisecondsUntilVancouverMinute(nextBoundaryMinutes) + NEXT_PROGRAM_BOUNDARY_FUDGE_MS
-      );
-    }
-
-    async function fetchLiveProgramSchedule() {
-      const { data, error } = await supabaseClient
-        .from("program_schedule_sets")
-        .select("id, updated_at, entries_json")
-        .eq("schedule_date", getTodayInVancouver())
-        .eq("mode", "live")
-        .maybeSingle();
-
-      if (error) throw error;
-      return data || null;
-    }
-
-    function getScheduleSignature(schedule) {
-      return schedule
-        ? JSON.stringify({
-            id: schedule.id,
-            updated_at: schedule.updated_at,
-            entries_json: schedule.entries_json
-          })
-        : "";
-    }
-
-    async function refreshLiveNextProgramSchedule() {
-      try {
-        const schedule = await fetchLiveProgramSchedule();
-        const signature = getScheduleSignature(schedule);
-
-        if (signature !== nextProgramState.lastScheduleSignature) {
-          nextProgramState.lastScheduleSignature = signature;
-          refreshNextProgramPinsFromEntries(schedule?.entries_json || []);
-        }
-      } catch (error) {
-        console.error("Could not refresh live next-program map pins.", error);
-      }
-
-      nextProgramState.refreshTimerId = setTimeout(
-        refreshLiveNextProgramSchedule,
-        NEXT_PROGRAM_DATA_REFRESH_MS
-      );
-    }
-
-    async function initializeNextProgramPins() {
-      renderNextProgramPins([]);
-      await refreshLiveNextProgramSchedule();
+      updateDebugPanel([
+        "Exploration Gallery event map loaded. Database connection disabled.",
+        `Vancouver event clock: ${Math.floor(eventMinutes / 60) % 24}:${String(eventMinutes % 60).padStart(2, "0")}`,
+        `Food Station / Outdoor Bar: ${hideFoodAndOutdoorBar ? "hidden" : "visible"}`,
+        `Bar / Dessert Station: ${hideBarAndDessert ? "hidden" : "visible"}`,
+        `Exit guidance animation: ${exitGuidanceIsActive ? "active" : "inactive"}`
+      ].join("\n"));
     }
 
     /* ======================================================================
-       12. VIEWPORT SCALING AND INITIALIZATION
+       11. VIEWPORT SCALING AND INITIALIZATION
        ====================================================================== */
 
     function fitCanvasToViewport() {
@@ -1097,7 +949,7 @@
       document.documentElement.style.setProperty("--stage-scale", scale);
     }
 
-    async function initialize() {
+    function initialize() {
       document.getElementById("page").classList.toggle("debug-enabled", DEBUG_MODE);
       fitCanvasToViewport();
 
@@ -1105,12 +957,10 @@
       renderAmenityMarkers();
       renderActiveYouAreHerePin();
       renderYouAreHereLegendKey();
-      renderNextProgramLegendKey();
       renderAmenityLegend();
-      initializeNextProgramPins();
-
-      const locationStyles = await loadLocationStyles();
-      renderGalleryLegend(locationStyles);
+      renderGalleryLegend(LOCATION_STYLES);
+      applyEventClockState();
+      window.setInterval(applyEventClockState, EVENT_CLOCK_REFRESH_MS);
     }
 
     window.addEventListener("resize", fitCanvasToViewport);

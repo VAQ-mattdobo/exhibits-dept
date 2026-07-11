@@ -33,6 +33,45 @@
   -->
 
   <link rel="stylesheet" href="../assets/css/visitor-map.css?v=1" />
+
+  <style>
+    /*
+      Temporary event-map refinements:
+      - The first five amenity legend icons are 39% larger.
+      - Exit guidance begins a slow, subtle pulse/wiggle after 11:30 p.m.
+        Vancouver time. Individual scale/rotate properties preserve the
+        positioning transform supplied by the shared visitor-map stylesheet.
+    */
+    .amenity-legend-item.event-featured-legend-icon img {
+      scale: 1.39;
+      transform-origin: center;
+    }
+
+    .exit-guidance-active {
+      animation: exitGuidancePulse 4.8s ease-in-out infinite;
+      transform-origin: center;
+      will-change: scale, rotate;
+    }
+
+    @keyframes exitGuidancePulse {
+      0%,
+      100% {
+        scale: 0.95;
+        rotate: -1deg;
+      }
+
+      50% {
+        scale: 1.05;
+        rotate: 1deg;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .exit-guidance-active {
+        animation: none;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -77,6 +116,19 @@
 
     const GALLERY_LEGEND_PILL_WIDTH_PX = 216;
     const GALLERY_LEGEND_COLUMN_WIDTH_PX = 292;
+
+    const EVENT_TIMEZONE_NAME = "America/Vancouver";
+    const FOOD_AND_OUTDOOR_BAR_HIDE_MINUTES = (22 * 60);
+    const BAR_AND_DESSERT_HIDE_MINUTES = (23 * 60) + 30;
+    const EVENT_CLOCK_REFRESH_MS = 30000;
+
+    const FEATURED_AMENITY_LEGEND_TYPES = new Set([
+      "bar",
+      "outdoor-bar",
+      "food-station",
+      "dessert-station",
+      "water-station"
+    ]);
 
     /* ======================================================================
        2. TEMPORARY EVENT-MAP PROFILE
@@ -198,16 +250,16 @@
     };
 
     const AMENITY_LEGEND_ORDER = [
-      "accessible-washroom",
-      "elevator",
-      "genderless-washroom",
-      "stairs",
-      "washroom",
-      "water-station",
-      "food-station",
       "bar",
       "outdoor-bar",
-      "dessert-station"
+      "food-station",
+      "dessert-station",
+      "water-station",
+      "washroom",
+      "accessible-washroom",
+      "genderless-washroom",
+      "stairs",
+      "elevator"
     ];
 
     /* ======================================================================
@@ -231,7 +283,7 @@
       { id: "accessible-washroom-01", visible: true, type: "accessible-washroom", x: 64.9, y: 33.7 },
       { id: "accessible-washroom-02", visible: true, type: "accessible-washroom", x: 51.2, y: 45.2 },
       { id: "accessible-washroom-03", visible: true, type: "accessible-washroom", x: 69.3, y: 56.6 },
-      { id: "accessible-washroom-04", visible: true, type: "accessible-washroom", x: 14.1, y: 35.6 },
+      { id: "accessible-washroom-04", visible: false, type: "accessible-washroom", x: 14.1, y: 35.6 },
 
       { id: "elevator-01", visible: true, type: "elevator",            x: 45.2, y: 23.2 },
       { id: "elevator-02", visible: true, type: "elevator",            x: 23.2, y: 25.3 },
@@ -274,14 +326,14 @@
       { id: "stroller-wagon-parking-05", visible: false, type: "stroller-wagon-parking", x: 58.0, y: 31.5 },
       { id: "stroller-wagon-parking-06", visible: false, type: "stroller-wagon-parking", x: 60.1, y: 52.2 },
 
-      { id: "washroom-01", visible: true, type: "washroom",            x: 42.5, y: 8.1 },
+      { id: "washroom-01", visible: false, type: "washroom",            x: 42.5, y: 8.1 },
       { id: "washroom-02", visible: true, type: "washroom",            x: 33.9, y: 15.2 },
       { id: "washroom-03", visible: true, type: "washroom",            x: 40.3, y: 22.3 },
-      { id: "washroom-04", visible: true, type: "washroom",            x: 15.5, y: 34.6 },
+      { id: "washroom-04", visible: false, type: "washroom",            x: 15.5, y: 34.6 },
       { id: "washroom-05", visible: true, type: "washroom",            x: 65.2, y: 35.2 },
-      { id: "washroom-06", visible: true, type: "washroom",            x: 70.9, y: 39.2 },
+      { id: "washroom-06", visible: false, type: "washroom",            x: 70.9, y: 39.2 },
       { id: "washroom-07", visible: true, type: "washroom",            x: 67.2, y: 54.8 },
-      { id: "washroom-08", visible: true, type: "washroom",            x: 52.5, y: 57.4 },
+      { id: "washroom-08", visible: false, type: "washroom",            x: 52.5, y: 57.4 },
 
       { id: "water-station-01", visible: true, type: "water-station",       x: 34.4, y: 17.5 },
       { id: "water-station-02", visible: true, type: "water-station",       x: 70.9, y: 34.9 },
@@ -475,10 +527,12 @@
       layer.appendChild(logo);
 
       const exitArrow = makeImage("../assets/icons/exit-arrow.svg", "wayfinding-asset direction-arrow");
+      exitArrow.id = "event-exit-arrow";
       setPosition(exitArrow, p.exitArrow);
       layer.appendChild(exitArrow);
 
       const exitLabel = makeImage("../assets/icons/exit-label.svg", "wayfinding-asset direction-label");
+      exitLabel.id = "event-exit-label";
       setPosition(exitLabel, p.exitLabel);
       layer.appendChild(exitLabel);
 
@@ -675,6 +729,7 @@
         const extraClass = marker.className ? ` ${marker.className}` : "";
         const image = makeImage(type.icon, `amenity-marker${extraClass}`);
         image.dataset.markerId = marker.id;
+        image.dataset.amenityType = marker.type;
         image.title = `${type.label}: ${marker.id}`;
         setPosition(image, marker);
         layer.appendChild(image);
@@ -729,6 +784,12 @@
         const type = AMENITY_TYPES[typeKey];
         const item = document.createElement("div");
         item.className = "amenity-legend-item";
+        item.dataset.amenityType = typeKey;
+
+        if (FEATURED_AMENITY_LEGEND_TYPES.has(typeKey)) {
+          item.classList.add("event-featured-legend-icon");
+        }
+
         item.innerHTML = `
           <img src="${type.icon}" alt="">
           <span>${type.label}</span>
@@ -804,8 +865,83 @@
       );
     }
 
+
     /* ======================================================================
-       10. VIEWPORT SCALING AND INITIALIZATION
+       10. VANCOUVER-TIME EVENT AUTOMATION
+
+       Event amenity shutdown schedule:
+       - 10:00 p.m.: Food Station and Outdoor Bar markers disappear.
+       - 11:30 p.m.: Bar and Dessert Station markers disappear.
+       - 11:30 p.m.: Exit arrow and label begin a subtle pulse/wiggle.
+
+       Times between midnight and 5:59 a.m. are treated as a continuation of
+       the prior event evening, preventing hidden amenities from reappearing
+       at midnight. The schedule resets at 6:00 a.m.
+       ====================================================================== */
+
+    function getCurrentVancouverMinutes() {
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: EVENT_TIMEZONE_NAME,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(new Date());
+      const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
+      const minute = Number(parts.find((part) => part.type === "minute")?.value ?? 0);
+
+      return (hour * 60) + minute;
+    }
+
+    function getEventClockMinutes() {
+      const currentMinutes = getCurrentVancouverMinutes();
+
+      // Carry the late-evening state through midnight until 6:00 a.m.
+      return currentMinutes < (6 * 60)
+        ? currentMinutes + (24 * 60)
+        : currentMinutes;
+    }
+
+    function setAmenityTypeVisibility(typeKey, isVisible) {
+      document
+        .querySelectorAll(`[data-amenity-type="${typeKey}"].amenity-marker`)
+        .forEach((marker) => {
+          marker.hidden = !isVisible;
+        });
+    }
+
+    function applyEventClockState() {
+      const eventMinutes = getEventClockMinutes();
+      const hideFoodAndOutdoorBar =
+        eventMinutes >= FOOD_AND_OUTDOOR_BAR_HIDE_MINUTES;
+      const hideBarAndDessert =
+        eventMinutes >= BAR_AND_DESSERT_HIDE_MINUTES;
+
+      setAmenityTypeVisibility("food-station", !hideFoodAndOutdoorBar);
+      setAmenityTypeVisibility("outdoor-bar", !hideFoodAndOutdoorBar);
+      setAmenityTypeVisibility("bar", !hideBarAndDessert);
+      setAmenityTypeVisibility("dessert-station", !hideBarAndDessert);
+
+      const exitGuidanceIsActive = hideBarAndDessert;
+
+      ["event-exit-arrow", "event-exit-label"].forEach((elementId) => {
+        document
+          .getElementById(elementId)
+          ?.classList.toggle("exit-guidance-active", exitGuidanceIsActive);
+      });
+
+      updateDebugPanel([
+        "Exploration Gallery event map loaded. Database connection disabled.",
+        `Vancouver event clock: ${Math.floor(eventMinutes / 60) % 24}:${String(eventMinutes % 60).padStart(2, "0")}`,
+        `Food Station / Outdoor Bar: ${hideFoodAndOutdoorBar ? "hidden" : "visible"}`,
+        `Bar / Dessert Station: ${hideBarAndDessert ? "hidden" : "visible"}`,
+        `Exit guidance animation: ${exitGuidanceIsActive ? "active" : "inactive"}`
+      ].join("\n"));
+    }
+
+    /* ======================================================================
+       11. VIEWPORT SCALING AND INITIALIZATION
        ====================================================================== */
 
     function fitCanvasToViewport() {
@@ -823,7 +959,8 @@
       renderYouAreHereLegendKey();
       renderAmenityLegend();
       renderGalleryLegend(LOCATION_STYLES);
-      updateDebugPanel("Exploration Gallery event map loaded. Database connection disabled.");
+      applyEventClockState();
+      window.setInterval(applyEventClockState, EVENT_CLOCK_REFRESH_MS);
     }
 
     window.addEventListener("resize", fitCanvasToViewport);
