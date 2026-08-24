@@ -1,0 +1,750 @@
+{
+  "meta": {
+    "lastEditedBy": "Matt Dobo",
+    "lastEditedInitials": "MD",
+    "lastEditedAt": "2026-08-24T13:51-07:00",
+    "maintenanceNotice": "Manually maintained inventory — device assignments and operational status may become out of date."
+  },
+  "items": [
+    {
+      "id": "ga-1-1_membership_bar",
+      "title": "Membership Bar",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-1-1_membership_bar/",
+      "location": "Admissions",
+      "status": "retired",
+      "notes": "Was used when one of the GA screens was down, using an alternative layout.",
+      "module": "GA 1-1",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "ga-1-1_membership_bar"
+        }
+      ]
+    },
+    {
+      "id": "ga-1-1_wide-membership-bar",
+      "title": "Membership Bar — Wide",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-1-1_wide-membership-bar/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 1.1 Wide Membership Colour Bar (blue/768 px).",
+      "module": "GA 1-1",
+      "assignments": [
+        {
+          "device": "AV-525 - GA1 - Admissions",
+          "channel": "ga-1-1_wide-membership-bar"
+        }
+      ]
+    },
+    {
+      "id": "ga-1-2_ga-1-3_memberships",
+      "title": "Memberships",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-1-2_ga-1-3_memberships/",
+      "location": "Admissions",
+      "status": "retired",
+      "notes": "Was used when one of the GA screens was down, using an alternative layout.",
+      "module": "GA 1-2 / 1-3",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "ga-1-2_ga-1-3_memberships"
+        }
+      ]
+    },
+    {
+      "id": "ga-2-1_vanaqua-title",
+      "title": "Vancouver Aquarium — Title",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-2-1_vanaqua-title/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 2.1 #VanAqua Memories Title.",
+      "module": "GA 2-1",
+      "assignments": [
+        {
+          "device": "AV-549 - GA2 - Admissions",
+          "channel": "ga-2-1_vanaqua-title"
+        }
+      ]
+    },
+    {
+      "id": "ga-2-2_express-members-bar-1",
+      "title": "Express Members Bar — 1",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-2-2_express-members-bar-1/",
+      "location": "Admissions",
+      "status": "retired",
+      "notes": "Was used when one of the GA screens was down, using an alternative layout.",
+      "module": "GA 2-2",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "ga-2-2_express-members-bar-1"
+        }
+      ]
+    },
+    {
+      "id": "ga-2-2_express-members-bar-3",
+      "title": "Express Members Bar — 3",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-2-2_express-members-bar-3/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 2.2 Narrow Express/Members Colour Bar (orange/384 px).",
+      "module": "GA 2-2",
+      "assignments": [
+        {
+          "device": "AV-549 - GA2 - Admissions",
+          "channel": "ga-2-2_express-members-bar-3"
+        }
+      ]
+    },
+    {
+      "id": "ga-2-3_crowdriff-gallery-1",
+      "title": "CrowdRiff Gallery — 1",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-2-3_crowdriff-gallery-1/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 2.3 CrowdRiff Gallery 1 of 2 (the other one is inside at Guest Services).",
+      "module": "GA 2-3",
+      "assignments": [
+        {
+          "device": "AV-549 - GA2 - Admissions",
+          "channel": "ga-2-3_crowdriff-gallery-1"
+        }
+      ]
+    },
+    {
+      "id": "ga-3-1_express-members-bar-2",
+      "title": "Express Members Bar — 2",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-3-1_express-members-bar-2/",
+      "location": "Admissions",
+      "status": "retired",
+      "notes": "Was used when one of the GA screens was down, using an alternative layout.",
+      "module": "GA 3-1",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "ga-3-1_express-members-bar-2"
+        }
+      ]
+    },
+    {
+      "id": "ga-3-1_express-members-bar-4",
+      "title": "Express Members Bar — 4",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-3-1_express-members-bar-4/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 3.1 Narrow Express/Members Colour Bar 2 (orange/384 px).",
+      "module": "GA 3-1",
+      "assignments": [
+        {
+          "device": "AV-543 - GA3 - Admissions",
+          "channel": "ga-3-1_express-members-bar-4"
+        }
+      ]
+    },
+    {
+      "id": "ga-3-2_prohibited-title",
+      "title": "Prohibited Items — Title",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-3-2_prohibited-title/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 3.2 Prohibited Items Titlebar.",
+      "module": "GA 3-2",
+      "assignments": [
+        {
+          "device": "AV-543 - GA3 - Admissions",
+          "channel": "ga-3-2_prohibited-title"
+        }
+      ]
+    },
+    {
+      "id": "ga-3-3_prohibited-content",
+      "title": "Prohibited Items — Content",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-3-3_prohibited-content/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 3.3 Prohibited Items web content from .../screenflow/ga-3-3_prohibited-content/index.html.",
+      "module": "GA 3-3",
+      "assignments": [
+        {
+          "device": "AV-543 - GA3 - Admissions",
+          "channel": "ga-3-3_prohibited-content (screenflow/web)"
+        }
+      ]
+    },
+    {
+      "id": "ga-4-1_pricing-title",
+      "title": "Admission Pricing — Title",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-4-1_pricing-title/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "1536 × 270 version — designed to work with the slim General Bar.",
+      "module": "GA 4-1",
+      "assignments": [
+        {
+          "device": "AV-526 - LCD Behind Admissions Staff",
+          "channel": "ga-4-1_pricing-title"
+        }
+      ]
+    },
+    {
+      "id": "ga-4-1b_pricing-title-slim",
+      "title": "Admission Pricing — Title (Slim)",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-4-1b_pricing-title-slim/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 4.1b Pricing Title — slim version (1152 px).",
+      "module": "GA 4-1B",
+      "assignments": [
+        {
+          "device": "AV-548 - GA4 - Admissions",
+          "channel": "ga-4-1b_pricing-title-slim"
+        }
+      ]
+    },
+    {
+      "id": "ga-4-2_pricing-content",
+      "title": "Admission Pricing — Content",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-4-2_pricing-content/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 4.2 GA Price Builder 1 (1536 px version).",
+      "module": "GA 4-2",
+      "assignments": [
+        {
+          "device": "AV-526 - LCD Behind Admissions Staff",
+          "channel": "ga-4-2_pricing-content"
+        }
+      ]
+    },
+    {
+      "id": "ga-4-2b_pricing-content-slim",
+      "title": "Admission Pricing — Content (Slim)",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-4-2b_pricing-content-slim/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 4.2b GA Price Builder 2 (1152 px slim version).",
+      "module": "GA 4-2B",
+      "assignments": [
+        {
+          "device": "AV-548 - GA4 - Admissions",
+          "channel": "ga-4-2b_pricing-content-slim"
+        }
+      ]
+    },
+    {
+      "id": "ga-4-3_general-bar",
+      "title": "General Bar",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-4-3_general-bar/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 4.3 General Admission Pricing Colour Bar.",
+      "module": "GA 4-3",
+      "assignments": [
+        {
+          "device": "AV-526 - LCD Behind Admissions Staff",
+          "channel": "ga-4-3_general-bar"
+        }
+      ]
+    },
+    {
+      "id": "ga-4-3_wide-general-bar",
+      "title": "General Bar — Wide",
+      "category": "Admissions",
+      "url": "https://vaq-smart-cms.github.io/screenflow/ga-4-3_wide-general-bar/",
+      "location": "Admissions",
+      "status": "live",
+      "notes": "GA 4.3 Wide General Admission Colour Bar (green/768 px).",
+      "module": "GA 4-3",
+      "assignments": [
+        {
+          "device": "AV-548 - GA4 - Admissions",
+          "channel": "ga-4-3_wide-general-bar"
+        }
+      ]
+    },
+    {
+      "id": "gs-1-1_program-schedule-title",
+      "title": "Daily Program Schedule — Title",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-1-1_program-schedule-title/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 1.1 Program Schedule Title.",
+      "module": "GS 1-1",
+      "assignments": [
+        {
+          "device": "AV-565 - GS1 - Guest Services",
+          "channel": "gs-1-1_program-schedule-title"
+        }
+      ]
+    },
+    {
+      "id": "gs-1-2_daily-program-schedule-program-schedule-full",
+      "title": "Daily Program Schedule",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-1-2_daily-program-schedule/program-schedule-full/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 1.2 Daily Program Schedule (Full). IMPORTANT: One of the biggest projects hosted using the Supabase database.",
+      "module": "GS 1-2",
+      "assignments": [
+        {
+          "device": "AV-565 - GS1 - Guest Services",
+          "channel": "gs-1-2_daily-program-schedule"
+        }
+      ]
+    },
+    {
+      "id": "gs-2-1+2-3_memberships",
+      "title": "Memberships",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-2-1+2-3_memberships/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 2.1 and 2.3 Memberships — was switched over to GS4 (originally GS2).",
+      "module": "GS 2-1 / 2-3",
+      "assignments": [
+        {
+          "device": "AV-557 - GS4 - Guest Services",
+          "channel": "gs-2-1+2-3_memberships"
+        },
+        {
+          "device": "AV-525 - GA1 - Admissions",
+          "channel": "gs-2-1+2-3_memberships"
+        }
+      ]
+    },
+    {
+      "id": "gs-2-2_todays-date",
+      "title": "Today's Date",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-2-2_todays-date/",
+      "location": "Guest Services",
+      "status": "standby",
+      "notes": "GS 2.2 Today's Date.",
+      "module": "GS 2-2",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "gs-2-2_todays-date"
+        }
+      ]
+    },
+    {
+      "id": "gs-2-4_crowdriff-gallery-2",
+      "title": "CrowdRiff Gallery — 2",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-2-4_crowdriff-gallery-2/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 2.4 CrowdRiff (Mini) Gallery 2 — was switched over to GS4 (originally GS2).",
+      "module": "GS 2-4",
+      "assignments": [
+        {
+          "device": "AV-557 - GS4 - Guest Services",
+          "channel": "gs-2-4_crowdriff-gallery-2"
+        }
+      ]
+    },
+    {
+      "id": "gs-3-1_membership-benefits-title",
+      "title": "Membership Benefits — Title",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-3-1_membership-benefits-title/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 3.1 Membership Benefits Title. REMINDER: \"gs-3-2_membership-benefits\" currently plays MP4 content; future intention is to switch it to web-driven content.",
+      "module": "GS 3-1",
+      "assignments": [
+        {
+          "device": "AV-556 - GS3 - Guest Services",
+          "channel": "gs-3-1_membership-benefits-title"
+        }
+      ]
+    },
+    {
+      "id": "gs-4-1_current-time",
+      "title": "Current Time",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-4-1_current-time/",
+      "location": "Guest Services",
+      "status": "retired",
+      "notes": "GS 4.1 Current Time — retired after the clock was integrated into GS 1-1 Daily Program Schedule — Title.",
+      "module": "GS 4-1",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "gs-4-1_current-time"
+        }
+      ]
+    },
+    {
+      "id": "gs-4-2_next-programs-title",
+      "title": "Next Programs — Title",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-4-2_next-programs-title/",
+      "location": "Guest Services",
+      "status": "retired",
+      "notes": "",
+      "module": "GS 4-2",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "gs-4-2_current-next-program-title"
+        }
+      ]
+    },
+    {
+      "id": "gs-4-3_crowdriff-cta",
+      "title": "CrowdRiff CTA",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-4-3_crowdriff-cta/",
+      "location": "Guest Services",
+      "status": "retired",
+      "notes": "GS 4.3 CrowdRiff Gallery 2 of 2 CTA with QR code.",
+      "module": "GS 4-3",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "gs-4-3_crowdriff-cta"
+        }
+      ]
+    },
+    {
+      "id": "gs-4-4_next-programs",
+      "title": "Next Programs",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-4-4_next-programs/",
+      "location": "Guest Services",
+      "status": "retired",
+      "notes": "GS 4.4 Current & Next Program Content.",
+      "module": "GS 4-4",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "gs-4-4_current-next-program"
+        }
+      ]
+    },
+    {
+      "id": "gs-5-1_4d-showtimes-title",
+      "title": "4D Showtimes — Title",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-5-1_4d-showtimes-title/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 5.1 4D Showtimes Title — was switched over to GS2 (originally GS5).",
+      "module": "GS 5-1",
+      "assignments": [
+        {
+          "device": "AV-558 - GS2 - Guest Services",
+          "channel": "gs-5-1_4d-showtimes-title"
+        }
+      ]
+    },
+    {
+      "id": "gs-5-1_check-it-out-title",
+      "title": "Check It Out — Title",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-5-1_check-it-out-title/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 5.1 Check It Out Title.",
+      "module": "GS 5-1",
+      "assignments": [
+        {
+          "device": "AV-554 - GS5 - Guest Services",
+          "channel": "gs-5-1_check-it-out-title"
+        }
+      ]
+    },
+    {
+      "id": "gs-5-1b_4d-showtimes-title",
+      "title": "4D Showtimes — Title (B)",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-5-1b_4d-showtimes-title/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "",
+      "module": "GS 5-1B",
+      "assignments": [
+        {
+          "device": "AV-507 - 4D Line Up (Show Schedule) - Canaccord - L",
+          "channel": "gs-5-1b_4d-showtimes-title"
+        },
+        {
+          "device": "AV-544 Research Lab Projector (Wet Lab) - Canaccord - L",
+          "channel": "gs-5-1b_4d-showtimes-title"
+        }
+      ]
+    },
+    {
+      "id": "gs-5-2_4d-showtimes-schedule",
+      "title": "4D Showtimes — Schedule",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-5-2_4d-showtimes-schedule/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 5.2 4D Showtimes Schedule — the number 5 in the designation is leftover from this content originally being intended for GS5.",
+      "module": "GS 5-2",
+      "assignments": [
+        {
+          "device": "AV-558 - GS2 - Guest Services",
+          "channel": "gs-5-2_4d-showtimes-schedule"
+        },
+        {
+          "device": "AV-507 - 4D Line Up (Show Schedule) - Canaccord - L",
+          "channel": "gs-5-2_4d-showtimes-schedule"
+        },
+        {
+          "device": "AV-544 Research Lab Projector (Wet Lab) - Canaccord - L",
+          "channel": "gs-5-2_4d-showtimes-schedule"
+        }
+      ]
+    },
+    {
+      "id": "gs-5-2_check-it-out",
+      "title": "Check It Out",
+      "category": "Guest Services",
+      "url": "https://vaq-smart-cms.github.io/screenflow/gs-5-2_check-it-out/",
+      "location": "Guest Services",
+      "status": "live",
+      "notes": "GS 5.2 Check It Out — Poster Slideshow. Posters must be hosted in the repo, in the correct folder and size, and referenced in the code.",
+      "module": "GS 5-2",
+      "assignments": [
+        {
+          "device": "AV-554 - GS5 - Guest Services",
+          "channel": "gs-5-2_check-it-out"
+        }
+      ]
+    },
+    {
+      "id": "vmap-01_exploration",
+      "title": "Visitor Map — Exploration Gallery",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-01_exploration/",
+      "location": "Exploration Gallery",
+      "status": "live",
+      "notes": "Visitor Map 1 Exploration Gallery (vaq.smart.cms).",
+      "module": "VMAP-01",
+      "assignments": [
+        {
+          "device": "AV-546 - Wayfinder - Exploration",
+          "channel": "vmap-01_exploration"
+        }
+      ]
+    },
+    {
+      "id": "vmap-01b_exploration_event-temp",
+      "title": "Event Visitor Map — Exploration Gallery",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-01b_exploration_event-temp/",
+      "location": "Exploration Gallery",
+      "status": "testing",
+      "notes": "Visitor Map 1 Exploration Gallery (vaq.smart.cms).",
+      "module": "VMAP-01B",
+      "assignments": [
+        {
+          "device": "AV-546 - Wayfinder - Exploration",
+          "channel": "vmap-01b_exploration_EVENTMODE"
+        }
+      ]
+    },
+    {
+      "id": "vmap-02_uteck1",
+      "title": "Visitor Map — Upper Teck 1",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-02_uteck1/",
+      "location": "Upper Teck 1",
+      "status": "live",
+      "notes": "Visitor Map 2 Teck Connections 1 of 2, near elevator (vaq.smart.cms).",
+      "module": "VMAP-02",
+      "assignments": [
+        {
+          "device": "AV-555 - Wayfinder Touch by Elevator - Upper Teck",
+          "channel": "vmap-02_uteck1"
+        }
+      ]
+    },
+    {
+      "id": "vmap-02b_uteck1_event-temp",
+      "title": "Event Visitor Map — Upper Teck 1",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-02b_uteck1_event-temp/",
+      "location": "Upper Teck 1",
+      "status": "testing",
+      "notes": "Visitor Map 2 Teck Connections 1 of 2, near elevator (vaq.smart.cms).",
+      "module": "VMAP-02B",
+      "assignments": [
+        {
+          "device": "AV-555 - Wayfinder Touch by Elevator - Upper Teck",
+          "channel": "vmap-02b_uteck1_EVENTMODE"
+        }
+      ]
+    },
+    {
+      "id": "vmap-03_uteck2",
+      "title": "Visitor Map — Upper Teck 2",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-03_uteck2/",
+      "location": "Upper Teck 2",
+      "status": "live",
+      "notes": "Visitor Map 3 Teck Connections 2 of 2, near photo experience (vaq.smart.cms).",
+      "module": "VMAP-03",
+      "assignments": [
+        {
+          "device": "AV-553 - Wayfinder Touch by Photo Desk- Upper Teck",
+          "channel": "vmap-03_uteck2"
+        }
+      ]
+    },
+    {
+      "id": "vmap-03b_uteck2_event-temp",
+      "title": "Event Visitor Map — Upper Teck 2",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-03b_uteck2_event-temp/",
+      "location": "Upper Teck 2",
+      "status": "testing",
+      "notes": "Visitor Map 3 Teck Connections 2 of 2, near photo experience (vaq.smart.cms).",
+      "module": "VMAP-03B",
+      "assignments": [
+        {
+          "device": "AV-553 - Wayfinder Touch by Photo Desk- Upper Teck",
+          "channel": "vmap-03b_uteck2_EVENTMODE"
+        }
+      ]
+    },
+    {
+      "id": "vmap-04_lteck",
+      "title": "Visitor Map — Lower Teck",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-04_lteck/",
+      "location": "Lower Teck",
+      "status": "live",
+      "notes": "Visitor Map 4 Teck Engagement (vaq.smart.cms).",
+      "module": "VMAP-04",
+      "assignments": [
+        {
+          "device": "AV-551 - Wayfinder Touch - Lower Teck",
+          "channel": "vmap-04_lteck"
+        }
+      ]
+    },
+    {
+      "id": "vmap-04b_lteck_event-temp",
+      "title": "Event Visitor Map — Lower Teck",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-04b_lteck_event-temp/",
+      "location": "Lower Teck",
+      "status": "testing",
+      "notes": "Visitor Map 4 Teck Engagement (vaq.smart.cms).",
+      "module": "VMAP-04B",
+      "assignments": [
+        {
+          "device": "AV-551 - Wayfinder Touch - Lower Teck",
+          "channel": "vmap-04b_lteck_EVENTMODE"
+        }
+      ]
+    },
+    {
+      "id": "vmap-05_uw-stellers",
+      "title": "Visitor Map — Underwater Steller’s Bay",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-05_uw-stellers/",
+      "location": "Underwater Steller’s Bay",
+      "status": "live",
+      "notes": "Visitor Map 5 Underwater Steller's Bay (vaq.smart.cms).",
+      "module": "VMAP-05",
+      "assignments": [
+        {
+          "device": "AV-537 - Wayfinder - Underwater Steller's Bay",
+          "channel": "vmap-05_uw-stellers"
+        }
+      ]
+    },
+    {
+      "id": "vmap-06_frogs1",
+      "title": "Visitor Map — Frogs 1",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-06_frogs1/",
+      "location": "Frogs 1",
+      "status": "live",
+      "notes": "Visitor Map 6 Frogs Forever? Gallery 1 of 2 (vaq.smart.cms).",
+      "module": "VMAP-06",
+      "assignments": [
+        {
+          "device": "AV-527 - Wayfinder - Frogs 01",
+          "channel": "vmap-06_frogs1"
+        }
+      ]
+    },
+    {
+      "id": "vmap-07_frogs2",
+      "title": "Visitor Map — Frogs 2",
+      "category": "Visitor Maps",
+      "url": "https://vaq-smart-cms.github.io/screenflow/vmap-07_frogs2/",
+      "location": "Frogs 2",
+      "status": "retired",
+      "notes": "Device/location no longer functioning as a display.",
+      "module": "VMAP-07",
+      "assignments": [
+        {
+          "device": "",
+          "channel": "vmap-07_frogs2"
+        }
+      ]
+    },
+    {
+      "id": "wf_daily-program-schedule",
+      "title": "Daily Program Schedule — Wayfinding",
+      "category": "Wayfinding",
+      "url": "https://vaq-smart-cms.github.io/screenflow/wf_daily-program-schedule/",
+      "location": "",
+      "status": "live",
+      "notes": "Way-finder — Daily Program Schedule 1080 × 480 px Version.",
+      "module": "WF",
+      "assignments": [
+        {
+          "device": "AV-546 - Wayfinder - Exploration",
+          "channel": "wf_daily-program-schedule"
+        },
+        {
+          "device": "AV-555 - Wayfinder Touch by Elevator - Upper Teck",
+          "channel": "wf_daily-program-schedule"
+        },
+        {
+          "device": "AV-553 - Wayfinder Touch by Photo Desk- Upper Teck",
+          "channel": "wf_daily-program-schedule"
+        },
+        {
+          "device": "AV-551 - Wayfinder Touch - Lower Teck",
+          "channel": "wf_daily-program-schedule"
+        },
+        {
+          "device": "AV-537 - Wayfinder - Underwater Steller's Bay",
+          "channel": "wf_daily-program-schedule"
+        },
+        {
+          "device": "AV-527 - Wayfinder - Frogs 01",
+          "channel": "wf_daily-program-schedule"
+        }
+      ]
+    }
+  ]
+}
