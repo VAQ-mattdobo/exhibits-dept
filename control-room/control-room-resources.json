@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "version": "1.1",
+    "notice": "Operational resource directory. Authentication credentials and secrets are intentionally excluded."
+  },
+  "cms": [
+    {
+      "id": "daily-pricing",
+      "name": "Daily Pricing Builder",
+      "eyebrow": "Admissions",
+      "description": "Manage and publish the daily admission pricing data used by the Admissions pricing displays.",
+      "flow": [
+        "Supabase",
+        "Daily Pricing Builder",
+        "Admissions"
+      ],
+      "adminUrl": "https://vaq-smart-cms.github.io/screenflow/admin.html",
+      "documentationUrl": "knowledge-base/daily-pricing/",
+      "status": "live"
+    },
+    {
+      "id": "daily-program-schedule",
+      "name": "Daily Program Schedule",
+      "eyebrow": "Guest Services + Wayfinding",
+      "description": "Build, review and publish the daily guest program schedule used across Guest Services and wayfinding displays.",
+      "flow": [
+        "Supabase",
+        "Program Schedule Admin",
+        "Guest Services + Wayfinding"
+      ],
+      "adminUrl": "https://vaq-smart-cms.github.io/screenflow/gs-1-2_daily-program-schedule/admin.html",
+      "documentationUrl": "knowledge-base/daily-program-schedule/",
+      "status": "live"
+    },
+    {
+      "id": "4d-showtimes",
+      "name": "4D Showtimes Admin",
+      "eyebrow": "4D Theatre",
+      "description": "Manage 4D film schedules and supporting film data for the Guest Services showtimes display.",
+      "flow": [
+        "Supabase",
+        "4D Showtimes Admin",
+        "Guest Services"
+      ],
+      "adminUrl": "https://vaq-smart-cms.github.io/screenflow/gs-5-2_4d-showtimes-schedule/admin.html",
+      "documentationUrl": "knowledge-base/4d-showtimes/",
+      "status": "live"
+    }
+  ],
+  "systems": [
+    {
+      "id": "github",
+      "service": "GitHub",
+      "role": "Source code + web hosting",
+      "organization": "vaq-smart-cms",
+      "resource": "screenflow",
+      "description": "Hosts the signage source repository and publishes the web signage through GitHub Pages.",
+      "links": [
+        {
+          "label": "Open Repository",
+          "url": "https://github.com/vaq-smart-cms/screenflow"
+        },
+        {
+          "label": "Open GitHub Pages",
+          "url": "https://vaq-smart-cms.github.io/screenflow/"
+        }
+      ]
+    },
+    {
+      "id": "supabase",
+      "service": "Supabase",
+      "role": "Database + authentication backend",
+      "organization": "Vancouver Aquarium digital signage projects",
+      "resource": "Project links to be documented",
+      "description": "Provides the structured data, authentication and backend services used by the VAQ signage CMS applications.",
+      "links": []
+    },
+    {
+      "id": "kuusoft",
+      "service": "Kuusoft / NexSigns",
+      "role": "Device + channel deployment",
+      "organization": "Vancouver Aquarium signage deployment",
+      "resource": "Devices and channels",
+      "description": "Deploys web signage content to the physical Vancouver Aquarium digital signage players and screens.",
+      "links": []
+    }
+  ]
+}

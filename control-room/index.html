@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <meta name="robots" content="noindex, nofollow">
 
   <title>Digital Signage Control Room | Vancouver Aquarium</title>
 
+  <link rel="icon" type="image/svg+xml" href="../assets/vaq-full-logo.svg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="v1-1.css">
 </head>
 
 <body>
@@ -17,12 +18,24 @@
     <div class="header-inner">
 
       <div class="header-title">
-        <p class="organization">Vancouver Aquarium</p>
+        <a
+          class="vaq-brand"
+          href="https://www.vanaqua.org/"
+          target="_blank"
+          rel="noopener"
+          aria-label="Vancouver Aquarium website"
+        >
+          <img src="../assets/vaq-full-logo.svg" alt="Vancouver Aquarium">
+        </a>
+
+        <p class="organization">
+          Vancouver Aquarium<sup>®</sup>
+        </p>
 
         <h1>Digital Signage Control Room</h1>
 
         <p class="subtitle">
-          Web content inventory and Kuusoft device assignments
+          Web content inventory, administration, documentation and Kuusoft device assignments
         </p>
       </div>
 
@@ -43,53 +56,139 @@
 
   <main>
 
-    <section class="toolbar">
+    <section class="operations-section" aria-labelledby="adminHeading">
+      <div class="section-intro">
+        <div>
+          <p class="section-kicker">Operations</p>
+          <h2 id="adminHeading">Signage Administration</h2>
+        </div>
 
-      <label class="search">
-        <span>Search</span>
-        <input
-          type="search"
-          id="searchInput"
-          placeholder="Content, module, device, location or URL"
-        >
-      </label>
+        <p>
+          Launch the three primary Vancouver Aquarium signage content-management systems,
+          see what each one controls, or open its operating documentation.
+        </p>
+      </div>
 
-      <label>
-        <span>Category</span>
-        <select id="categoryFilter">
-          <option value="all">All categories</option>
-        </select>
-      </label>
-
-      <label>
-        <span>Status</span>
-        <select id="statusFilter">
-          <option value="all">All statuses</option>
-          <option value="review">Needs Review</option>
-          <option value="live">Live</option>
-          <option value="testing">Testing</option>
-          <option value="standby">Standby</option>
-          <option value="retired">Retired</option>
-        </select>
-      </label>
-
+      <div id="cmsLaunchpad" class="cms-launchpad" aria-live="polite">
+        <div class="resource-loading">Loading administration tools…</div>
+      </div>
     </section>
 
-    <section
-      id="content"
-      class="content-groups"
-      aria-live="polite"
-    ></section>
+    <section class="operations-section" aria-labelledby="systemsHeading">
+      <div class="section-intro">
+        <div>
+          <p class="section-kicker">Infrastructure</p>
+          <h2 id="systemsHeading">Digital Signage Systems</h2>
+        </div>
+
+        <p>
+          The services that host, store, manage and deploy Vancouver Aquarium web-driven signage.
+          Authentication credentials and secrets are intentionally never recorded here.
+        </p>
+      </div>
+
+      <div id="systemsHierarchy" class="systems-grid" aria-live="polite">
+        <div class="resource-loading">Loading system references…</div>
+      </div>
+    </section>
+
+    <section class="inventory-section" aria-labelledby="inventoryHeading">
+      <div class="section-intro inventory-intro">
+        <div>
+          <p class="section-kicker">Inventory</p>
+          <h2 id="inventoryHeading">Web Signage Modules</h2>
+        </div>
+
+        <p>
+          Search the audited module directory by display, device, channel, location, status or URL.
+        </p>
+      </div>
+
+      <section class="toolbar">
+
+        <label class="search">
+          <span>Search</span>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Content, module, device, location or URL"
+          >
+        </label>
+
+        <label>
+          <span>Category</span>
+          <select id="categoryFilter">
+            <option value="all">All categories</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Status</span>
+          <select id="statusFilter">
+            <option value="all">All statuses</option>
+            <option value="review">Needs Review</option>
+            <option value="live">Live</option>
+            <option value="testing">Testing</option>
+            <option value="standby">Standby</option>
+            <option value="retired">Retired</option>
+          </select>
+        </label>
+
+      </section>
+
+      <section
+        id="content"
+        class="content-groups"
+        aria-live="polite"
+      ></section>
+    </section>
+
+    <section class="operations-section knowledge-base-teaser" aria-labelledby="docsHeading">
+      <div class="section-intro">
+        <div>
+          <p class="section-kicker">Knowledge Base</p>
+          <h2 id="docsHeading">Documentation & Resources</h2>
+        </div>
+
+        <p>
+          Staff operating guides and technical reference pages for the CMS applications
+          and the wider signage ecosystem.
+        </p>
+      </div>
+
+      <a class="knowledge-base-link" href="knowledge-base/">
+        <span>
+          <strong>Open Digital Signage Knowledge Base</strong>
+          <small>CMS operating guides, system architecture and troubleshooting reference</small>
+        </span>
+        <span aria-hidden="true">→</span>
+      </a>
+    </section>
 
   </main>
 
-  <footer>
-    <p>
-      Vancouver Aquarium — Internal Digital Signage Reference
-    </p>
+  <footer class="official-footer">
+    <div class="footer-inner">
+      <div>
+        <strong>Vancouver Aquarium<sup>®</sup></strong>
+        <span>Digital Signage Control Room</span>
+      </div>
+
+      <div class="footer-links">
+        <a href="https://github.com/vaq-smart-cms/screenflow" target="_blank" rel="noopener">Repository</a>
+        <a href="knowledge-base/">Documentation</a>
+        <a href="./">Control Room</a>
+      </div>
+
+      <p>
+        Internal operational reference. Do not store passwords, API keys, credentials,
+        private network information or other confidential information in this public GitHub Pages project.
+      </p>
+    </div>
   </footer>
 
   <script src="app.js"></script>
+  <script src="v1-1.js"></script>
 
 </body>
 </html>

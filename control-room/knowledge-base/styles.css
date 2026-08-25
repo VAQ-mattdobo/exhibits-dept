@@ -1,0 +1,230 @@
+@font-face {
+  font-family: 'BlissPro';
+  src:
+    url('../../assets/BlissPro-Bold.woff2') format('woff2'),
+    url('../../assets/BlissPro-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --green: #7d9b2d;
+  --blue: #64a5c3;
+  --orange: #e6782d;
+  --grey: #646e78;
+  --navy: #36516a;
+  --bg: #eef3f6;
+  --surface: #fff;
+  --border: #d7e0e5;
+  --text: #243341;
+  --muted: #596876;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-family: Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+body { margin: 0; }
+
+.docs-header {
+  position: relative;
+  padding: 34px max(24px, calc((100% - 1100px) / 2));
+  background: linear-gradient(180deg, #4c6c89, #36516a);
+  color: #fff;
+}
+
+.docs-header::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  background: linear-gradient(90deg, var(--green) 0 28%, var(--blue) 28% 54%, var(--orange) 54% 78%, var(--grey) 78%);
+}
+
+.docs-header a { color: #fff; }
+.docs-header .back { font-size: 12px; font-weight: 700; }
+
+.docs-header h1 {
+  margin: 18px 0 7px;
+  font: 700 clamp(30px, 5vw, 48px)/1 'BlissPro', Arial, sans-serif;
+}
+
+.docs-header p {
+  margin: 0;
+  color: #dce7ed;
+  max-width: 760px;
+  line-height: 1.5;
+}
+
+.docs-main {
+  width: min(1100px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 34px 0 60px;
+}
+
+.docs-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 22px;
+}
+
+.docs-nav,
+.docs-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.docs-nav {
+  align-self: start;
+  position: sticky;
+  top: 18px;
+  padding: 16px;
+}
+
+.docs-nav strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.docs-nav a {
+  display: block;
+  padding: 9px 10px;
+  border-radius: 7px;
+  color: var(--navy);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.docs-nav a:hover { background: #eef6fa; }
+
+.docs-card {
+  padding: 26px;
+  margin-bottom: 16px;
+}
+
+.docs-card h2 {
+  margin: 0 0 12px;
+  font: 700 25px/1.1 'BlissPro', Arial, sans-serif;
+}
+
+.docs-card h3 { margin-top: 24px; }
+
+.docs-card p,
+.docs-card li {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.docs-card code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #f2f5f6;
+  color: var(--text);
+}
+
+.callout {
+  padding: 15px 17px;
+  border-left: 4px solid var(--orange);
+  background: #fff7f1;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  margin: 15px 0;
+}
+
+.flow span {
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: #eef6fa;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.flow b { color: var(--orange); }
+
+.docs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.docs-actions a {
+  padding: 10px 13px;
+  border-radius: 7px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.docs-actions .primary { background: var(--blue); color: #fff; }
+.docs-actions .secondary { border: 1px solid var(--border); color: var(--navy); }
+
+.kb-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.kb-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 230px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.kb-card small {
+  color: var(--orange);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.kb-card strong {
+  margin: 10px 0;
+  font: 700 21px/1.1 'BlissPro', Arial, sans-serif;
+}
+
+.kb-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.kb-card em {
+  margin-top: auto;
+  padding-top: 15px;
+  color: var(--blue);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+@media (max-width: 800px) {
+  .docs-grid { grid-template-columns: 1fr; }
+  .docs-nav { position: static; }
+  .kb-cards { grid-template-columns: 1fr; }
+}

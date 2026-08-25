@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>4D Showtimes Admin Documentation | Vancouver Aquarium</title>
+  <link rel="icon" type="image/svg+xml" href="../../../assets/vaq-full-logo.svg">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header class="docs-header">
+    <a class="back" href="../">← Digital Signage Knowledge Base</a>
+    <h1>4D Showtimes Admin</h1>
+    <p>Manage 4D film schedules and supporting film information for the Vancouver Aquarium Guest Services showtimes display.</p>
+  </header>
+
+  <main class="docs-main">
+    <div class="docs-grid">
+      <nav class="docs-nav" aria-label="Documentation sections">
+        <strong>4D Theatre</strong>
+        <a href="#overview">Overview</a>
+        <a href="#workflow">System Flow</a>
+        <a href="#operations">Operating Guide</a>
+        <a href="#data">Data & Supabase</a>
+        <a href="#technical">Technical Reference</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+        <a href="#maintenance">Maintenance</a>
+      </nav>
+
+      <div>
+        <section class="docs-card" id="overview">
+          <h2>Overview</h2>
+          <p>Manage 4D film schedules and supporting film information for the Vancouver Aquarium Guest Services showtimes display.</p>
+          <div class="docs-actions">
+            <a class="primary" href="https://vaq-smart-cms.github.io/screenflow/gs-5-2_4d-showtimes-schedule/admin.html" target="_blank" rel="noopener">Open Admin</a>
+            <a class="secondary" href="../../">Return to Control Room</a>
+          </div>
+        </section>
+
+        <section class="docs-card" id="workflow">
+          <h2>System Flow</h2>
+          <div class="flow"><span>Supabase</span><b>→</b><span>4D Showtimes Admin</span><b>→</b><span>Guest Services 4D display</span></div>
+          <p>
+            This relationship is intentionally shown in plain language so staff can understand which backend,
+            editing interface and guest-facing signage are connected.
+          </p>
+        </section>
+
+        <section class="docs-card" id="operations">
+          <h2>Operating Guide</h2>
+          <div class="callout">
+            Detailed staff operating steps will be completed from the current live project files and the
+            real-world workflow used by Vancouver Aquarium staff.
+          </div>
+
+          <h3>Verified starting points</h3>
+          <ul><li>The live admin entry point is <code>gs-5-2_4d-showtimes-schedule/admin.html</code>.</li><li>The project also contains separate film-management and load-management interfaces.</li><li>The admin currently includes an authenticated sign-in state before schedule-management tools are shown.</li></ul>
+        </section>
+
+        <section class="docs-card" id="data">
+          <h2>Data & Supabase</h2>
+          <p>
+            The current Supabase schema summary will be incorporated here. The documentation will describe
+            tables, views and relationships in operational language first, with a technical reference underneath.
+          </p>
+
+          <div class="callout">
+            Never publish API secrets, service-role keys, passwords, private tokens or other credentials in this public repository.
+          </div>
+        </section>
+
+        <section class="docs-card" id="technical">
+          <h2>Technical Reference</h2>
+          <p>
+            The current live HTML, CSS and JavaScript files will be reviewed to document the page structure,
+            database calls, authentication behavior, publishing logic and guest-facing dependencies.
+          </p>
+        </section>
+
+        <section class="docs-card" id="troubleshooting">
+          <h2>Troubleshooting</h2>
+          <p>
+            This section will become a practical symptom → likely cause → corrective action reference,
+            based on the actual failure modes and operator errors already encountered in production.
+          </p>
+        </section>
+
+        <section class="docs-card" id="maintenance">
+          <h2>Maintenance</h2>
+          <p>
+            Documentation should be reviewed whenever the CMS workflow, Supabase schema, authentication model,
+            deployment path or major display dependency changes.
+          </p>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
