@@ -4,97 +4,901 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+
   <title>Daily Pricing Builder Documentation | Vancouver Aquarium</title>
+
   <link rel="icon" type="image/svg+xml" href="../../../assets/vaq-full-logo.svg">
   <link rel="stylesheet" href="../styles.css">
+
+  <style>
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .doc-meta span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 9px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: #e7f0f4;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .quick-start {
+      counter-reset: quickstep;
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .quick-step {
+      counter-increment: quickstep;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafb;
+    }
+
+    .quick-step::before {
+      content: counter(quickstep);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .quick-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .quick-step p {
+      margin: 0;
+    }
+
+    .callout.warning {
+      border-left-color: var(--orange);
+      background: #fff6ef;
+    }
+
+    .callout.success {
+      border-left-color: var(--green);
+      background: #f5f9ec;
+    }
+
+    .callout.info {
+      border-left-color: var(--blue);
+      background: #eef7fb;
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    .button-guide {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .button-guide article {
+      display: grid;
+      grid-template-columns: minmax(130px, 170px) 1fr;
+      gap: 16px;
+      padding: 13px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .button-guide article:first-child {
+      border-top: 0;
+    }
+
+    .button-guide h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .button-guide p {
+      margin: 0;
+    }
+
+    .data-table-wrap {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 690px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    .data-table th {
+      background: #eef3f6;
+      color: var(--text);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .data-table td {
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .data-table code {
+      white-space: nowrap;
+    }
+
+    .architecture {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .architecture-row {
+      display: grid;
+      grid-template-columns: minmax(160px, .65fr) 28px minmax(220px, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .architecture-node {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .architecture-node strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .architecture-arrow {
+      color: var(--orange);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .file-map {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .file-map article {
+      padding: 13px 15px;
+      border-left: 4px solid var(--blue);
+      background: #f8fafb;
+    }
+
+    .file-map article:nth-child(2) {
+      border-left-color: var(--green);
+    }
+
+    .file-map article:nth-child(3) {
+      border-left-color: var(--orange);
+    }
+
+    .file-map strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .file-map code {
+      overflow-wrap: anywhere;
+    }
+
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 26px;
+      margin-bottom: 9px;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .trouble-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .trouble-item {
+      padding: 14px 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .trouble-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .trouble-item p {
+      margin: 0;
+    }
+
+    .source-note {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: #7a8790;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 720px) {
+      .button-guide article,
+      .architecture-row {
+        grid-template-columns: 1fr;
+      }
+
+      .architecture-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
 </head>
+
 <body>
+
   <header class="docs-header">
     <a class="back" href="../">← Digital Signage Knowledge Base</a>
+
     <h1>Daily Pricing Builder</h1>
-    <p>Manage and publish the daily admission pricing data used by Vancouver Aquarium Admissions pricing displays.</p>
+
+    <p>
+      Operating and technical reference for the Vancouver Aquarium® General Admissions Screen Editor,
+      also identified in the application as VAQ Daily Rates.
+    </p>
+
+    <div class="doc-meta" aria-label="Documentation metadata">
+      <span>Admissions</span>
+      <span>Production CMS</span>
+      <span>Supabase-backed</span>
+      <span>Documentation reviewed Aug. 25, 2026</span>
+    </div>
   </header>
 
   <main class="docs-main">
+
     <div class="docs-grid">
+
       <nav class="docs-nav" aria-label="Documentation sections">
-        <strong>Admissions</strong>
+        <strong>Daily Pricing</strong>
         <a href="#overview">Overview</a>
+        <a href="#quick-start">Staff Quick Start</a>
+        <a href="#buttons">What Each Button Does</a>
         <a href="#workflow">System Flow</a>
-        <a href="#operations">Operating Guide</a>
+        <a href="#displays">Guest-Facing Displays</a>
         <a href="#data">Data & Supabase</a>
+        <a href="#security">Authentication & Security</a>
         <a href="#technical">Technical Reference</a>
         <a href="#troubleshooting">Troubleshooting</a>
         <a href="#maintenance">Maintenance</a>
       </nav>
 
       <div>
+
         <section class="docs-card" id="overview">
           <h2>Overview</h2>
-          <p>Manage and publish the daily admission pricing data used by Vancouver Aquarium Admissions pricing displays.</p>
+
+          <p>
+            The Daily Pricing Builder is the staff-facing editor used to prepare and publish
+            General Admission pricing for the Vancouver Aquarium Admissions digital signage.
+            Staff edit four pricing rows plus shared tax and footer text, compare a draft preview
+            with the currently published live version, and then choose when the new information
+            should become guest-facing.
+          </p>
+
+          <div class="flow" aria-label="System flow summary">
+            <span>Supabase Auth</span>
+            <b>→</b>
+            <span>General Admissions Screen Editor</span>
+            <b>→</b>
+            <span>pricing_sets</span>
+            <b>→</b>
+            <span>Admissions pricing displays</span>
+          </div>
+
+          <div class="callout info">
+            <strong>Two separate states are maintained:</strong>
+            a saved <code>draft</code> row and a published <code>live</code> row.
+            The guest-facing displays read only the <code>live</code> row.
+          </div>
+
           <div class="docs-actions">
-            <a class="primary" href="https://vaq-smart-cms.github.io/screenflow/admin.html" target="_blank" rel="noopener">Open Admin</a>
+            <a class="primary" href="../../../admin.html" target="_blank" rel="noopener">Open Pricing Admin</a>
+            <a class="secondary" href="../../../ga-4-2_pricing-content/" target="_blank" rel="noopener">Open 1536 × 810 Display</a>
+            <a class="secondary" href="../../../ga-4-2b_pricing-content-slim/" target="_blank" rel="noopener">Open 1152 × 810 Display</a>
             <a class="secondary" href="../../">Return to Control Room</a>
+          </div>
+        </section>
+
+        <section class="docs-card" id="quick-start">
+          <h2>Staff Quick Start</h2>
+
+          <p>
+            For ordinary pricing updates, use this sequence. It keeps the saved draft and
+            published live state aligned and gives staff an opportunity to catch formatting errors
+            before anything reaches the guest-facing screens.
+          </p>
+
+          <div class="quick-start">
+
+            <div class="quick-step">
+              <div>
+                <strong>Sign in.</strong>
+                <p>
+                  Use an authorised Exhibits Department login. The editor checks for an existing
+                  Supabase session first; if no session exists, the login screen is shown.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Review the loaded Draft and Live states.</strong>
+                <p>
+                  The editor loads both database rows. The form is populated from the saved draft,
+                  while the separate Live Preview shows what is currently published.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Edit the four pricing rows.</strong>
+                <p>
+                  Each row has a Label, Age and Price. The form also includes shared Tax Text
+                  and a Footer Note.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Preview Draft.</strong>
+                <p>
+                  This validates the form and updates only the local Draft Preview.
+                  It does not write anything to Supabase.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Save Draft.</strong>
+                <p>
+                  This writes the current form values to the database row where
+                  <code>mode = "draft"</code> and updates the saved timestamp.
+                  Guest-facing signage is not changed.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Publish Live.</strong>
+                <p>
+                  After a confirmation prompt, the current form values are written to the
+                  database row where <code>mode = "live"</code>. The live preview then reloads.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Verify the guest-facing display.</strong>
+                <p>
+                  The pricing displays poll Supabase every 60 seconds, so a successful publish
+                  should normally appear within approximately one minute.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Sign out when finished.</strong>
+                <p>
+                  The Sign Out button ends the Supabase Auth session and returns the page to the login state.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout warning">
+            <strong>Recommended publishing sequence: Preview Draft → Save Draft → Publish Live.</strong><br>
+            In the current implementation, <strong>Publish Live does not also save the draft database row</strong>.
+            If staff edit values and publish without first choosing Save Draft, the published live values can be newer
+            than the saved draft values.
+          </div>
+        </section>
+
+        <section class="docs-card" id="buttons">
+          <h2>What Each Button Does</h2>
+
+          <div class="button-guide">
+
+            <article>
+              <h3>Preview Draft</h3>
+              <p>
+                Reads the values currently entered in the form, validates them and refreshes the Draft Preview.
+                Nothing is written to Supabase. This is safe for experimenting with wording and layout.
+              </p>
+            </article>
+
+            <article>
+              <h3>Save Draft</h3>
+              <p>
+                Validates the form and updates only the <code>draft</code> pricing record.
+                It also updates <code>saved_at</code> and <code>updated_at</code>.
+                This does not change the guest-facing signs.
+              </p>
+            </article>
+
+            <article>
+              <h3>Publish Live</h3>
+              <p>
+                Validates the form, asks for confirmation, then updates only the
+                <code>live</code> pricing record. It updates <code>published_at</code>
+                and <code>updated_at</code>, then reloads the Live Preview from Supabase.
+              </p>
+            </article>
+
+            <article>
+              <h3>Reset Draft</h3>
+              <p>
+                Replaces the form and Draft Preview with the editor's built-in default sample pricing
+                <strong>locally only</strong>. It does not automatically write those defaults to the database.
+              </p>
+            </article>
+
+            <article>
+              <h3>Sign Out</h3>
+              <p>
+                Ends the current Supabase Auth session, clears the login fields and returns to the login screen.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout warning">
+            <strong>Reset Draft is not an “undo to last saved draft” command.</strong>
+            If Reset Draft is clicked accidentally and nothing has been saved or published afterward,
+            refreshing/reopening the page will reload the actual saved <code>draft</code> row from Supabase.
           </div>
         </section>
 
         <section class="docs-card" id="workflow">
           <h2>System Flow</h2>
-          <div class="flow"><span>Supabase</span><b>→</b><span>Daily Pricing Builder</span><b>→</b><span>Admissions pricing displays</span></div>
+
+          <div class="architecture">
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>1. Staff login</strong>
+                Email/password sign-in through Supabase Auth.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>Authenticated browser session</strong>
+                The editor uses the logged-in session for database operations.
+              </div>
+            </div>
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>2. Editor</strong>
+                <code>/admin.html</code>
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>Supabase table</strong>
+                <code>public.pricing_sets</code> contains separate <code>draft</code> and <code>live</code> records.
+              </div>
+            </div>
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>3. Publish</strong>
+                Current form values are written to <code>mode = "live"</code>.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>Guest-facing signage</strong>
+                Display pages query only the live record and render its pricing content.
+              </div>
+            </div>
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>4. Ongoing refresh</strong>
+                Display pages poll every 60 seconds.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>Automatic update</strong>
+                New live pricing appears without manually editing the display HTML.
+              </div>
+            </div>
+
+          </div>
+
           <p>
-            This relationship is intentionally shown in plain language so staff can understand which backend,
-            editing interface and guest-facing signage are connected.
+            This is a deliberately small architecture. Supabase stores the editable content,
+            the CMS controls when draft content becomes live, and the guest-facing web pages
+            independently read the published state.
           </p>
         </section>
 
-        <section class="docs-card" id="operations">
-          <h2>Operating Guide</h2>
-          <div class="callout">
-            Detailed staff operating steps will be completed from the current live project files and the
-            real-world workflow used by Vancouver Aquarium staff.
+        <section class="docs-card" id="displays">
+          <h2>Guest-Facing Displays</h2>
+
+          <p>
+            The same published pricing data is used by more than one Admissions layout.
+            The visual dimensions and typography differ, but both display variants query the
+            same <code>pricing_sets</code> table and select the record where <code>mode = "live"</code>.
+          </p>
+
+          <div class="file-map">
+
+            <article>
+              <strong>Standard pricing content — 1536 × 810</strong>
+              <code>ga-4-2_pricing-content/index.html</code>
+              <p>
+                Full-width Admissions pricing layout. Its dimensions match the large preview
+                rendered inside the editor.
+              </p>
+            </article>
+
+            <article>
+              <strong>Slim pricing content — 1152 × 810</strong>
+              <code>ga-4-2b_pricing-content-slim/index.html</code>
+              <p>
+                Narrower live layout using the same database fields, with adjusted spacing
+                and type sizes for the 1152-pixel-wide container.
+              </p>
+            </article>
+
+            <article>
+              <strong>Live data behaviour</strong>
+              <code>mode = "live"</code> · refresh interval: <code>60000 ms</code>
+              <p>
+                Each display loads the live pricing immediately on startup and then requests
+                it again every 60 seconds.
+              </p>
+            </article>
+
           </div>
 
-          <h3>Verified starting points</h3>
-          <ul><li>The live admin entry point is the repository-root <code>admin.html</code> page.</li><li>The current page title identifies the tool as <code>VAQ Daily Rates 2026</code>.</li><li>Guest-facing Admissions pricing modules read structured pricing data rather than requiring line-by-line display edits.</li></ul>
+          <div class="callout info">
+            If the display cannot load the live row, its fallback state shows
+            <strong>“Pricing Unavailable”</strong> and <strong>“Please check back shortly.”</strong>
+            This usually means the live query failed or no valid live pricing record was returned.
+          </div>
         </section>
 
         <section class="docs-card" id="data">
           <h2>Data & Supabase</h2>
+
           <p>
-            The current Supabase schema summary will be incorporated here. The documentation will describe
-            tables, views and relationships in operational language first, with a technical reference underneath.
+            As of the schema snapshot generated August 25, 2026, the application has one
+            business-data table: <code>public.pricing_sets</code>. The table contains two rows,
+            representing the draft and live pricing states.
           </p>
 
-          <div class="callout">
-            Never publish API secrets, service-role keys, passwords, private tokens or other credentials in this public repository.
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Purpose in this CMS</th>
+                  <th>Used by</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>Identity primary key.</td>
+                  <td>Database structure.</td>
+                </tr>
+                <tr>
+                  <td><code>mode</code></td>
+                  <td>Unique state identifier. The application uses <code>draft</code> and <code>live</code>.</td>
+                  <td>Editor and displays.</td>
+                </tr>
+                <tr>
+                  <td><code>rows_json</code></td>
+                  <td>
+                    JSON array containing the four pricing rows. Each application row uses
+                    <code>label</code>, <code>age</code> and <code>price</code>.
+                  </td>
+                  <td>Editor, previews and displays.</td>
+                </tr>
+                <tr>
+                  <td><code>tax_text</code></td>
+                  <td>Shared tax text displayed beside each price.</td>
+                  <td>Editor, previews and displays.</td>
+                </tr>
+                <tr>
+                  <td><code>footer_note</code></td>
+                  <td>Shared footnote/footer text shown at the bottom of the pricing content.</td>
+                  <td>Editor, previews and displays.</td>
+                </tr>
+                <tr>
+                  <td><code>updated_at</code></td>
+                  <td>General record-update timestamp.</td>
+                  <td>Database maintenance.</td>
+                </tr>
+                <tr>
+                  <td><code>saved_at</code></td>
+                  <td>Timestamp updated when Save Draft succeeds.</td>
+                  <td>Draft status in editor.</td>
+                </tr>
+                <tr>
+                  <td><code>published_at</code></td>
+                  <td>Timestamp updated when Publish Live succeeds.</td>
+                  <td>Live status in editor.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>What is not required for this CMS today</h3>
+
+          <p>
+            Supabase Storage and Realtime infrastructure exist in the project, but the supplied schema
+            snapshot shows no Storage objects/buckets in use and no active Realtime data.
+            The pricing signs use ordinary database queries plus timed polling rather than a Realtime subscription.
+          </p>
+
+          <div class="callout info">
+            <strong>Simple data model:</strong>
+            <code>pricing_sets</code> currently has no documented foreign-key dependencies.
+            This makes the pricing system relatively easy to understand and maintain compared with
+            the more complex schedule-based CMS applications.
+          </div>
+        </section>
+
+        <section class="docs-card" id="security">
+          <h2>Authentication & Security</h2>
+
+          <p>
+            Supabase Auth handles staff identity and browser sessions. The editor checks
+            <code>auth.getSession()</code> when it starts, signs staff in with
+            email/password authentication, and signs out through Supabase Auth.
+          </p>
+
+          <ul>
+            <li>The editor requires an authenticated session before the administration interface is shown.</li>
+            <li>The browser uses the project's public/publishable Supabase client configuration.</li>
+            <li><code>public.pricing_sets</code> has Row Level Security (RLS) enabled.</li>
+            <li>The supplied schema summary does not include the actual RLS policy definitions.</li>
+            <li>The business table has no documented foreign key linking a pricing edit to a specific Auth user.</li>
+          </ul>
+
+          <div class="callout warning">
+            <strong>Do not place credentials in the Control Room or knowledge base.</strong>
+            Passwords, private tokens, service-role keys and other secrets must never be documented
+            in this public GitHub Pages repository.
+          </div>
+
+          <div class="callout info">
+            <strong>Future documentation improvement:</strong>
+            export and archive the explicit RLS policies for <code>public.pricing_sets</code>.
+            The current schema confirms that RLS is enabled, but does not establish exactly which
+            authenticated roles can select or update each row.
           </div>
         </section>
 
         <section class="docs-card" id="technical">
           <h2>Technical Reference</h2>
+
+          <h3>Editor entry point</h3>
+          <p><code>/admin.html</code></p>
+
+          <h3>Supabase client library</h3>
           <p>
-            The current live HTML, CSS and JavaScript files will be reviewed to document the page structure,
-            database calls, authentication behavior, publishing logic and guest-facing dependencies.
+            The editor and displays load <code>@supabase/supabase-js@2</code> from jsDelivr.
+          </p>
+
+          <h3>Editor startup</h3>
+          <p>
+            On page load, the editor checks the current Auth session. Authenticated users proceed
+            to the admin app, which loads the saved draft and published live rows separately.
+          </p>
+
+          <h3>Validation rules</h3>
+          <ul>
+            <li>All four labels are required.</li>
+            <li>All four age-text fields are required.</li>
+            <li>All four prices are required.</li>
+            <li>Price format must begin with <code>$</code> and include exactly two decimal places, such as <code>$50.46</code>.</li>
+            <li>Tax Text is required.</li>
+            <li>Footer Note is required.</li>
+            <li>Preview, Save and Publish are blocked until validation succeeds.</li>
+          </ul>
+
+          <h3>Save Draft database action</h3>
+          <p>
+            Updates <code>rows_json</code>, <code>tax_text</code>, <code>footer_note</code>,
+            <code>saved_at</code> and <code>updated_at</code> on the record where
+            <code>mode = "draft"</code>.
+          </p>
+
+          <h3>Publish Live database action</h3>
+          <p>
+            Updates <code>rows_json</code>, <code>tax_text</code>, <code>footer_note</code>,
+            <code>published_at</code> and <code>updated_at</code> on the record where
+            <code>mode = "live"</code>.
+          </p>
+
+          <h3>Display query</h3>
+          <p>
+            The Admissions pricing displays request <code>rows_json</code>, <code>tax_text</code>
+            and <code>footer_note</code> from the <code>live</code> pricing record. They do not
+            read the draft record.
+          </p>
+
+          <h3>Refresh behaviour</h3>
+          <p>
+            Live pricing is loaded immediately and then refreshed every <code>60000 ms</code>
+            (60 seconds).
           </p>
         </section>
 
         <section class="docs-card" id="troubleshooting">
           <h2>Troubleshooting</h2>
-          <p>
-            This section will become a practical symptom → likely cause → corrective action reference,
-            based on the actual failure modes and operator errors already encountered in production.
-          </p>
+
+          <div class="trouble-grid">
+
+            <div class="trouble-item">
+              <strong>The editor only shows the login screen.</strong>
+              <p>
+                Confirm the staff user is signing in with an authorised Supabase Auth account.
+                If sign-in fails, the editor displays the Supabase error message.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <strong>Preview Draft will not update.</strong>
+              <p>
+                Check the validation message. Every field is required, and each price must
+                use the expected format such as <code>$50.46</code>.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <strong>The draft preview looks correct, but reopening the editor loses the changes.</strong>
+              <p>
+                Preview Draft is local only. Choose Save Draft to write the changes to Supabase.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <strong>The live signs changed, but the saved draft still contains older values.</strong>
+              <p>
+                Publish Live and Save Draft are separate operations. Use Save Draft before publishing
+                when you want the saved draft to match the live state.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <strong>Reset Draft replaced the form with unfamiliar values.</strong>
+              <p>
+                Reset Draft loads the built-in default sample data. If those values have not been saved
+                or published, reload the page to retrieve the actual saved draft from Supabase.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <strong>Publish succeeded, but the physical sign has not changed yet.</strong>
+              <p>
+                Allow up to approximately 60 seconds for the display's next database poll.
+                If it remains unchanged, verify the web display itself and the Kuusoft channel assignment.
+              </p>
+            </div>
+
+            <div class="trouble-item">
+              <strong>The sign says “Pricing Unavailable.”</strong>
+              <p>
+                The live display could not retrieve a valid <code>live</code> pricing row.
+                Check network access, the Supabase project, the live record, and any relevant RLS/read policy.
+              </p>
+            </div>
+
+          </div>
         </section>
 
         <section class="docs-card" id="maintenance">
           <h2>Maintenance</h2>
+
           <p>
-            Documentation should be reviewed whenever the CMS workflow, Supabase schema, authentication model,
-            deployment path or major display dependency changes.
+            Review this documentation whenever any of the following changes:
           </p>
+
+          <ul class="checklist">
+            <li>The four pricing-row structure or shared text fields change.</li>
+            <li>The <code>pricing_sets</code> schema changes.</li>
+            <li>Supabase Auth or RLS policies change.</li>
+            <li>The editor's Save Draft / Publish Live behaviour changes.</li>
+            <li>The guest-facing pricing display paths or dimensions change.</li>
+            <li>The 60-second polling interval changes.</li>
+            <li>A new Admissions pricing layout begins using this same live data.</li>
+          </ul>
+
+          <h3>Current documentation limitations</h3>
+
+          <ul>
+            <li>
+              The supplied schema export confirms that RLS is enabled, but did not have permission
+              to inspect the individual RLS policy definitions.
+            </li>
+            <li>
+              The current business table records save/publish timestamps but does not document
+              which authenticated staff member performed a particular pricing edit.
+            </li>
+          </ul>
+
+          <div class="source-note">
+            Documentation basis: current production General Admissions Screen Editor source,
+            current 1536 × 810 and 1152 × 810 pricing-display implementations,
+            and Supabase schema snapshot generated August 25, 2026.
+          </div>
         </section>
+
       </div>
     </div>
+
   </main>
 </body>
 </html>
