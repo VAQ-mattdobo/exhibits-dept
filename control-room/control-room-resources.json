@@ -71,18 +71,28 @@
       "service": "Supabase",
       "role": "Database + authentication backend",
       "organization": "Vancouver Aquarium digital signage projects",
-      "resource": "Project links to be documented",
-      "description": "Provides the structured data, authentication and backend services used by the VAQ signage CMS applications.",
-      "links": []
+      "resource": "Company projects \u2014 authorised access required",
+      "description": "Provides the structured data, authentication and backend services used by the VAQ signage CMS applications. Staff must have permission to the appropriate Vancouver Aquarium Supabase projects.",
+      "links": [
+        {
+          "label": "Sign in to Supabase",
+          "url": "https://supabase.com/dashboard/sign-in"
+        }
+      ]
     },
     {
       "id": "kuusoft",
       "service": "Kuusoft / NexSigns",
       "role": "Device + channel deployment",
       "organization": "Vancouver Aquarium signage deployment",
-      "resource": "Devices and channels",
-      "description": "Deploys web signage content to the physical Vancouver Aquarium digital signage players and screens.",
-      "links": []
+      "resource": "OnePass / NexSigns \u2014 authorised access required",
+      "description": "Deploys web signage content to the physical Vancouver Aquarium digital signage players and screens. Staff must have approved access to the Vancouver Aquarium OnePass / NexSigns account.",
+      "links": [
+        {
+          "label": "Sign in to OnePass / NexSigns",
+          "url": "https://onepass.kuusoft.com/Authentication/Login?ReturnUrl=%2fNexSigns2"
+        }
+      ]
     }
   ]
 }
