@@ -4,97 +4,1304 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+
   <title>Daily Program Schedule Documentation | Vancouver Aquarium</title>
+
   <link rel="icon" type="image/svg+xml" href="../../../assets/vaq-full-logo.svg">
   <link rel="stylesheet" href="../styles.css">
+
+  <style>
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .doc-meta span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 9px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: #e7f0f4;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .quick-start {
+      counter-reset: quickstep;
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .quick-step {
+      counter-increment: quickstep;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafb;
+    }
+
+    .quick-step::before {
+      content: counter(quickstep);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .quick-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .quick-step p {
+      margin: 0;
+    }
+
+    .callout.warning {
+      border-left-color: var(--orange);
+      background: #fff6ef;
+    }
+
+    .callout.success {
+      border-left-color: var(--green);
+      background: #f5f9ec;
+    }
+
+    .callout.info {
+      border-left-color: var(--blue);
+      background: #eef7fb;
+    }
+
+    .callout.danger {
+      border-left-color: #b14f4f;
+      background: #fff4f4;
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    .button-guide {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .button-guide article {
+      display: grid;
+      grid-template-columns: minmax(150px, 190px) 1fr;
+      gap: 16px;
+      padding: 13px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .button-guide article:first-child {
+      border-top: 0;
+    }
+
+    .button-guide h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .button-guide p {
+      margin: 0;
+    }
+
+    .data-table-wrap {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    .data-table th {
+      background: #eef3f6;
+      color: var(--text);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .data-table td {
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .data-table code {
+      white-space: nowrap;
+    }
+
+    .architecture {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .architecture-row {
+      display: grid;
+      grid-template-columns: minmax(170px, .7fr) 28px minmax(250px, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .architecture-node {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .architecture-node strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .architecture-arrow {
+      color: var(--orange);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .file-map {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .file-map article {
+      padding: 13px 15px;
+      border-left: 4px solid var(--blue);
+      background: #f8fafb;
+    }
+
+    .file-map article:nth-child(2) {
+      border-left-color: var(--green);
+    }
+
+    .file-map article:nth-child(3) {
+      border-left-color: var(--orange);
+    }
+
+    .file-map article:nth-child(4) {
+      border-left-color: var(--grey);
+    }
+
+    .file-map strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .file-map code {
+      overflow-wrap: anywhere;
+    }
+
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 26px;
+      margin-bottom: 9px;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .trouble-grid,
+    .safety-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .trouble-item,
+    .safety-item {
+      padding: 14px 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .trouble-item strong,
+    .safety-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .trouble-item p,
+    .safety-item p {
+      margin: 0;
+    }
+
+    .workflow-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .workflow-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .workflow-card h3 {
+      margin: 0 0 7px;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .workflow-card p {
+      margin: 0;
+    }
+
+    .workflow-card small {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--orange);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .entry-shape {
+      margin: 16px 0 0;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f7f9fa;
+      overflow-x: auto;
+    }
+
+    .entry-shape pre {
+      margin: 0;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .source-note {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: #7a8790;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 800px) {
+      .workflow-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .button-guide article,
+      .architecture-row {
+        grid-template-columns: 1fr;
+      }
+
+      .architecture-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
 </head>
+
 <body>
+
   <header class="docs-header">
     <a class="back" href="../">← Digital Signage Knowledge Base</a>
+
     <h1>Daily Program Schedule</h1>
-    <p>Build, review and publish the daily Vancouver Aquarium program schedule used across Guest Services and wayfinding displays.</p>
+
+    <p>
+      Operating and technical reference for the Vancouver Aquarium® Program Schedule Admin,
+      which prepares date-specific schedules for Guest Services and wayfinding signage.
+    </p>
+
+    <div class="doc-meta" aria-label="Documentation metadata">
+      <span>Guest Services + Wayfinding</span>
+      <span>Production CMS</span>
+      <span>Supabase-backed</span>
+      <span>America/Vancouver</span>
+      <span>Documentation reviewed Aug. 25, 2026</span>
+    </div>
   </header>
 
   <main class="docs-main">
+
     <div class="docs-grid">
+
       <nav class="docs-nav" aria-label="Documentation sections">
-        <strong>Guest Services + Wayfinding</strong>
+        <strong>Program Schedule</strong>
         <a href="#overview">Overview</a>
+        <a href="#quick-start">Staff Quick Start</a>
+        <a href="#editing">Editing Programs</a>
+        <a href="#tools">Schedule Tools</a>
+        <a href="#publishing">Publishing Rules</a>
         <a href="#workflow">System Flow</a>
-        <a href="#operations">Operating Guide</a>
+        <a href="#displays">Guest-Facing Displays</a>
         <a href="#data">Data & Supabase</a>
+        <a href="#locations">Location Styles</a>
+        <a href="#security">Authentication & Security</a>
         <a href="#technical">Technical Reference</a>
         <a href="#troubleshooting">Troubleshooting</a>
         <a href="#maintenance">Maintenance</a>
       </nav>
 
       <div>
+
         <section class="docs-card" id="overview">
           <h2>Overview</h2>
-          <p>Build, review and publish the daily Vancouver Aquarium program schedule used across Guest Services and wayfinding displays.</p>
+
+          <p>
+            The Daily Program Schedule CMS lets authorised staff create, review, reuse and publish
+            program schedules for a specific calendar date. Each date can have a separate
+            <code>draft</code> record and <code>live</code> record. The editor works from the draft;
+            the digital signs read only the live schedule for the current Vancouver date.
+          </p>
+
+          <div class="flow" aria-label="System flow summary">
+            <span>Supabase Auth</span>
+            <b>→</b>
+            <span>Program Schedule Admin</span>
+            <b>→</b>
+            <span>program_schedule_sets</span>
+            <b>→</b>
+            <span>Guest Services + Wayfinding</span>
+          </div>
+
+          <div class="callout info">
+            <strong>Two database tables support the system:</strong>
+            <code>program_schedule_sets</code> stores date-specific draft/live schedules,
+            while <code>program_location_styles</code> supplies the recognised location names
+            and display colours used by the editor and signs.
+          </div>
+
           <div class="docs-actions">
-            <a class="primary" href="https://vaq-smart-cms.github.io/screenflow/gs-1-2_daily-program-schedule/admin.html" target="_blank" rel="noopener">Open Admin</a>
+            <a class="primary" href="../../../gs-1-2_daily-program-schedule/admin.html" target="_blank" rel="noopener">Open Program Schedule Admin</a>
+            <a class="secondary" href="../../../gs-1-2_daily-program-schedule/program-schedule-full/" target="_blank" rel="noopener">Open Full Guest Services Display</a>
+            <a class="secondary" href="../../../wf_daily-program-schedule/" target="_blank" rel="noopener">Open Wayfinding Display</a>
             <a class="secondary" href="../../">Return to Control Room</a>
+          </div>
+        </section>
+
+        <section class="docs-card" id="quick-start">
+          <h2>Staff Quick Start</h2>
+
+          <p>
+            For a normal one-day schedule update, use this sequence. It keeps the saved draft
+            aligned with the version that becomes live and reduces the chance of accidentally
+            propagating unsaved or stale schedule data.
+          </p>
+
+          <div class="quick-start">
+
+            <div class="quick-step">
+              <div>
+                <strong>Sign in.</strong>
+                <p>
+                  Use an authorised VAQ schedule editor account. If a valid Supabase session already
+                  exists, the administration interface opens automatically.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose the Schedule Date and select Load Date.</strong>
+                <p>
+                  The editor loads the active location styles, the live schedule for that date
+                  (if one exists), and the saved draft for that date (if one exists).
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Create a draft if the date does not have one.</strong>
+                <p>
+                  Choose <strong>Create Empty Draft</strong>. A date must have a draft record
+                  before programs can be edited in the schedule table.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Add, duplicate or edit the program rows.</strong>
+                <p>
+                  Each program needs a title, recognised location, start time and end time.
+                  Mark a row Cancelled when it should remain in the schedule record but not appear on signage.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Add an Internal Day Note if useful.</strong>
+                <p>
+                  The Day Note is stored with the schedule for staff context and identification.
+                  It is not currently rendered on the guest-facing signs.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Validate Schedule.</strong>
+                <p>
+                  Fix every validation error before saving or publishing. The editor checks IDs,
+                  required fields, recognised locations and the start/end time relationship.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Save Draft.</strong>
+                <p>
+                  This writes the current program rows and Day Note back to the selected date's
+                  <code>draft</code> record.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Review the Schedule Summary and Currently Live preview.</strong>
+                <p>
+                  The summary helps compare the edited draft with the date's already-published live schedule,
+                  if one exists.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Publish Live.</strong>
+                <p>
+                  After confirmation, the current validated page state is written to that date's
+                  <code>live</code> record.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Verify the live signs.</strong>
+                <p>
+                  Both schedule display families poll Supabase every 25 seconds, so a successful publish
+                  should normally become visible shortly afterward when that date is the current Vancouver date.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout warning">
+            <strong>Recommended routine: Validate → Save Draft → Publish Live.</strong><br>
+            Publish Live uses the currently edited page values, even if those edits have not first been saved
+            back to the <code>draft</code> database row. Saving first keeps the draft and live versions aligned.
+          </div>
+
+          <div class="callout warning">
+            <strong>Loading or reloading data can discard unsaved browser edits.</strong>
+            Use Save Draft before changing dates, choosing Load Date, or choosing Reload Data whenever
+            you need to preserve the work currently shown on the page.
+          </div>
+        </section>
+
+        <section class="docs-card" id="editing">
+          <h2>Editing Programs</h2>
+
+          <div class="button-guide">
+
+            <article>
+              <h3>Create Empty Draft</h3>
+              <p>
+                Creates a new <code>draft</code> schedule record for the selected date with an empty
+                program list, an empty Day Note and <code>America/Vancouver</code> as its timezone.
+                It will not create a second draft when one already exists.
+              </p>
+            </article>
+
+            <article>
+              <h3>Add Program</h3>
+              <p>
+                Adds a new unsaved row. A new row begins with a generated internal ID, a 15-minute
+                default duration and a starting time based on the latest program start already in the editor
+                (or 9:00 a.m. when the draft is empty).
+              </p>
+            </article>
+
+            <article>
+              <h3>Duplicate</h3>
+              <p>
+                Copies an existing row and gives the duplicate a new internal entry ID.
+                The duplicated row remains an unsaved browser edit until Save Draft is chosen.
+              </p>
+            </article>
+
+            <article>
+              <h3>Delete</h3>
+              <p>
+                Uses a two-click confirmation. The second click must occur within approximately four seconds.
+                The deletion is only local until the draft is saved.
+              </p>
+            </article>
+
+            <article>
+              <h3>Cancelled</h3>
+              <p>
+                Keeps the program in the schedule record but marks it <code>is_cancelled = true</code>.
+                Guest-facing displays filter cancelled programs out completely.
+              </p>
+            </article>
+
+            <article>
+              <h3>Validate Schedule</h3>
+              <p>
+                Sorts the current entries by start time and reports validation errors.
+                Validation alone does not save anything to Supabase.
+              </p>
+            </article>
+
+            <article>
+              <h3>Save Draft</h3>
+              <p>
+                Validates, sorts and writes the current program rows and Day Note to the loaded
+                <code>draft</code> record. Saving is blocked while validation errors remain.
+              </p>
+            </article>
+
+            <article>
+              <h3>Publish Live</h3>
+              <p>
+                Validates the current page state, asks for confirmation, then upserts a
+                <code>live</code> record for the selected date. It can replace an existing live schedule
+                for that same date.
+              </p>
+            </article>
+
+          </div>
+
+          <h3>Validation rules</h3>
+          <ul>
+            <li>Every entry must have an internal entry ID.</li>
+            <li>Internal entry IDs must not be duplicated within the schedule.</li>
+            <li>Program Title is required.</li>
+            <li>Location is required and must match an active <code>program_location_styles</code> record.</li>
+            <li>Start Time is required and must be valid.</li>
+            <li>End Time is required and must be valid.</li>
+            <li>End Time must be later than Start Time.</li>
+            <li>Cancelled rows are still part of validation even though the public signs do not render them.</li>
+          </ul>
+
+          <div class="callout info">
+            The editor's time controls present minutes in five-minute increments.
+            Multiple programs can share the same start time; the current validation logic does not prohibit
+            overlapping or simultaneous programs.
+          </div>
+        </section>
+
+        <section class="docs-card" id="tools">
+          <h2>Schedule Tools</h2>
+
+          <p>
+            The Schedule Tools accordion exists to reduce repetitive data entry, but these commands can
+            affect several date records at once. Review source and target dates carefully before confirming them.
+          </p>
+
+          <div class="workflow-cards">
+
+            <article class="workflow-card">
+              <small>Copy Tool</small>
+              <h3>Copy from Date</h3>
+              <p>
+                Copies another date into the currently selected date's <strong>draft</strong>.
+                The source lookup prefers that date's <code>draft</code>; if no draft exists, it falls
+                back to that date's <code>live</code> schedule. The target draft is created if needed,
+                then overwritten after confirmation. The target's live record is not changed.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Copy Tool</small>
+              <h3>Copy Same Weekday from Last Week</h3>
+              <p>
+                Automatically uses the date seven days before the selected target date and then runs
+                the normal Copy from Date process, including source priority and overwrite confirmation.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Planning Tool</small>
+              <h3>Repeat Weekly Until Date</h3>
+              <p>
+                Takes the current validated editor state and copies it into weekly target dates.
+                Existing target drafts are skipped by default. Enabling <strong>Overwrite existing drafts</strong>
+                allows those draft records to be replaced. Live records are not published or replaced by this tool.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Publishing Tool</small>
+              <h3>Publish All Drafts</h3>
+              <p>
+                Finds populated saved drafts that do <strong>not</strong> already have a live record.
+                Empty drafts are skipped. Every populated candidate must pass validation before the batch can run.
+                Existing live schedules are deliberately never overwritten.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout danger">
+            <strong>Copy from Date prefers a source draft over a source live schedule.</strong>
+            A stale or incorrect draft can therefore be copied even when the same source date has a different,
+            correct live version. Before using Copy or Last Week, confirm that the source draft is genuinely
+            the version you intend to reuse.
+          </div>
+
+          <div class="callout warning">
+            <strong>Save before Repeat Weekly.</strong>
+            Weekly Repeat uses the current validated page state, so it can propagate edits that have not yet
+            been saved back to the source date's draft. Saving first creates a clearer, recoverable source record.
+          </div>
+
+          <div class="callout info">
+            <strong>Publish All Drafts is for first-time publication of prepared dates.</strong>
+            If a date already has a live record, that date is excluded from the batch even when its draft
+            has newer changes. To update an already-live date, load that date and use the normal
+            <strong>Publish Live</strong> action.
+          </div>
+        </section>
+
+        <section class="docs-card" id="publishing">
+          <h2>Publishing Rules</h2>
+
+          <div class="safety-grid">
+
+            <article class="safety-item">
+              <strong>Single-date Publish Live</strong>
+              <p>
+                Can create or replace the live record for the selected date. It publishes the current
+                in-browser editor state after validation and confirmation.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Publish All Drafts</strong>
+              <p>
+                Reads saved draft rows from Supabase. It does not use unsaved browser edits and it does not
+                overwrite dates that already have live records.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Future live schedules</strong>
+              <p>
+                A live record can exist before its date arrives. The guest-facing signs query only the
+                live row whose <code>schedule_date</code> matches the current date in
+                <code>America/Vancouver</code>.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Day Note</strong>
+              <p>
+                Travels with draft/live schedule records for staff reference but is not currently rendered
+                by the guest-facing full or wayfinding schedule displays.
+              </p>
+            </article>
+
           </div>
         </section>
 
         <section class="docs-card" id="workflow">
           <h2>System Flow</h2>
-          <div class="flow"><span>Supabase</span><b>→</b><span>Program Schedule Admin</span><b>→</b><span>Guest Services + Wayfinding</span></div>
-          <p>
-            This relationship is intentionally shown in plain language so staff can understand which backend,
-            editing interface and guest-facing signage are connected.
-          </p>
+
+          <div class="architecture">
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>1. Staff authentication</strong>
+                Authorised editor signs in through Supabase Auth.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>Authenticated admin session</strong>
+                The CMS loads the selected date's saved draft/live records and active location styles.
+              </div>
+            </div>
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>2. Draft planning</strong>
+                Staff edit <code>entries_json</code> and optional <code>day_note</code>.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>program_schedule_sets</strong>
+                One date may have a <code>draft</code> row, a <code>live</code> row, or both.
+              </div>
+            </div>
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>3. Location reference</strong>
+                Programs store a <code>location_key</code>.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>program_location_styles</strong>
+                Active records supply location display names and colours and define which locations validate.
+              </div>
+            </div>
+
+            <div class="architecture-row">
+              <div class="architecture-node">
+                <strong>4. Publish</strong>
+                A validated date is written to <code>mode = "live"</code>.
+              </div>
+              <div class="architecture-arrow">→</div>
+              <div class="architecture-node">
+                <strong>Guest Services + Wayfinding</strong>
+                Both display families read today's live schedule and active location styles.
+              </div>
+            </div>
+
+          </div>
         </section>
 
-        <section class="docs-card" id="operations">
-          <h2>Operating Guide</h2>
-          <div class="callout">
-            Detailed staff operating steps will be completed from the current live project files and the
-            real-world workflow used by Vancouver Aquarium staff.
+        <section class="docs-card" id="displays">
+          <h2>Guest-Facing Displays</h2>
+
+          <p>
+            The same published schedule feeds two current display families. Both use
+            <code>America/Vancouver</code> to determine today's date, query the matching
+            <code>live</code> schedule, query active location styles, remove cancelled programs,
+            and refresh database data every 25 seconds.
+          </p>
+
+          <div class="file-map">
+
+            <article>
+              <strong>Full Guest Services schedule — 1920 × 810</strong>
+              <code>gs-1-2_daily-program-schedule/program-schedule-full/</code>
+              <p>
+                Displays up to 10 remaining program entries in two columns, five positions per column.
+              </p>
+            </article>
+
+            <article>
+              <strong>Wayfinding schedule — 1080 × 480</strong>
+              <code>wf_daily-program-schedule/</code>
+              <p>
+                Compact sibling display using the same database data, showing up to six remaining entries
+                in two columns, three positions per column.
+              </p>
+            </article>
+
+            <article>
+              <strong>Live refresh</strong>
+              <code>25000 ms</code>
+              <p>
+                Both displays poll for changed schedule/location data every 25 seconds.
+                Time-driven queue changes also occur locally around program start-time boundaries.
+              </p>
+            </article>
+
+            <article>
+              <strong>What a program tile shows</strong>
+              <code>Title · Start Time · Location</code>
+              <p>
+                Location colour comes from <code>program_location_styles.hex_color</code>.
+                The nearest upcoming/start-time group receives additional visual emphasis.
+              </p>
+            </article>
+
           </div>
 
-          <h3>Verified starting points</h3>
-          <ul><li>The live admin entry point is <code>gs-1-2_daily-program-schedule/admin.html</code>.</li><li>The project drives both the full Guest Services schedule and the 1080 × 480 wayfinding schedule.</li><li>Draft and published schedule data is stored in Supabase and should be documented as part of the operating workflow.</li></ul>
+          <h3>Automatic display behaviour</h3>
+          <ul>
+            <li>Cancelled entries are removed before rendering.</li>
+            <li>Entries whose end time has passed are excluded when the visible queue is recalculated.</li>
+            <li>Programs are sorted by start time.</li>
+            <li>The public queue displays only a limited number of remaining entries at once.</li>
+            <li>If no live schedule exists for today, a friendly “still setting up today’s schedule” status is shown.</li>
+            <li>When no program entries remain visible, the display shows a “today’s programs have finished” message.</li>
+          </ul>
         </section>
 
         <section class="docs-card" id="data">
           <h2>Data & Supabase</h2>
+
           <p>
-            The current Supabase schema summary will be incorporated here. The documentation will describe
-            tables, views and relationships in operational language first, with a technical reference underneath.
+            The August 25, 2026 schema snapshot identifies two application tables in the
+            <code>public</code> schema. At the time of that snapshot,
+            <code>program_schedule_sets</code> contained 54 rows and
+            <code>program_location_styles</code> contained 21 rows.
           </p>
 
-          <div class="callout">
-            Never publish API secrets, service-role keys, passwords, private tokens or other credentials in this public repository.
+          <h3>public.program_schedule_sets</h3>
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Purpose in this CMS</th>
+                  <th>Operational meaning</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td>UUID primary key for a schedule record.</td>
+                  <td>Identifies the individual draft/live row.</td>
+                </tr>
+                <tr>
+                  <td><code>schedule_date</code></td>
+                  <td>Date the schedule belongs to.</td>
+                  <td>Public signs request today's Vancouver date.</td>
+                </tr>
+                <tr>
+                  <td><code>mode</code></td>
+                  <td>Schedule state: <code>draft</code> or <code>live</code>.</td>
+                  <td>Editor plans in draft; signs read live.</td>
+                </tr>
+                <tr>
+                  <td><code>timezone_name</code></td>
+                  <td>Timezone metadata; default is <code>America/Vancouver</code>.</td>
+                  <td>Keeps schedule/date interpretation anchored to Vancouver.</td>
+                </tr>
+                <tr>
+                  <td><code>entries_json</code></td>
+                  <td>JSON array containing all program rows for the date.</td>
+                  <td>Main editable schedule content.</td>
+                </tr>
+                <tr>
+                  <td><code>day_note</code></td>
+                  <td>Optional internal note.</td>
+                  <td>Staff context only; not currently guest-facing.</td>
+                </tr>
+                <tr>
+                  <td><code>saved_at</code></td>
+                  <td>Save-related timestamp.</td>
+                  <td>Used for schedule status/history context.</td>
+                </tr>
+                <tr>
+                  <td><code>published_at</code></td>
+                  <td>Publish timestamp.</td>
+                  <td>Shown by the admin when describing the live schedule.</td>
+                </tr>
+                <tr>
+                  <td><code>created_at</code> / <code>updated_at</code></td>
+                  <td>Record lifecycle timestamps.</td>
+                  <td>Technical maintenance and change detection.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Program entry JSON shape</h3>
+
+          <p>
+            The current editor creates and saves entry objects with the following working shape.
+            The <code>description</code> property exists in the object model but is currently cleared
+            during sanitisation and is not presented as an editable field.
+          </p>
+
+          <div class="entry-shape">
+<pre>{
+  "id": "entry_...",
+  "title": "Program title",
+  "location_key": "location-key",
+  "start_time": "10:00",
+  "end_time": "10:15",
+  "description": "",
+  "is_cancelled": false
+}</pre>
+          </div>
+
+          <h3>Infrastructure currently not used for schedule content</h3>
+          <p>
+            Supabase Storage is provisioned but the supplied schema reports zero buckets and zero objects.
+            Supabase Realtime infrastructure also exists, but the current signage implementation uses
+            timed database polling rather than a Realtime subscription.
+          </p>
+        </section>
+
+        <section class="docs-card" id="locations">
+          <h2>Location Styles</h2>
+
+          <p>
+            <code>public.program_location_styles</code> is the shared location reference table.
+            It is not edited by the Program Schedule Admin itself; the admin reads active records and
+            uses them to build the Location dropdown and validate schedule rows.
+          </p>
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Column</th>
+                  <th>Current role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>location_key</code></td>
+                  <td>Unique machine-readable location identifier stored in each program entry.</td>
+                </tr>
+                <tr>
+                  <td><code>display_name</code></td>
+                  <td>Human-readable location name shown in the admin and public program meta line.</td>
+                </tr>
+                <tr>
+                  <td><code>hex_color</code></td>
+                  <td>Six-digit location colour used to colour program tiles.</td>
+                </tr>
+                <tr>
+                  <td><code>icon_path</code></td>
+                  <td>
+                    Schema field available for icon metadata. The current full and wayfinding renderers
+                    derive their SVG icon file path from <code>location_key</code> rather than reading this field.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>sort_order</code></td>
+                  <td>Controls location ordering in the admin dropdown.</td>
+                </tr>
+                <tr>
+                  <td><code>is_active</code></td>
+                  <td>
+                    Only active locations are loaded by the editor/displays. A program using an inactive or
+                    unknown location key will fail current editor validation.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout warning">
+            <strong>Location key and icon filename are operationally linked in the current displays.</strong>
+            Because the renderers construct SVG paths from <code>location_key</code>, changing a key
+            without providing the matching icon file can break that program's icon even if the database
+            <code>icon_path</code> field contains something else.
+          </div>
+        </section>
+
+        <section class="docs-card" id="security">
+          <h2>Authentication & Security</h2>
+
+          <p>
+            The administration interface uses Supabase Auth email/password sessions.
+            On startup it calls <code>auth.getSession()</code>; authenticated staff see the CMS,
+            while unauthenticated visitors see the Sign In panel.
+          </p>
+
+          <ul>
+            <li>Both application tables have Row Level Security (RLS) enabled.</li>
+            <li>The schema snapshot does not include the individual RLS policy definitions because policy inspection was not authorised in that session.</li>
+            <li>The public signage pages use the project's public/publishable Supabase client and depend on permitted read access to today's live schedule and active location styles.</li>
+            <li>The schedule table records timestamps but the supplied app schema does not include an editor/user ID field that attributes each save or publish to a specific staff account.</li>
+          </ul>
+
+          <div class="callout danger">
+            <strong>Do not place credentials in the Control Room or knowledge base.</strong>
+            Passwords, service-role keys, private tokens and other secrets must never be committed
+            to this public GitHub Pages repository.
+          </div>
+
+          <div class="callout info">
+            <strong>Future documentation improvement:</strong>
+            archive the exact RLS policy definitions for both public application tables in a secure
+            maintenance record. The current schema establishes that RLS is enabled, but not the exact
+            select/update/insert rules.
           </div>
         </section>
 
         <section class="docs-card" id="technical">
           <h2>Technical Reference</h2>
+
+          <h3>Primary files</h3>
+
+          <div class="file-map">
+            <article>
+              <strong>Administration interface</strong>
+              <code>gs-1-2_daily-program-schedule/admin.html</code>
+            </article>
+
+            <article>
+              <strong>Full Guest Services display</strong>
+              <code>gs-1-2_daily-program-schedule/program-schedule-full/index.html</code><br>
+              <code>gs-1-2_daily-program-schedule/program-schedule-full/index.css</code>
+            </article>
+
+            <article>
+              <strong>Wayfinding display</strong>
+              <code>wf_daily-program-schedule/index.html</code>
+            </article>
+
+            <article>
+              <strong>Shared location icons</strong>
+              <code>gs-1-2_daily-program-schedule/program-schedule-full/assets/icons/</code>
+            </article>
+          </div>
+
+          <h3>Supabase client</h3>
           <p>
-            The current live HTML, CSS and JavaScript files will be reviewed to document the page structure,
-            database calls, authentication behavior, publishing logic and guest-facing dependencies.
+            The admin and signage pages use <code>@supabase/supabase-js@2</code>.
+            The CMS uses authenticated session operations; the signage pages perform public reads.
           </p>
+
+          <h3>Schedule loading</h3>
+          <p>
+            The admin loads the selected date's <code>draft</code> and <code>live</code> records separately,
+            plus all active location styles ordered by <code>sort_order</code>.
+          </p>
+
+          <h3>Saving</h3>
+          <p>
+            Save Draft updates the currently loaded draft row by ID and writes the sanitised
+            <code>entries_json</code>, trimmed <code>day_note</code> and a new <code>saved_at</code> value.
+          </p>
+
+          <h3>Single-date publishing</h3>
+          <p>
+            Publish Live upserts a <code>live</code> record using the conflict target
+            <code>schedule_date,mode</code>. This means the application expects that date/mode combination
+            to behave as a unique schedule state. Publishing writes the current editor entries and Day Note
+            along with save/publish timestamps.
+          </p>
+
+          <h3>Copy source priority</h3>
+          <p>
+            Copy from Date queries the source date's draft first. Only when no draft exists does it query
+            that source date's live record.
+          </p>
+
+          <h3>Sorting</h3>
+          <p>
+            Editable entries are sorted by start time, with title used as a secondary ordering rule when
+            start times are equal. Batch publishing also sorts saved draft entries before writing live records.
+          </p>
+
+          <h3>Public display queries</h3>
+          <p>
+            Each display queries active <code>program_location_styles</code> and the
+            <code>program_schedule_sets</code> row where <code>schedule_date</code> is today's Vancouver date
+            and <code>mode = "live"</code>.
+          </p>
+
+          <h3>Polling and queue timing</h3>
+          <p>
+            Database content is rechecked every 25 seconds. If the fetched schedule/location payload changes,
+            the display reapplies it. Separately, the visible program queue is recalculated at program
+            start-time and five-minutes-after-start boundaries; end times are used when deciding which entries
+            remain eligible whenever that queue recalculation occurs.
+          </p>
+
+          <h3>Public display sizes</h3>
+          <ul>
+            <li>Full Guest Services schedule: <strong>1920 × 810</strong>, maximum 10 visible entries.</li>
+            <li>Wayfinding schedule: <strong>1080 × 480</strong>, maximum 6 visible entries.</li>
+          </ul>
         </section>
 
         <section class="docs-card" id="troubleshooting">
           <h2>Troubleshooting</h2>
-          <p>
-            This section will become a practical symptom → likely cause → corrective action reference,
-            based on the actual failure modes and operator errors already encountered in production.
-          </p>
+
+          <div class="trouble-grid">
+
+            <article class="trouble-item">
+              <strong>No draft exists for the selected date.</strong>
+              <p>
+                Choose Create Empty Draft or use a Copy tool to prepare a target draft.
+                Programs cannot be edited until a draft row exists.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Save Draft or Publish Live is blocked.</strong>
+              <p>
+                Run Validate Schedule and inspect the row-level errors. Common causes are a blank title,
+                missing location, inactive/unrecognised location key, invalid time, or an end time that is
+                not later than the start time.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Edits disappeared after loading/reloading.</strong>
+              <p>
+                Changes in the table remain browser-side until Save Draft succeeds.
+                Loading database data again restores the saved draft state and can discard unsaved edits.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>The live schedule contains changes that are not in the saved draft.</strong>
+              <p>
+                Publish Live can publish current unsaved page edits. Recreate/verify the intended editor state,
+                Save Draft, then Publish Live again if the two records should match.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Copy from Last Week produced unexpected content.</strong>
+              <p>
+                Remember that Copy prefers the source date's draft over its live record.
+                Inspect the source draft before copying when there is any possibility that an old or test draft remains.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Repeat Weekly skipped some dates.</strong>
+              <p>
+                Existing draft rows are skipped unless Overwrite existing drafts is enabled.
+                The completion message reports Created, Updated, Skipped and Error counts.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Publish All Drafts did not republish a changed date.</strong>
+              <p>
+                The batch tool intentionally excludes every date that already has a live row.
+                Use the normal single-date Publish Live command to replace an existing live schedule.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Publish All Drafts is completely blocked.</strong>
+              <p>
+                If any populated unpublished draft fails validation, the entire batch is blocked until
+                those date(s) are corrected. Empty drafts are skipped rather than published.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>A cancelled program still appears in the admin.</strong>
+              <p>
+                That is expected. Cancelled programs remain stored in the schedule for staff reference,
+                but the guest-facing displays filter them out.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>The public sign says today's schedule is still being set up.</strong>
+              <p>
+                The display did not find a live schedule for today's Vancouver date.
+                Verify the selected date, confirm that it was actually published live, and then verify
+                Supabase read access if the live row exists.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>A program has the correct location name/colour but its icon is missing.</strong>
+              <p>
+                Verify that an SVG file matching the program's <code>location_key</code> exists in the expected
+                shared icons directory. The current display code derives the icon filename from that key.
+              </p>
+            </article>
+
+          </div>
         </section>
 
         <section class="docs-card" id="maintenance">
           <h2>Maintenance</h2>
-          <p>
-            Documentation should be reviewed whenever the CMS workflow, Supabase schema, authentication model,
-            deployment path or major display dependency changes.
-          </p>
+
+          <p>Review this documentation whenever any of the following changes:</p>
+
+          <ul class="checklist">
+            <li>The structure of <code>entries_json</code> changes.</li>
+            <li>The draft/live model or schedule uniqueness rules change.</li>
+            <li>Copy, Repeat Weekly or Publish All Drafts behaviour changes.</li>
+            <li>Validation rules change.</li>
+            <li>The <code>program_location_styles</code> schema or active location keys change.</li>
+            <li>Location icon paths are decoupled from <code>location_key</code>.</li>
+            <li>The full or wayfinding display dimensions/page sizes change.</li>
+            <li>The 25-second database polling interval changes.</li>
+            <li>Supabase Auth or RLS policies change.</li>
+            <li>Another signage family begins consuming this same live schedule data.</li>
+          </ul>
+
+          <h3>Current documentation limitations</h3>
+
+          <ul>
+            <li>
+              The supplied schema confirms table-level RLS but did not include the exact RLS policy definitions.
+            </li>
+            <li>
+              The schema summary does not describe an application-level audit trail tying individual schedule
+              saves/publishes to a specific Auth user.
+            </li>
+            <li>
+              The schema describes <code>icon_path</code>, but the current inspected display implementations
+              derive SVG paths from <code>location_key</code> instead.
+            </li>
+          </ul>
+
+          <div class="source-note">
+            Documentation basis: supplied current Program Schedule Admin and full-display files,
+            Supabase schema snapshot generated August 25, 2026, and the current repository implementation
+            of the sibling 1080 × 480 wayfinding schedule.
+          </div>
         </section>
+
       </div>
     </div>
+
   </main>
 </body>
 </html>
