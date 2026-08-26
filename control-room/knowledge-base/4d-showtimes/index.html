@@ -4,97 +4,1697 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+
   <title>4D Showtimes Admin Documentation | Vancouver Aquarium</title>
+
   <link rel="icon" type="image/svg+xml" href="../../../assets/vaq-full-logo.svg">
   <link rel="stylesheet" href="../styles.css">
+
+  <style>
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .doc-meta span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 9px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: #e7f0f4;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .quick-start {
+      counter-reset: quickstep;
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .quick-step {
+      counter-increment: quickstep;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafb;
+    }
+
+    .quick-step::before {
+      content: counter(quickstep);
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .quick-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .quick-step p {
+      margin: 0;
+    }
+
+    .callout.warning {
+      border-left-color: var(--orange);
+      background: #fff6ef;
+    }
+
+    .callout.success {
+      border-left-color: var(--green);
+      background: #f5f9ec;
+    }
+
+    .callout.info {
+      border-left-color: var(--blue);
+      background: #eef7fb;
+    }
+
+    .callout.danger {
+      border-left-color: #b14f4f;
+      background: #fff4f4;
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    .subsystem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .subsystem-card {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .subsystem-card small {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--orange);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .subsystem-card h3 {
+      margin: 0 0 7px;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .subsystem-card p {
+      margin: 0 0 12px;
+    }
+
+    .subsystem-card a {
+      display: inline-flex;
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .button-guide {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .button-guide article {
+      display: grid;
+      grid-template-columns: minmax(155px, 200px) 1fr;
+      gap: 16px;
+      padding: 13px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .button-guide article:first-child {
+      border-top: 0;
+    }
+
+    .button-guide h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .button-guide p {
+      margin: 0;
+    }
+
+    .data-table-wrap {
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    .data-table th {
+      background: #eef3f6;
+      color: var(--text);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .data-table td {
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .data-table code {
+      white-space: nowrap;
+    }
+
+    .architecture {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .architecture-row {
+      display: grid;
+      grid-template-columns: minmax(180px, .72fr) 28px minmax(260px, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .architecture-node {
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .architecture-node strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .architecture-arrow {
+      color: var(--orange);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .workflow-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .workflow-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .workflow-card h3 {
+      margin: 0 0 7px;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .workflow-card p {
+      margin: 0;
+    }
+
+    .workflow-card small {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--orange);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .file-map {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .file-map article {
+      padding: 13px 15px;
+      border-left: 4px solid var(--blue);
+      background: #f8fafb;
+    }
+
+    .file-map article:nth-child(2) {
+      border-left-color: var(--green);
+    }
+
+    .file-map article:nth-child(3) {
+      border-left-color: var(--orange);
+    }
+
+    .file-map article:nth-child(4) {
+      border-left-color: var(--grey);
+    }
+
+    .file-map article:nth-child(5) {
+      border-left-color: #7b5bbd;
+    }
+
+    .file-map strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .file-map code {
+      overflow-wrap: anywhere;
+    }
+
+    .relationship-graph {
+      overflow-x: auto;
+      margin-top: 16px;
+      padding: 15px 17px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f7f9fa;
+    }
+
+    .relationship-graph pre {
+      margin: 0;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .checklist li {
+      position: relative;
+      padding-left: 26px;
+      margin-bottom: 9px;
+    }
+
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .trouble-grid,
+    .safety-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .trouble-item,
+    .safety-item {
+      padding: 14px 15px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .trouble-item strong,
+    .safety-item strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    .trouble-item p,
+    .safety-item p {
+      margin: 0;
+    }
+
+    .source-note {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: #7a8790;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 980px) {
+      .subsystem-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .workflow-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .button-guide article,
+      .architecture-row {
+        grid-template-columns: 1fr;
+      }
+
+      .architecture-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
 </head>
+
 <body>
+
   <header class="docs-header">
     <a class="back" href="../">← Digital Signage Knowledge Base</a>
+
     <h1>4D Showtimes Admin</h1>
-    <p>Manage 4D film schedules and supporting film information for the Vancouver Aquarium Guest Services showtimes display.</p>
+
+    <p>
+      Operating and technical reference for the Vancouver Aquarium® 4D scheduling system:
+      daily showtime scheduling, reusable load templates, film metadata and the live Guest Services display.
+    </p>
+
+    <div class="doc-meta" aria-label="Documentation metadata">
+      <span>Guest Services / 4D Theatre</span>
+      <span>Production CMS</span>
+      <span>Three Admin Surfaces</span>
+      <span>Supabase-backed</span>
+      <span>America/Vancouver</span>
+      <span>Documentation reviewed Aug. 25, 2026</span>
+    </div>
   </header>
 
   <main class="docs-main">
+
     <div class="docs-grid">
+
       <nav class="docs-nav" aria-label="Documentation sections">
-        <strong>4D Theatre</strong>
+        <strong>4D Showtimes</strong>
         <a href="#overview">Overview</a>
-        <a href="#workflow">System Flow</a>
-        <a href="#operations">Operating Guide</a>
+        <a href="#quick-start">Daily Quick Start</a>
+        <a href="#calendar">Calendar & Day Status</a>
+        <a href="#day-editor">Single-Date Editor</a>
+        <a href="#batch">Batch Editor</a>
+        <a href="#film-manager">Film Manager</a>
+        <a href="#poster-assets">Poster Assets</a>
+        <a href="#load-manager">Load Manager</a>
+        <a href="#publishing">Publishing Rules</a>
+        <a href="#guest-display">Guest-Facing Display</a>
         <a href="#data">Data & Supabase</a>
+        <a href="#database-helpers">View & RPC Layer</a>
+        <a href="#security">Authentication & Security</a>
         <a href="#technical">Technical Reference</a>
         <a href="#troubleshooting">Troubleshooting</a>
         <a href="#maintenance">Maintenance</a>
       </nav>
 
       <div>
+
         <section class="docs-card" id="overview">
           <h2>Overview</h2>
-          <p>Manage 4D film schedules and supporting film information for the Vancouver Aquarium Guest Services showtimes display.</p>
+
+          <p>
+            The 4D Showtimes system is the most interconnected of the current signage CMS applications.
+            It separates reusable content from day-by-day scheduling: films define what guests are seeing,
+            load templates define reusable patterns of showtimes, daily schedules tie a film and optional load
+            to a calendar date, and concrete showtime rows determine the actual times for that date.
+          </p>
+
+          <div class="flow" aria-label="System flow summary">
+            <span>Film + Load Libraries</span>
+            <b>→</b>
+            <span>Daily Draft Schedule</span>
+            <b>→</b>
+            <span>Publish Live</span>
+            <b>→</b>
+            <span>4D Guest Display</span>
+          </div>
+
+          <div class="subsystem-grid">
+
+            <article class="subsystem-card">
+              <small>Daily Operations</small>
+              <h3>4D Showtimes Admin</h3>
+              <p>
+                Calendar-based scheduling. Assign a film, apply a reusable load, manually adjust showtimes,
+                inspect draft/live status and publish one or many dates.
+              </p>
+              <a href="../../../gs-5-2_4d-showtimes-schedule/admin.html" target="_blank" rel="noopener">Open Showtimes Admin →</a>
+            </article>
+
+            <article class="subsystem-card">
+              <small>Content Library</small>
+              <h3>4D Film Manager</h3>
+              <p>
+                Maintains film titles, posters, synopsis, accessibility information, advisories,
+                testimonials, active status and theme colours.
+              </p>
+              <a href="../../../gs-5-2_4d-showtimes-schedule/film-manager.html" target="_blank" rel="noopener">Open Film Manager →</a>
+            </article>
+
+            <article class="subsystem-card">
+              <small>Schedule Templates</small>
+              <h3>4D Load Manager</h3>
+              <p>
+                Maintains reusable showtime templates, load type/colour, active status and after-hours time rows.
+              </p>
+              <a href="../../../gs-5-2_4d-showtimes-schedule/load-manager.html" target="_blank" rel="noopener">Open Load Manager →</a>
+            </article>
+
+          </div>
+
+          <div class="callout info">
+            <strong>Core idea:</strong>
+            a Load is a reusable set of theatre times. Applying a Load to a date generates or replaces that date's
+            <strong>draft showtime rows</strong>. Staff can then manually adjust the generated draft before publishing it.
+          </div>
+
           <div class="docs-actions">
-            <a class="primary" href="https://vaq-smart-cms.github.io/screenflow/gs-5-2_4d-showtimes-schedule/admin.html" target="_blank" rel="noopener">Open Admin</a>
+            <a class="primary" href="../../../gs-5-2_4d-showtimes-schedule/admin.html" target="_blank" rel="noopener">Open 4D Admin</a>
+            <a class="secondary" href="../../../gs-5-2_4d-showtimes-schedule/" target="_blank" rel="noopener">Open Live 4D Display</a>
             <a class="secondary" href="../../">Return to Control Room</a>
           </div>
         </section>
 
-        <section class="docs-card" id="workflow">
-          <h2>System Flow</h2>
-          <div class="flow"><span>Supabase</span><b>→</b><span>4D Showtimes Admin</span><b>→</b><span>Guest Services 4D display</span></div>
-          <p>
-            This relationship is intentionally shown in plain language so staff can understand which backend,
-            editing interface and guest-facing signage are connected.
-          </p>
-        </section>
+        <section class="docs-card" id="quick-start">
+          <h2>Daily Quick Start</h2>
 
-        <section class="docs-card" id="operations">
-          <h2>Operating Guide</h2>
-          <div class="callout">
-            Detailed staff operating steps will be completed from the current live project files and the
-            real-world workflow used by Vancouver Aquarium staff.
+          <p>
+            For an ordinary single-day schedule, the safest sequence is:
+            <strong>select date → select film → select/apply load → review times → save pending changes → publish → verify.</strong>
+          </p>
+
+          <div class="quick-start">
+
+            <div class="quick-step">
+              <div>
+                <strong>Sign in.</strong>
+                <p>
+                  Use an authorised 4D Showtimes admin account. The app persists the Supabase Auth session
+                  and attempts to restore it when the page is reopened.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Select the working date on the calendar.</strong>
+                <p>
+                  The selected date loads its draft schedule, live schedule, draft showtimes, live showtimes,
+                  assigned film and assigned load. The app remembers the last selected date per signed-in user.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Select the Featured Film.</strong>
+                <p>
+                  Only active films are offered. Changing the film in normal single-date mode immediately
+                  creates or updates that date's draft film assignment.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Select the Assigned Load and preview its times.</strong>
+                <p>
+                  Only active loads are offered. The preview shows the reusable time pattern before it is applied.
+                  After-hours template times are visually distinguished.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Apply Load to Draft.</strong>
+                <p>
+                  This generates or refreshes the draft from the selected Film + Load.
+                  If the date already has active draft showtimes, the editor warns that those draft times will be replaced.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Review or manually adjust Draft Showtimes.</strong>
+                <p>
+                  Change the hour/minute/AM-PM controls, add a showtime or delete an unwanted time.
+                  A manual change marks the draft as manually modified rather than purely load-generated.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Make sure every changed row says Saved.</strong>
+                <p>
+                  Time edits auto-save shortly after a change, and each row also has Save Now.
+                  Use Save Pending Showtimes before publishing whenever any rows still show an unsaved state.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Review Day Summary.</strong>
+                <p>
+                  Confirm the date, Film, Load, showtime count, Manual Edits state, Last Updated timestamp
+                  and Last Published timestamp before taking the schedule live.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Publish.</strong>
+                <p>
+                  The editor first attempts to save any pending showtime changes. Publishing requires a draft,
+                  a film assignment and at least one active showtime. After confirmation it publishes that date live.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Verify the live 4D display.</strong>
+                <p>
+                  The guest-facing page rechecks its consolidated Supabase data every 10 seconds.
+                  When publishing the current Vancouver date, a successful change should therefore normally appear quickly.
+                </p>
+              </div>
+            </div>
+
           </div>
 
-          <h3>Verified starting points</h3>
-          <ul><li>The live admin entry point is <code>gs-5-2_4d-showtimes-schedule/admin.html</code>.</li><li>The project also contains separate film-management and load-management interfaces.</li><li>The admin currently includes an authenticated sign-in state before schedule-management tools are shown.</li></ul>
+          <div class="callout success">
+            <strong>Single-date publishing has a useful safety net:</strong>
+            before the publish RPC runs, the editor calls Save Pending Showtimes silently and refuses to publish
+            if any changed showtime row could not be saved.
+          </div>
+        </section>
+
+        <section class="docs-card" id="calendar">
+          <h2>Calendar & Day Status</h2>
+
+          <p>
+            The calendar is both a date picker and a high-level status dashboard. For the visible calendar month,
+            the admin reads schedule state from <code>daily_schedules</code> and decorates each date accordingly.
+          </p>
+
+          <div class="workflow-cards">
+
+            <article class="workflow-card">
+              <small>Status</small>
+              <h3>No Draft / Draft / Live</h3>
+              <p>
+                The header and Day Summary use the three-state meter. If a live schedule exists, the date is presented
+                as Live even when a draft also exists for future edits.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Manual Changes</small>
+              <h3>Manual Edit Indicator</h3>
+              <p>
+                Dates whose draft has <code>has_manual_edits = true</code> receive a separate calendar indicator.
+                Day Summary describes the state as “Yes — manually modified” rather than “No — load-generated.”
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Load</small>
+              <h3>Load Colour Dot</h3>
+              <p>
+                When the schedule is associated with a load template, a small dot uses that load's display colour.
+                Its tooltip identifies the load name.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Batch Selection</small>
+              <h3>Long-Press a Date</h3>
+              <p>
+                Holding a calendar date for approximately 1.5 seconds enters Batch Editor mode.
+                Once batch mode is active, additional dates can be toggled into or out of the batch with ordinary taps.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout info">
+            The admin also stores each signed-in user's Night Mode preference and last selected date in local browser storage.
+            These are convenience settings, not schedule data.
+          </div>
+        </section>
+
+        <section class="docs-card" id="day-editor">
+          <h2>Single-Date Editor</h2>
+
+          <div class="button-guide">
+
+            <article>
+              <h3>Featured Film</h3>
+              <p>
+                Selecting a film writes that film assignment into the current date's draft.
+                If no draft exists yet, the editor can create the draft record as part of this workflow.
+              </p>
+            </article>
+
+            <article>
+              <h3>Assigned Load</h3>
+              <p>
+                Selecting a load only changes the load preview until <strong>Apply Load to Draft</strong> is chosen.
+                Merely choosing a different load in the dropdown does not itself regenerate the schedule.
+              </p>
+            </article>
+
+            <article>
+              <h3>Apply Load to Draft</h3>
+              <p>
+                Calls the database helper <code>generate_draft_schedule_from_load</code> with the selected date,
+                film and load template. Existing active draft showtimes are replaced after confirmation.
+              </p>
+            </article>
+
+            <article>
+              <h3>+ Add Showtime</h3>
+              <p>
+                Adds a new concrete <code>daily_showtimes</code> row. When other active draft times exist,
+                the default is 20 minutes after the latest one; otherwise the default begins at 10:30 a.m.
+              </p>
+            </article>
+
+            <article>
+              <h3>Change a Showtime</h3>
+              <p>
+                Changing hour, minute or AM/PM marks the row unsaved and schedules an automatic save after about
+                650 milliseconds. Each row also has Save Now for an explicit immediate write.
+              </p>
+            </article>
+
+            <article>
+              <h3>Delete Showtime</h3>
+              <p>
+                Permanently removes that draft showtime row after confirmation and marks the draft schedule as
+                having manual edits.
+              </p>
+            </article>
+
+            <article>
+              <h3>Save Pending Showtimes</h3>
+              <p>
+                Iterates through only the currently unsaved showtime rows, attempts to save each one,
+                and reports the number saved versus the number still requiring attention.
+              </p>
+            </article>
+
+            <article>
+              <h3>Publish</h3>
+              <p>
+                Requires a selected date, an existing draft, a film assignment and at least one non-cancelled showtime.
+                The action auto-saves pending rows before invoking the database publish helper.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout warning">
+            <strong>Applying a Load is a replacement operation.</strong>
+            Use it to regenerate a draft from the template. Do not choose Apply Load after carefully hand-editing a date
+            unless you intend to replace those draft showtimes with the template pattern again.
+          </div>
+        </section>
+
+        <section class="docs-card" id="batch">
+          <h2>Batch Editor</h2>
+
+          <p>
+            Batch Editor is designed for efficiently preparing several dates with the same film and load template.
+            It should be treated as a generation tool, not merely a multi-date “publish existing drafts” tool.
+          </p>
+
+          <div class="quick-start">
+
+            <div class="quick-step">
+              <div>
+                <strong>Long-press a calendar date for approximately 1.5 seconds.</strong>
+                <p>This enters Batch Editor and makes that date the first selected batch date.</p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Tap additional dates.</strong>
+                <p>Each tap toggles the date into or out of the selected batch.</p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Select the film to use for the batch.</strong>
+                <p>
+                  While Batch Editor is active, changing the Film dropdown changes the batch selection state
+                  rather than immediately writing a single-date film assignment.
+                </p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Select the load to apply to all selected dates.</strong>
+                <p>The batch requires both a Film and a Load before it can be saved or published.</p>
+              </div>
+            </div>
+
+            <div class="quick-step">
+              <div>
+                <strong>Choose Save Drafts and Close — or Publish Selected Dates Live.</strong>
+                <p>
+                  Saving generates/replaces drafts for all selected dates and exits Batch Editor.
+                  Publishing first generates/replaces those drafts and then publishes every selected date.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="callout danger">
+            <strong>Critical Batch Editor rule:</strong>
+            <em>Publish Selected Dates Live does not simply publish each date's existing draft.</em>
+            It first calls the load-generation workflow for every selected date using the currently selected Film + Load,
+            which can replace existing draft showtimes, and only then publishes those regenerated drafts.
+          </div>
+
+          <div class="callout warning">
+            <strong>Save Drafts and Close is also a replacement operation.</strong>
+            The confirmation message explicitly warns that existing draft showtimes on the selected dates will be replaced.
+            Use Batch Editor only when those dates are intended to share the selected Film + Load pattern.
+          </div>
+
+          <div class="callout info">
+            Individual showtime editing is disabled while Batch Editor is active.
+            Finish the batch with Save Drafts and Close (or publish it) before hand-editing individual times.
+          </div>
+        </section>
+
+        <section class="docs-card" id="film-manager">
+          <h2>Film Manager</h2>
+
+          <p>
+            Film Manager maintains the reusable guest-facing metadata in <code>public.films</code>.
+            Only films marked Active are offered in the Showtimes Admin scheduler.
+          </p>
+
+          <h3>Film fields managed by the current interface</h3>
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Film Manager field</th>
+                  <th>Stored / used as</th>
+                  <th>Guest-facing effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Film Title</td>
+                  <td><code>title</code>; the interface also derives a slug from the title when saving.</td>
+                  <td>Identifies the selected feature and contributes to poster alt text / metadata.</td>
+                </tr>
+                <tr>
+                  <td>Synopsis</td>
+                  <td><code>synopsis</code></td>
+                  <td>Used in admin previews; available in the film data model.</td>
+                </tr>
+                <tr>
+                  <td>Accessibility Info</td>
+                  <td><code>accessibility_text</code> JSONB array</td>
+                  <td>Active recognised items become accessibility icons on the live sign.</td>
+                </tr>
+                <tr>
+                  <td>Advisory Text</td>
+                  <td><code>advisory_text</code> JSONB array</td>
+                  <td>Active advisory messages rotate in the live advisory region.</td>
+                </tr>
+                <tr>
+                  <td>Testimonials</td>
+                  <td><code>testimonial</code> JSONB array</td>
+                  <td>Active quotes periodically replace the accessibility-icon region.</td>
+                </tr>
+                <tr>
+                  <td>Poster Code</td>
+                  <td><code>poster_url</code> currently stores/accepts a normalized film code in the live manager.</td>
+                  <td>The code is expanded into the expected small/medium/large poster filenames.</td>
+                </tr>
+                <tr>
+                  <td>Primary / Secondary Theme</td>
+                  <td><code>theme_color_primary</code>, <code>theme_color_secondary</code></td>
+                  <td>The public sign applies these as film-specific CSS theme colours.</td>
+                </tr>
+                <tr>
+                  <td>Theme Source</td>
+                  <td><code>theme_color_source</code></td>
+                  <td>Records whether the colours are manual or poster-sampled.</td>
+                </tr>
+                <tr>
+                  <td>Active / available in scheduler</td>
+                  <td><code>is_active</code></td>
+                  <td>Controls whether the film appears in the Showtimes Admin film selector.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Film Manager actions</h3>
+
+          <div class="button-guide">
+
+            <article>
+              <h3>Save Film Details</h3>
+              <p>
+                Requires a non-empty film title. Saves the metadata fields, normalized poster code,
+                active flags for messages/accessibility items and theme information.
+              </p>
+            </article>
+
+            <article>
+              <h3>Sample from Poster</h3>
+              <p>
+                Loads the medium poster image in the browser, samples/quantizes its colours and proposes
+                two visually distinct theme colours. The result remains unsaved until Film Details is saved.
+              </p>
+            </article>
+
+            <article>
+              <h3>Swap Colours</h3>
+              <p>Exchanges the Primary and Secondary theme colour values before saving.</p>
+            </article>
+
+            <article>
+              <h3>Create New Film</h3>
+              <p>
+                Prompts for a title and creates an active film with blank guest-facing content and default theme values.
+              </p>
+            </article>
+
+            <article>
+              <h3>Duplicate Film</h3>
+              <p>
+                Creates a new active film using the selected film's synopsis, messages, accessibility content,
+                poster code and theme colours as the starting point.
+              </p>
+            </article>
+
+            <article>
+              <h3>Delete Film</h3>
+              <p>
+                Permanently attempts to delete the selected <code>films</code> row after confirmation.
+                Historical schedules reference films through a foreign key, so deactivation is generally the safer
+                operational choice when a film should simply stop appearing in the scheduler.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout info">
+            Film Manager tracks whether the current form has unsaved changes and asks before discarding those changes
+            when switching away from the edited film.
+          </div>
+        </section>
+
+        <section class="docs-card" id="poster-assets">
+          <h2>Poster Assets</h2>
+
+          <p>
+            The current live Film Manager uses a <strong>poster code</strong>, not a full manually entered URL.
+            The code is normalized to lowercase letters/numbers, hyphens and underscores, then matched to three
+            signage-ready JPEGs under <code>film-posters/web/</code>.
+          </p>
+
+          <div class="relationship-graph">
+<pre>[poster-code]_poster_sm.jpg
+[poster-code]_poster_md.jpg
+[poster-code]_poster_lg.jpg
+
+Example current assets:
+na4d_poster_sm.jpg
+na4d_poster_md.jpg
+na4d_poster_lg.jpg</pre>
+          </div>
+
+          <div class="file-map">
+            <article>
+              <strong>Web posters</strong>
+              <code>gs-5-2_4d-showtimes-schedule/film-posters/web/</code>
+              <p>Optimized files referenced by the Film Manager and public signage.</p>
+            </article>
+            <article>
+              <strong>Archive posters</strong>
+              <code>gs-5-2_4d-showtimes-schedule/film-posters/archive/</code>
+              <p>Optional originals/source artwork; not referenced by the live display.</p>
+            </article>
+          </div>
+
+          <div class="callout warning">
+            <strong>Maintenance note about the included poster README:</strong>
+            its older guidance says to store a poster path or absolute URL in <code>films.poster_url</code>.
+            The current live Film Manager instead normalizes and saves the one-word/code-style value and constructs
+            the <code>_sm</code>, <code>_md</code> and <code>_lg</code> paths itself. Treat the live application code
+            as authoritative unless that asset strategy is intentionally changed.
+          </div>
+
+          <div class="callout info">
+            The supplied live implementation serves poster assets from the GitHub-hosted project folder.
+            Although Supabase Storage exists as platform infrastructure, these current poster files are not being
+            retrieved from Supabase Storage.
+          </div>
+        </section>
+
+        <section class="docs-card" id="load-manager">
+          <h2>Load Manager</h2>
+
+          <p>
+            A Load is a reusable theatre-intensity/showtime template. The parent record lives in
+            <code>load_templates</code>; its individual time rows live in <code>load_template_times</code>.
+            Applying a Load to a date expands those reusable time rows into concrete <code>daily_showtimes</code>.
+          </p>
+
+          <h3>Load types and colours</h3>
+
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Load kind</th>
+                  <th>Current manager behaviour</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>green</code></td>
+                  <td>Uses fixed VAQ green <code>#7d9b2d</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>yellow</code></td>
+                  <td>Uses fixed yellow <code>#f3bc43</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>red</code></td>
+                  <td>Uses fixed red <code>#c73232</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>custom</code></td>
+                  <td>Allows a custom display colour and is used for newly created / duplicated non-default loads.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Default-load protection</h3>
+
+          <p>
+            The live Load Manager distinguishes system-default loads from ordinary/custom loads.
+            A system-default load is locked by default: its details and showtime controls cannot be changed until
+            <strong>Edit Default</strong> is explicitly enabled. System-default loads also cannot be deleted.
+          </p>
+
+          <div class="callout success">
+            <strong>Safer practice:</strong>
+            when a standard/default Load needs a one-off variation, Duplicate Load and modify the duplicate instead
+            of unlocking and changing the system default used by other dates.
+          </div>
+
+          <h3>Template Showtime behaviour</h3>
+
+          <div class="button-guide">
+
+            <article>
+              <h3>Change a time</h3>
+              <p>
+                Hour/minute/AM-PM edits auto-save after about 650 milliseconds and can also be saved immediately.
+                Duplicate times within the same Load are rejected.
+              </p>
+            </article>
+
+            <article>
+              <h3>+ Add Showtime</h3>
+              <p>
+                Adds a new template row. When times already exist, the default new time is 20 minutes after
+                the latest template time; otherwise it begins at 10:30 a.m.
+              </p>
+            </article>
+
+            <article>
+              <h3>After-hours flag</h3>
+              <p>
+                Load Manager automatically sets <code>is_after_hours</code> when a template time is
+                5:00 p.m. or later.
+              </p>
+            </article>
+
+            <article>
+              <h3>Duplicate Load</h3>
+              <p>
+                Creates a new non-default Custom Load and copies all of the selected Load's template time rows.
+              </p>
+            </article>
+
+            <article>
+              <h3>Delete Load</h3>
+              <p>
+                System-default loads are protected. For an eligible non-default load, the manager first deletes
+                its template-time rows and then attempts to delete the load itself.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout warning">
+            Historical or current <code>daily_schedules</code> can reference a load template through
+            <code>applied_load_template_id</code>. If a load has been used by schedules, database foreign-key rules
+            may prevent deletion or otherwise require careful handling. Deactivation is safer when the goal is only
+            to stop offering a Load for new schedules.
+          </div>
+        </section>
+
+        <section class="docs-card" id="publishing">
+          <h2>Publishing Rules</h2>
+
+          <div class="safety-grid">
+
+            <article class="safety-item">
+              <strong>Draft and Live are separate daily schedule records.</strong>
+              <p>
+                <code>daily_schedules.status</code> is constrained to <code>draft</code> or <code>live</code>.
+                A selected date can therefore retain a draft for editing while a live version remains guest-facing.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Single-date Publish auto-saves pending time edits.</strong>
+              <p>
+                The editor refuses to proceed if any pending showtime change reports a save error.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Publish readiness is intentionally simple.</strong>
+              <p>
+                A single date is considered publishable when it has a draft, an assigned film and at least one
+                non-cancelled showtime.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Batch Publish regenerates first.</strong>
+              <p>
+                Batch publishing applies the selected Load + Film to every selected date before invoking
+                <code>publish_daily_schedule</code> for those dates.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Manual edits are tracked.</strong>
+              <p>
+                Adding, changing or deleting individual draft showtimes sets <code>has_manual_edits = true</code>.
+                The Day Summary and calendar surface this distinction.
+              </p>
+            </article>
+
+            <article class="safety-item">
+              <strong>Live display follows Vancouver time.</strong>
+              <p>
+                The public renderer is explicitly anchored to <code>America/Vancouver</code> for time-of-day logic,
+                including the after-hours gate.
+              </p>
+            </article>
+
+          </div>
+        </section>
+
+        <section class="docs-card" id="guest-display">
+          <h2>Guest-Facing 4D Display</h2>
+
+          <p>
+            The public 4D page is a fixed <strong>1920 × 810</strong> signage layout. Rather than reading the five
+            application tables individually, it queries one consolidated Supabase read interface:
+            <code>live_4d_signage_today</code>.
+          </p>
+
+          <div class="file-map">
+
+            <article>
+              <strong>Guest-facing entry point</strong>
+              <code>gs-5-2_4d-showtimes-schedule/index.html</code>
+            </article>
+
+            <article>
+              <strong>Visual stylesheet</strong>
+              <code>gs-5-2_4d-showtimes-schedule/index.css</code>
+            </article>
+
+            <article>
+              <strong>Live database refresh</strong>
+              <code>10000 ms</code>
+              <p>The current sign rechecks the consolidated live payload every 10 seconds.</p>
+            </article>
+
+            <article>
+              <strong>Poster size used on signage</strong>
+              <code>[poster-code]_poster_lg.jpg</code>
+            </article>
+
+            <article>
+              <strong>Timezone</strong>
+              <code>America/Vancouver</code>
+            </article>
+
+          </div>
+
+          <h3>Showtime filtering</h3>
+          <ul>
+            <li>Cancelled showtimes are excluded.</li>
+            <li>Only showtimes later than the current moment remain in the visible future-showtime list.</li>
+            <li>The earliest remaining displayable showtime becomes the “Next show” tile.</li>
+            <li>The showtime grid dynamically changes its column count and font sizing based on how many future times remain.</li>
+            <li>As showtimes pass, the renderer animates/reflows the remaining times without requiring a full page reload.</li>
+          </ul>
+
+          <h3>After-hours gate</h3>
+
+          <p>
+            The renderer has a 5:00 p.m. Vancouver-time gate for later showtimes. Before 5:00 p.m.,
+            showtimes after 5:00 p.m. are hidden from the public list. When hidden after-hours times are the only
+            remaining shows, the sign displays <strong>“More showtimes later today”</strong> and asks guests to
+            check back after 5:00 p.m.
+          </p>
+
+          <div class="callout info">
+            <strong>5:00 p.m. itself is a special case.</strong>
+            Although Load Manager marks times at 5:00 p.m. or later as after-hours, the public renderer explicitly
+            does not hide a showtime scheduled at exactly 5:00 p.m. before the gate. Times later than 5:00 p.m.
+            remain hidden until the gate opens.
+          </div>
+
+          <h3>Accessibility, advisories and testimonials</h3>
+          <ul>
+            <li>Up to five active recognised accessibility items are rendered as icons.</li>
+            <li>Active advisory messages rotate every 9 seconds when more than one advisory exists.</li>
+            <li>Active testimonials interrupt the accessibility region approximately once per minute.</li>
+            <li>A testimonial remains visible for about 9 seconds, after which the accessibility icons return.</li>
+            <li>If no future displayable showtimes remain, the supplemental rotations are stopped and an end-of-day state is shown.</li>
+          </ul>
+
+          <h3>Film theme</h3>
+          <p>
+            The public display applies <code>theme_color_primary</code> and <code>theme_color_secondary</code>
+            from the live film data as CSS variables, allowing the sign to visually follow the selected film's poster palette.
+          </p>
         </section>
 
         <section class="docs-card" id="data">
           <h2>Data & Supabase</h2>
+
           <p>
-            The current Supabase schema summary will be incorporated here. The documentation will describe
-            tables, views and relationships in operational language first, with a technical reference underneath.
+            The August 25, 2026 schema summary identifies five core application tables. All use UUID primary keys
+            and all five have Row Level Security enabled.
           </p>
 
-          <div class="callout">
-            Never publish API secrets, service-role keys, passwords, private tokens or other credentials in this public repository.
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Table</th>
+                  <th>Purpose</th>
+                  <th>Current snapshot</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>public.films</code></td>
+                  <td>
+                    Film metadata and presentation settings: title/slug, poster reference, synopsis,
+                    testimonials, advisories, accessibility content, theme colours and active ordering.
+                  </td>
+                  <td>2 rows</td>
+                </tr>
+                <tr>
+                  <td><code>public.load_templates</code></td>
+                  <td>
+                    Reusable named Load definitions. Schema constrains <code>load_kind</code> to
+                    green, yellow, red or custom.
+                  </td>
+                  <td>9 rows</td>
+                </tr>
+                <tr>
+                  <td><code>public.load_template_times</code></td>
+                  <td>
+                    Reusable time rows belonging to a Load, including sort order and after-hours state.
+                  </td>
+                  <td>147 rows</td>
+                </tr>
+                <tr>
+                  <td><code>public.daily_schedules</code></td>
+                  <td>
+                    Per-date draft/live schedule record tied to one Film and optionally one applied Load.
+                    Tracks generated/manual-edit/publish state.
+                  </td>
+                  <td>313 rows</td>
+                </tr>
+                <tr>
+                  <td><code>public.daily_showtimes</code></td>
+                  <td>
+                    Concrete timestamped showtimes belonging to an individual daily schedule.
+                    Includes cancelled, admin-note and after-hours fields.
+                  </td>
+                  <td>5,523 rows</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Relationship graph</h3>
+
+          <div class="relationship-graph">
+<pre>films
+  │
+  └──────&lt; daily_schedules &gt;────── load_templates
+                    │                    │
+                    │                    └──────&lt; load_template_times
+                    │
+                    └──────&lt; daily_showtimes</pre>
+          </div>
+
+          <h3>Key foreign keys</h3>
+          <ul>
+            <li><code>daily_schedules.film_id → films.id</code></li>
+            <li><code>daily_schedules.applied_load_template_id → load_templates.id</code> (optional)</li>
+            <li><code>load_template_times.load_template_id → load_templates.id</code></li>
+            <li><code>daily_showtimes.daily_schedule_id → daily_schedules.id</code></li>
+          </ul>
+
+          <div class="callout info">
+            This relational model is why the system can reuse one Film and one Load across many different dates
+            without duplicating all film metadata or template definitions into every schedule.
+          </div>
+        </section>
+
+        <section class="docs-card" id="database-helpers">
+          <h2>View & RPC Layer</h2>
+
+          <p>
+            The supplied schema summary documents the core tables and relationships, but it does not include database
+            views or function/RPC definitions. The live application code nevertheless proves that the current system
+            depends on the following database helpers.
+          </p>
+
+          <div class="workflow-cards">
+
+            <article class="workflow-card">
+              <small>RPC</small>
+              <h3>generate_draft_schedule_from_load</h3>
+              <p>
+                Called by single-date and batch Load application. The admin supplies
+                <code>p_schedule_date</code>, <code>p_film_id</code> and <code>p_load_template_id</code>.
+                Observed result: create/refresh a date's draft schedule and generated showtime pattern.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>RPC</small>
+              <h3>publish_daily_schedule</h3>
+              <p>
+                Called for both single-date and batch publishing with <code>p_schedule_date</code>.
+                Observed role: publish that date's prepared draft schedule into the live state.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Read View</small>
+              <h3>live_4d_signage_today</h3>
+              <p>
+                Queried by the guest-facing sign with <code>select('*').maybeSingle()</code>.
+                Its returned payload combines schedule identity/timestamps, film presentation data and an aggregated
+                showtime collection for the live sign.
+              </p>
+            </article>
+
+            <article class="workflow-card">
+              <small>Documentation Gap</small>
+              <h3>SQL definitions not supplied</h3>
+              <p>
+                The exact SQL for these two RPCs and the live signage view was not present in the provided schema summary
+                or live-file package. Their external behaviour can be documented from the application, but their internal
+                SQL should be exported separately for a complete database-maintenance record.
+              </p>
+            </article>
+
+          </div>
+
+          <div class="callout warning">
+            Do not rewrite or “simplify” these database helpers based only on this knowledge-base description.
+            Their precise transaction/copy semantics are not available in the supplied materials.
+          </div>
+        </section>
+
+        <section class="docs-card" id="security">
+          <h2>Authentication & Security</h2>
+
+          <p>
+            All three administration pages use Supabase Auth email/password sessions.
+            The main admin explicitly configures persistent sessions, automatic refresh and a dedicated browser-storage key.
+          </p>
+
+          <ul>
+            <li>The administration interface is hidden unless a valid Supabase session is present.</li>
+            <li>Film Manager and Load Manager use the same authorised 4D admin login model.</li>
+            <li>RLS is enabled on all five public application tables identified by the schema summary.</li>
+            <li>The supplied schema does not include the exact RLS policy definitions.</li>
+            <li>The public sign uses a public/publishable Supabase client and reads the consolidated live view.</li>
+          </ul>
+
+          <div class="callout danger">
+            <strong>Do not place credentials in the Control Room or knowledge base.</strong>
+            Passwords, service-role keys, private tokens, secret URLs or other privileged values must never be committed
+            to this public GitHub Pages repository.
+          </div>
+
+          <div class="callout info">
+            Public/publishable browser configuration is intentionally different from a service-role secret.
+            The knowledge base documents the architecture and resource names but does not reproduce credentials or keys.
           </div>
         </section>
 
         <section class="docs-card" id="technical">
           <h2>Technical Reference</h2>
+
+          <h3>Primary live files</h3>
+
+          <div class="file-map">
+            <article>
+              <strong>Main scheduler</strong>
+              <code>gs-5-2_4d-showtimes-schedule/admin.html</code>
+            </article>
+
+            <article>
+              <strong>Film content manager</strong>
+              <code>gs-5-2_4d-showtimes-schedule/film-manager.html</code>
+            </article>
+
+            <article>
+              <strong>Load-template manager</strong>
+              <code>gs-5-2_4d-showtimes-schedule/load-manager.html</code>
+            </article>
+
+            <article>
+              <strong>Guest-facing display</strong>
+              <code>gs-5-2_4d-showtimes-schedule/index.html</code><br>
+              <code>gs-5-2_4d-showtimes-schedule/index.css</code>
+            </article>
+
+            <article>
+              <strong>Shared admin stylesheet</strong>
+              <code>gs-5-2_4d-showtimes-schedule/admin.css</code>
+            </article>
+          </div>
+
+          <h3>Supabase client</h3>
+          <p>Administration and public display pages use <code>@supabase/supabase-js@2</code>.</p>
+
+          <h3>Admin cache</h3>
           <p>
-            The current live HTML, CSS and JavaScript files will be reviewed to document the page structure,
-            database calls, authentication behavior, publishing logic and guest-facing dependencies.
+            Film/load reference data uses a browser <code>localStorage</code> cache with a current TTL of
+            approximately 10 minutes. Writes that modify films/loads clear relevant cache keys before refresh.
+          </p>
+
+          <h3>Showtime edit debounce</h3>
+          <p>
+            Both the daily showtime editor and Load Manager wait approximately <code>650 ms</code> after a time-control
+            change before auto-saving that row.
+          </p>
+
+          <h3>Default showtime interval</h3>
+          <p>
+            The scheduler and Load Manager use a current default increment of <code>20 minutes</code> when proposing
+            a new time after the latest existing time.
+          </p>
+
+          <h3>Public data refresh</h3>
+          <p>
+            The guest-facing sign uses <code>DATA_REFRESH_MS = 10000</code>, or 10 seconds.
+            It compares a payload signature and rerenders the sign when relevant schedule/film/showtime data changes.
+          </p>
+
+          <h3>Public timer behaviour</h3>
+          <ul>
+            <li>Advisory rotation: 9 seconds.</li>
+            <li>Testimonial interruption interval: 60 seconds.</li>
+            <li>Testimonial visible duration: 9 seconds.</li>
+            <li>After-hours gate: 5:00 p.m. Vancouver time.</li>
+            <li>Showtime departure/reflow animation: approximately 520 ms.</li>
+          </ul>
+
+          <h3>Accessibility icons</h3>
+          <p>
+            The renderer recognises wheelchair, assistive-listening/audio, captions, service-animal and inductive/hearing-loop
+            categories. It can infer the category from familiar wording when an explicit key is absent.
           </p>
         </section>
 
         <section class="docs-card" id="troubleshooting">
           <h2>Troubleshooting</h2>
-          <p>
-            This section will become a practical symptom → likely cause → corrective action reference,
-            based on the actual failure modes and operator errors already encountered in production.
-          </p>
+
+          <div class="trouble-grid">
+
+            <article class="trouble-item">
+              <strong>No films appear in the scheduler.</strong>
+              <p>
+                The Showtimes Admin requests only <code>films</code> where <code>is_active = true</code>.
+                Open Film Manager and confirm the required film is marked Active.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>No loads appear in the scheduler.</strong>
+              <p>
+                The admin requests only active Load templates. Open Load Manager and confirm the intended Load is active.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Selecting a Load did not change the draft times.</strong>
+              <p>
+                That is expected. The dropdown only changes the preview. Choose <strong>Apply Load to Draft</strong>
+                to generate/replace the draft showtimes.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Applying a Load erased hand-edited draft times.</strong>
+              <p>
+                Applying a Load is intentionally a replacement operation. Restore the intended Load and make the manual
+                adjustments again, or use a different prepared draft if one exists.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Publish is disabled.</strong>
+              <p>
+                Confirm that the selected date has a draft, the draft has a film assignment,
+                and at least one non-cancelled showtime exists.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Publish reports that pending rows could not be saved.</strong>
+              <p>
+                Inspect the Draft Showtimes rows for a Save failed/error state. Correct the time and use Save Now or
+                Save Pending Showtimes before attempting Publish again.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>A newly added showtime is at the wrong time.</strong>
+              <p>
+                A new row is inserted with a default time before the user finishes editing it. Adjust the controls and
+                ensure the row reaches Saved state. If it was just added and should be abandoned, use its Cancel action.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Batch Editor changed draft times on dates that were already prepared.</strong>
+              <p>
+                Batch saving/publishing regenerates the selected dates from the chosen Film + Load and replaces their
+                draft showtimes. Batch Editor should only be used when this replacement is intended.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>A default Load cannot be edited.</strong>
+              <p>
+                System-default Loads are deliberately locked. Enable Edit Default for intentional changes,
+                or preferably duplicate the Load and edit the copy.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>A Load time says “Already exists.”</strong>
+              <p>
+                Duplicate template times are not allowed within the same Load. Choose a different time.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>A poster is missing.</strong>
+              <p>
+                Verify the Film Manager poster code and confirm matching <code>_sm</code>, <code>_md</code> and
+                <code>_lg</code> JPEGs exist under <code>film-posters/web/</code>.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Poster colour sampling fails.</strong>
+              <p>
+                Confirm the medium poster file can be loaded from the expected path.
+                Sampling depends on successfully reading that image into an in-browser canvas.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>The live sign does not update immediately after publishing.</strong>
+              <p>
+                Allow for the current 10-second polling cycle. If it still does not update, verify the live schedule,
+                the <code>live_4d_signage_today</code> view and the Kuusoft/NexSigns deployment.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>Evening showtimes are missing before 5:00 p.m.</strong>
+              <p>
+                That may be intentional. Times later than 5:00 p.m. are hidden until the after-hours gate opens.
+                A show scheduled exactly at 5:00 p.m. is explicitly exempt from that hiding rule.
+              </p>
+            </article>
+
+            <article class="trouble-item">
+              <strong>The sign says 4D showtimes are unavailable.</strong>
+              <p>
+                The public page did not receive a usable row from <code>live_4d_signage_today</code>, or its query failed.
+                Check that today's schedule is live and then inspect the view/read permissions if the live data exists.
+              </p>
+            </article>
+
+          </div>
         </section>
 
         <section class="docs-card" id="maintenance">
           <h2>Maintenance</h2>
+
+          <p>Review this documentation whenever any of the following changes:</p>
+
+          <ul class="checklist">
+            <li>The five-table application schema or foreign-key relationships change.</li>
+            <li>The <code>generate_draft_schedule_from_load</code> RPC changes.</li>
+            <li>The <code>publish_daily_schedule</code> RPC changes.</li>
+            <li>The <code>live_4d_signage_today</code> view changes.</li>
+            <li>Batch Editor generation or publishing semantics change.</li>
+            <li>Default Load lock/delete rules change.</li>
+            <li>Load types, fixed colours or after-hours rules change.</li>
+            <li>Film accessibility/advisory/testimonial JSON formats change.</li>
+            <li>The poster-code naming convention or asset folder changes.</li>
+            <li>The live display's 10-second polling interval changes.</li>
+            <li>The 5:00 p.m. after-hours gate changes.</li>
+            <li>Supabase Auth or RLS policies change.</li>
+          </ul>
+
+          <h3>Current documentation gaps / caveats</h3>
+
+          <ul>
+            <li>
+              The supplied schema summary documents table-level RLS but not the exact policy definitions.
+            </li>
+            <li>
+              The SQL definitions of <code>generate_draft_schedule_from_load</code>,
+              <code>publish_daily_schedule</code> and <code>live_4d_signage_today</code> were not included.
+            </li>
+            <li>
+              The schema summary lists the most notable Load columns, while the live Load Manager also relies on
+              fields including active/default/display-colour state. Those observed fields should be included in a future
+              full DDL/schema export.
+            </li>
+            <li>
+              The included poster README contains older URL-storage guidance that does not match the current live
+              Film Manager's poster-code implementation.
+            </li>
+          </ul>
+
+          <h3>Recommended next database-documentation artifact</h3>
+
           <p>
-            Documentation should be reviewed whenever the CMS workflow, Supabase schema, authentication model,
-            deployment path or major display dependency changes.
+            For this particular CMS, the highest-value follow-up would be one secure technical export containing:
+            the exact RLS policies for the five application tables, the SQL for both RPC functions, and the definition
+            of <code>live_4d_signage_today</code>. That would close the only major gap between this operating guide and
+            a complete database-maintenance specification.
           </p>
+
+          <div class="source-note">
+            Documentation basis: supplied current 4D Showtimes Admin, Film Manager, Load Manager,
+            guest-facing display files, poster asset notes and Supabase schema summary provided August 25, 2026.
+            Behaviour described here is based on the supplied live implementation; database-internal behaviour is not
+            inferred beyond what the supplied application code and schema summary directly support.
+          </div>
         </section>
+
       </div>
     </div>
+
   </main>
 </body>
 </html>
